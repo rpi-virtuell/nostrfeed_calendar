@@ -90,6 +90,7 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            min-width: 4rem;
         }
         .date-bubble-year {
             background-color: var(--date-red);
@@ -271,7 +272,7 @@
                             <div class="tile-meta">
                                 <p>${clockIcon}<span>${timeSpanString}</span></p>
                                 ${event.location ? `<p>${locationIcon}<span>${event.location}</span></p>` : ''}
-                                ${event.summary ? `<p>${organizerIcon}<span>${event.summary}</span></p>` : ''}
+                                ${event.summary ? `<p><hr><span>${event.summary}</span></p>` : ''}
                             </div>
                         </div>
                     `;

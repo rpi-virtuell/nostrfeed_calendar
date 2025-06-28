@@ -1,0 +1,895 @@
+{
+  "name": "map relilab termine to nostr 31923",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        20,
+        280
+      ],
+      "id": "39dac2a7-d7b4-4ba3-bc94-5b70f0dfc070",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://relilab.org/wp-json/wp/v2/posts",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "categories",
+              "value": "176"
+            },
+            {
+              "name": "per_page",
+              "value": "50"
+            },
+            {
+              "name": "meta_key",
+              "value": "relilab_startdate"
+            },
+            {
+              "name": "orderby",
+              "value": "meta_value"
+            },
+            {
+              "name": "order",
+              "value": "desc"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        280
+      ],
+      "id": "56789961-1d5d-47db-b646-d6ca13529fba",
+      "name": "HTTP Request",
+      "notes": ""
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7605b2bd-d452-44b5-b0e5-857e317a8154",
+              "name": "d",
+              "value": "={{ $json.guid.rendered.base64Encode() }}",
+              "type": "string"
+            },
+            {
+              "id": "4cec803e-c079-4d5d-8782-5178ff04b3f6",
+              "name": "start",
+              "value": "={{ $json.acf.relilab_startdate }}",
+              "type": "string"
+            },
+            {
+              "id": "32212278-7a84-49f8-8116-469ece370536",
+              "name": "end",
+              "value": "={{ $json.acf.relilab_enddate }}",
+              "type": "string"
+            },
+            {
+              "id": "1831a5dc-0858-4b2a-8710-c48a4239c00d",
+              "name": "title",
+              "value": "={{ $json.title.rendered }}",
+              "type": "string"
+            },
+            {
+              "id": "dec56e5c-04cc-43c4-a4eb-4db540b21c18",
+              "name": "location",
+              "value": "=Zoom: {{ $json.acf.relilab_custom_zoom_link }}",
+              "type": "string"
+            },
+            {
+              "id": "5d730474-ee89-453c-9f7e-2d18b7785e04",
+              "name": "content",
+              "value": "={{ $json.content.rendered }}",
+              "type": "string"
+            },
+            {
+              "id": "ab8559f6-2969-4e74-a0d5-5afb090d7918",
+              "name": "created_at",
+              "value": "={{ $json.modified_gmt }}",
+              "type": "string"
+            },
+            {
+              "id": "5a1b67a9-9fce-41bf-b334-be626358bc8e",
+              "name": "summary",
+              "value": "={{ $json.excerpt.rendered }}",
+              "type": "string"
+            },
+            {
+              "id": "23664606-dbdc-4569-92d8-2ec07ef65916",
+              "name": "image",
+              "value": "={{ $json.featured_image_urls_v2.thumbnail[0] }}",
+              "type": "string"
+            },
+            {
+              "id": "7201b767-c4a2-43e9-b641-e5d11c411d93",
+              "name": "keywords",
+              "value": "={{ $json.taxonomy_info.post_tag.map(item => [\"t\",item.label]) }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        660,
+        280
+      ],
+      "id": "fed80292-9951-46cd-bc6c-0444f011727c",
+      "name": "map"
+    },
+    {
+      "parameters": {
+        "resource": "event",
+        "content": "={{ $json.content }}",
+        "kind": 31923,
+        "tags": "={{ JSON.stringify($json.tags) }}",
+        "relay": "wss://relilab.nostr1.com, wss://relay-rpi.edufeed.org"
+      },
+      "type": "n8n-nodes-nostrobots.nostrobots",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        280
+      ],
+      "id": "6cf4a487-04d1-4301-bfa2-33da8b54c258",
+      "name": "Send a event",
+      "credentials": {
+        "nostrobotsApi": {
+          "id": "G2LvTOE9bJyG42t2",
+          "name": "Johan Amos Comenius Nostr"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "html": "={{ $json.content }}",
+        "destinationKey": "content",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        900,
+        280
+      ],
+      "id": "c91f238a-7074-467c-a32b-b9ff7ba820e2",
+      "name": "content to markdown"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "nostrfeed",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1940,
+        680
+      ],
+      "id": "7cc8891d-063b-4fb5-bf51-aa1766f22a2c",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5dbd0fef-7854-4342-b6fb-9222bf370fb2",
+              "name": "allowed_npub",
+              "value": "=[\n  \"54a340072ccc625516c8d572b638a828c5b857074511302fb4392f26e34e1913\"\n]",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        680
+      ],
+      "id": "9814e0e3-8736-419e-82a4-0bc1b60f7bac",
+      "name": "alowed_npubs"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "126170a3-6f5f-43a5-aa9b-ba07effed07a",
+              "name": "ID",
+              "value": "={{ \n$json.tags\n.filter(item => item[0] === 'd')\n.map(item => item[1]).join(',') \n}}",
+              "type": "string"
+            },
+            {
+              "id": "478919ab-9e68-44f8-8477-a78175add0cc",
+              "name": "title",
+              "value": "={{  $json.tags .filter(item => item[0] === 'title') .map(item => item[1]).join(',')  }}",
+              "type": "string"
+            },
+            {
+              "id": "3642668f-f6b1-4281-9d65-6e56eabf655b",
+              "name": "starts",
+              "value": "={{  $json.tags .filter(item => item[0] === 'starts') .map(item => item[1]).join(',').toDateTime('s')  }}",
+              "type": "string"
+            },
+            {
+              "id": "0631f2f0-4c71-444a-9caa-c4fc85eb846e",
+              "name": "ends",
+              "value": "={{  $json.tags .filter(item => item[0] === 'ends') .map(item => item[1]).join(',').toDateTime('s')  }}",
+              "type": "string"
+            },
+            {
+              "id": "e9b2891f-d2a1-42ea-9f13-447d8e29814b",
+              "name": "status",
+              "value": "={{  $json.tags .filter(item => item[0] === 'status') .map(item => item[1]).join(',')  }}",
+              "type": "string"
+            },
+            {
+              "id": "e2914bf9-b392-48d3-80b2-9365bcb403bc",
+              "name": "location",
+              "value": "={{  $json.tags .filter(item => item[0] === 'location') .map(item => item[1]).join(',')  }}",
+              "type": "string"
+            },
+            {
+              "id": "9081a2ce-fabd-4525-87e6-484b66cc4fab",
+              "name": "tags",
+              "value": "={{  $json.tags .filter(item => item[0] === 't') .map(item => item[1]).join(', ')  }}",
+              "type": "string"
+            },
+            {
+              "id": "8bcd3492-b8a5-4088-a034-077dd6f79522",
+              "name": "summary",
+              "value": "={{  $json.tags .filter(item => item[0] === 'summary') .map(item => item[1]).join(',')  }}",
+              "type": "string"
+            },
+            {
+              "id": "edcee753-7116-4701-8131-bc5b29d5f211",
+              "name": "content",
+              "value": "={{ $json.content }}",
+              "type": "string"
+            },
+            {
+              "id": "959fb9de-6c8c-4a71-b77c-42aa6fd9a40b",
+              "name": "pubkey",
+              "value": "={{ $json.pubkey }}",
+              "type": "string"
+            },
+            {
+              "id": "48b2940c-12aa-42d1-9857-3a0575b94e10",
+              "name": "image",
+              "value": "={{  $json.tags .filter(item => item[0] === 'image') .map(item => item[1]).join(',')  }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        880,
+        680
+      ],
+      "id": "05f1fc1f-0a41-4a06-b5e9-35c7106252a7",
+      "name": "convert to readable fields"
+    },
+    {
+      "parameters": {
+        "strategy": "rawFilter",
+        "rawFilter": "={\n  \"kinds\":[31923],\n  \"limit\": 1000,\n  \"authors\":{{ $json.allowed_npub.toJsonString() }}\n} ",
+        "from": 365,
+        "relay": "wss://relilab.nostr1.com"
+      },
+      "type": "n8n-nodes-nostrobots.nostrobotsread",
+      "typeVersion": 1,
+      "position": [
+        440,
+        680
+      ],
+      "id": "79caa6a4-dc9a-4e27-aba4-ad8df6285c02",
+      "name": "read last 100 events"
+    },
+    {
+      "parameters": {
+        "html": "={{ $json.summary }}",
+        "destinationKey": "summary",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        280
+      ],
+      "id": "02e5b35f-05d8-4733-88f4-d8aa9180a93b",
+      "name": "summary to markdown"
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// Hilfsfunktion zum Dekodieren von einfachen HTML-Entitäten im Titel\nfunction decodeHtmlEntities(text) {\n  if (!text) return \"\";\n  return text.replace(/&#(\\d+);/g, (match, dec) => {\n    return String.fromCharCode(dec);\n  }).replace(/&/g, '&');\n}\n\n// Loop over input items\nfor (const item of $input.all()) {\n  const results = [];\n  //Identifier aus guid.base64\n  const d_tag = item.json.d; \n  // Titel extrahieren und bereinigen\n  let title = \"\";\n  try {\n    const parsedTitle = JSON.parse(item.json.title);\n    title = decodeHtmlEntities(parsedTitle.rendered);\n  } catch (e) {\n    title = decodeHtmlEntities(item.json.title);\n  }\n  // Start- und End-Datum in Unix-Timestamp (Sekunden) umwandeln\n  const start_timestamp = Math.floor(new Date(item.json.start.replace(' ', 'T') + 'Z').getTime() / 1000);\n  const end_timestamp = Math.floor(new Date(item.json.end.replace(' ', 'T') + 'Z').getTime() / 1000);\n  // --- 2. Nostr 'tags'-Array erstellen ---\n\n  const tags = [];\n\n  tags.push([\"d\", d_tag]);\n  tags.push([\"title\", title]);\n  tags.push([\"starts\", start_timestamp.toString()]);\n  tags.push([\"ends\", end_timestamp.toString()]);\n  tags.push([\"status\", \"planned\"]);\n\n  if (item.json.summary) {\n    tags.push([\"summary\", item.json.summary]);\n  }\n  if (item.json.location) {\n    tags.push([\"location\", item.json.location]);\n  }\n  if (item.json.image) {\n    tags.push([\"image\", item.json.image]);\n  }\n  // pusht alle keywords vom format [\"t\", \"relilab\"] in den nostrtags root\n  if (item.json.keywords && Array.isArray(item.json.keywords)) {\n    tags.push(...item.json.keywords);\n  }\n  \n  item.json.tags = tags;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1340,
+        280
+      ],
+      "id": "e1299ff1-b92e-4595-8fef-ca2491cc67d1",
+      "name": "prepare nostr tags"
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json.content }}",
+        "destinationKey": "content",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        680
+      ],
+      "id": "bfb459d8-abf9-4e4e-ad77-ced038545110",
+      "name": "content to HTML"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        2120,
+        680
+      ],
+      "id": "84fb750b-c1e3-410a-ab95-e6d7a913f97b",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1dde9d1e-627c-46c0-9ed1-0ce1c115621b",
+              "leftValue": "={{  $json.tags .filter(item => item[0] === 'starts') .map(item => item[1]).join(',').toDateTime('s').toMillis()  }}",
+              "rightValue": "={{ new Date().toDateTime().toMillis() }}",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "0e07c43b-67c5-493f-893e-400793f94646",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        680
+      ],
+      "id": "388a60ee-ce3e-435b-b0f3-08c9c8e51660",
+      "name": "only future termine"
+    },
+    {
+      "parameters": {
+        "strategy": "rawFilter",
+        "rawFilter": "={\n  \"kinds\":[31923],\n  \"limit\": 10000,\n  \"authors\":{{ $json.allowed_npub.toJsonString() }}\n} ",
+        "from": 365,
+        "relay": "wss://relilab.nostr1.com, wss://relay-rpi.edufeed.org"
+      },
+      "type": "n8n-nodes-nostrobots.nostrobotsread",
+      "typeVersion": 1,
+      "position": [
+        420,
+        1000
+      ],
+      "id": "9972a7b8-a9c1-4d98-b4de-31decf7f8e76",
+      "name": "read last 100 events1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5dbd0fef-7854-4342-b6fb-9222bf370fb2",
+              "name": "allowed_npub",
+              "value": "=[\n  \"54a340072ccc625516c8d572b638a828c5b857074511302fb4392f26e34e1913\"\n]",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        200,
+        1000
+      ],
+      "id": "68598e15-9372-4258-97a6-2a933715aa5d",
+      "name": "author_npubs"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        1000
+      ],
+      "id": "f8835710-3212-4170-b418-25793ab98856",
+      "name": "delete termine"
+    },
+    {
+      "parameters": {
+        "resource": "event",
+        "content": "Fehlerhafter Eintrag",
+        "kind": 5,
+        "tags": "=[\n  [\"e\", {{ $json.id.toJsonString() }}]\n] ",
+        "relay": "wss://relilab.nostr1.com, wss://relay-rpi.edufeed.org"
+      },
+      "type": "n8n-nodes-nostrobots.nostrobots",
+      "typeVersion": 1,
+      "position": [
+        660,
+        1000
+      ],
+      "id": "7f94bd9d-dd83-4c21-ba52-e38321630bc2",
+      "name": "Send delete request",
+      "credentials": {
+        "nostrobotsApi": {
+          "id": "G2LvTOE9bJyG42t2",
+          "name": "Johan Amos Comenius Nostr"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "nostre_termine",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        680
+      ],
+      "id": "d1ea34a3-a9ae-4501-9fa8-dc544096ec98",
+      "name": "Kalender Webhook",
+      "webhookId": "c3cf3a84-1b52-4ef4-a857-fd345f2729d1"
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json.summary }}",
+        "destinationKey": "summary",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        1500,
+        680
+      ],
+      "id": "6088b5bf-e8af-4def-ac40-b4399ef12416",
+      "name": "summary to html"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "aec8e391-a9b7-4804-8499-8633ebfc8075",
+              "leftValue": "={{ $json.acf.relilab_startdate.toDateTime().toMillis() }}",
+              "rightValue": "={{ new Date().toDateTime().toMillis() }}",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        460,
+        280
+      ],
+      "id": "12bb2f59-3ee3-40f6-97a3-282bdb3278ba",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5b92680f-ff01-4a26-b88d-075365b8d504",
+              "name": "summary",
+              "value": "={{ $json.summary.substring(0,300) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1320,
+        680
+      ],
+      "id": "e680938d-c05c-4f75-a8ac-a71ab9cde7dc",
+      "name": "shorten summary"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.location_url=item.json.location.replace('Zoom:', '').trim();\n  item.json.location='<a href=\"'+item.json.location+'\">Link zum Online-Event</a>'\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        680
+      ],
+      "id": "78eee54c-e6b7-4ba7-98e3-7d05d0448833",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "content": "## Löschen\nAlle events eines Autors löschen",
+        "height": 80,
+        "width": 1460,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -20,
+        880
+      ],
+      "typeVersion": 1,
+      "id": "474f2b80-beb7-4703-aa7b-edf98c397748",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Webhook für Ausgabe auf Webseite\nAlle Events vertrauter npub holen. Künftige Termine filtern. Für webausgabe aufbereiten.",
+        "height": 80,
+        "width": 1460,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -20,
+        520
+      ],
+      "typeVersion": 1,
+      "id": "86868536-2652-42a7-b055-cadc529237f6",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Cronjob relilab Termine abfragen über wp-json.\nAlle künftrigen  Termine filtern und als nostre Kind 31293 mappen, in makdown konvertieren  und an relays versenden.",
+        "height": 80,
+        "width": 1460,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -20,
+        120
+      ],
+      "typeVersion": 1,
+      "id": "faf54f07-45cf-4b59-8faf-9b1b6b09062a",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "map": {
+      "main": [
+        [
+          {
+            "node": "content to markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "content to markdown": {
+      "main": [
+        [
+          {
+            "node": "summary to markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a event": {
+      "main": [
+        []
+      ]
+    },
+    "alowed_npubs": {
+      "main": [
+        [
+          {
+            "node": "read last 100 events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "convert to readable fields": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "read last 100 events": {
+      "main": [
+        [
+          {
+            "node": "only future termine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "summary to markdown": {
+      "main": [
+        [
+          {
+            "node": "prepare nostr tags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "prepare nostr tags": {
+      "main": [
+        [
+          {
+            "node": "Send a event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "content to HTML": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        []
+      ]
+    },
+    "only future termine": {
+      "main": [
+        [
+          {
+            "node": "convert to readable fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "author_npubs": {
+      "main": [
+        [
+          {
+            "node": "read last 100 events1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "delete termine": {
+      "main": [
+        [
+          {
+            "node": "author_npubs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "read last 100 events1": {
+      "main": [
+        [
+          {
+            "node": "Send delete request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kalender Webhook": {
+      "main": [
+        [
+          {
+            "node": "alowed_npubs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "summary to html": {
+      "main": [
+        [
+          {
+            "node": "content to HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "map",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "shorten summary": {
+      "main": [
+        [
+          {
+            "node": "summary to html",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "shorten summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d2b49b4d-adaa-4d03-80fd-ae9a08eaa41d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "634e789e9cac462123b2b4acaedfe20e105965d27f018a60d1d4305ae72b1acb"
+  },
+  "id": "CwIIkxGr3SFxzjQj",
+  "tags": [
+    {
+      "createdAt": "2025-04-28T06:09:26.562Z",
+      "updatedAt": "2025-04-28T06:09:26.562Z",
+      "id": "aKdhwd3Lydp1gI6s",
+      "name": "nostr"
+    },
+    {
+      "createdAt": "2025-06-27T14:06:35.467Z",
+      "updatedAt": "2025-06-27T14:06:35.467Z",
+      "id": "0E0pIZZSLGtdJKxI",
+      "name": "wp to nostr"
+    }
+  ]
+}
