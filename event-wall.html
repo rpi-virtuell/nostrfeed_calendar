@@ -32,7 +32,7 @@
         #edu-event-wall {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 25px;
+            gap: 30px;
             max-width: 1600px;
             margin: 0 auto;
         }
@@ -81,16 +81,16 @@
         /* Abreißkalender-Stil für die Datums-Bubble */
         .date-bubble {
             background-color: var(--white);
-            border-radius: 8px;
+            border-radius: 4px;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            box-shadow: 6px 6px 9px rgba(0,0,0,0.4);
             font-weight: bold;
             line-height: 1.1;
             flex-shrink: 0;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            min-width: 4rem;
+            min-width: 4.5rem;
         }
         .date-bubble-year {
             background-color: var(--date-red);
@@ -130,11 +130,24 @@
             padding: 20px;
             flex-grow: 1;
         }
+        .tile-body a {
+            color: var(--white);
+            text-decoration: none;
+        }
         .tile-title {
             margin: 0 0 15px 0;
-            font-size: 1.4em;
             line-height: 1.3;
         }
+        .tile-meta {
+            display: grid;
+            grid-template-rows: 1.5rem 1.5rem auto 1fr;
+            height: 12vh;
+            align-items: self-end;
+        }
+        .tile-meta .summary{
+            vertical-align: baseline;
+        }
+
         .tile-meta p {
             margin: 8px 0;
             display: flex;
@@ -272,7 +285,8 @@
                             <div class="tile-meta">
                                 <p>${clockIcon}<span>${timeSpanString}</span></p>
                                 ${event.location ? `<p>${locationIcon}<span>${event.location}</span></p>` : ''}
-                                ${event.summary ? `<p><hr><span>${event.summary}</span></p>` : ''}
+                                <div class="ghost"></div>
+                                ${event.summary ? `<div class="summary">${event.summary}</div>` : ''}
                             </div>
                         </div>
                     `;
