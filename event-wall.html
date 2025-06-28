@@ -184,9 +184,40 @@
             const endpoint = 'https://n8n.rpi-virtuell.de/webhook/nostre_termine';
             
             const eventWallEl = document.getElementById('edu-event-wall');
-            // ... (Rest der Element-Deklarationen ist unverändert)
+            const eventWallEl = document.getElementById('edu-event-wall');
+            const loaderEl = document.getElementById('loader');
+            const modal = document.getElementById('event-modal');
+            const closeModalBtn = document.getElementById('close-modal');
+            
+            let allEvents = [];
 
-            // --- HIER BEGINNEN DIE ÄNDERUNGEN IM SCRIPT ---
+            // Helper zum Formatieren des Datums für das Modal
+            const formatGermanDate = (date) => {
+                if (!date) return 'Keine Angabe';
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
+                return new Intl.DateTimeFormat('de-DE', options).format(date) + ' Uhr';
+            };
+            
+            // Daten vom Endpunkt abrufen
+            const fetchEvents = async () => {
+                try {
+                    const response = await fetch(endpoint);
+                    if (!response.ok) throw new Error(`HTTP-Fehler! Status: ${response.status}`);
+                    const data = await response.json();
+                    if (data && data.length > 0 && data[0].nostrfeed) {
+                        allEvents = data[0].nostrfeed.map(event => ({
+                            ...event,
+                            start: new Date(event.starts),
+                            end: new Date(event.ends)
+                        })).sort((a, b) => a.start - b.start); // Termine nach Datum sortieren
+                    } else {
+                        allEvents = [];
+                    }
+                } catch (error) {
+                    console.error('Fehler beim Abrufen der Termine:', error);
+                    eventWallEl.innerHTML = `<div id="no-events" style="color: red;">Fehler beim Laden der Termine.</div>`;
+                }
+            };
 
             const renderEventWall = () => {
                 eventWallEl.innerHTML = '';
