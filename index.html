@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nostr Terminkalender</title>
     <style>
-        /* Grundlegende Stile und Farbvariablen */
         :root {
             --primary-color: #4a90e2;
             --secondary-color: #f5a623;
@@ -27,7 +26,6 @@
             align-items: flex-start;
         }
 
-        /* Hauptcontainer für den Kalender */
         .calendar-container {
             width: 100%;
             max-width: 1200px;
@@ -37,7 +35,6 @@
             overflow: hidden;
         }
 
-        /* Header mit Navigation und Monatsanzeige */
         .calendar-header {
             display: flex;
             justify-content: space-between;
@@ -67,12 +64,8 @@
             transform: scale(1.2);
         }
 
-        /* Grid für Wochentage und Kalendertage */
         .calendar-grid {
             display: grid;
-            /* --- ÄNDERUNG HIER --- 
-               minmax(0, 1fr) verhindert, dass überlange Inhalte die Spaltenbreite sprengen.
-               Dies ist der Fix für das Layout-Problem. */
             grid-template-columns: repeat(7, minmax(0, 1fr));
             gap: 1px;
             background-color: var(--light-gray);
@@ -87,7 +80,6 @@
             color: var(--primary-color);
         }
 
-        /* Einzelne Tage im Kalender */
         .day {
             position: relative;
             padding: 10px;
@@ -128,10 +120,9 @@
             display: flex;
             flex-direction: column;
             gap: 4px;
-            overflow-y: auto; /* Erlaubt scrollen, wenn zu viele Termine da sind */
+            overflow-y: auto;
         }
 
-        /* Stil für Termineinträge im Kalender */
         .event {
             background-color: var(--primary-color);
             color: var(--white);
@@ -140,26 +131,21 @@
             font-size: 0.8em;
             cursor: pointer;
             transition: background-color 0.2s ease;
-            
-            /* --- ÄNDERUNG HIER ---
-               Diese Stile sorgen für den korrekten Zeilenumbruch. */
             white-space: normal;
             word-break: break-word; 
-            overflow: hidden; /* Verhindert, dass Text aus dem blauen Kasten ragt */
+            overflow: hidden;
         }
         
         .event:hover {
             background-color: #3a80d2;
         }
 
-        /* Ladeanzeige */
         #loader {
             text-align: center;
             padding: 40px;
             font-size: 1.2em;
         }
         
-        /* Modal für Termindetails */
         .modal {
             display: none;
             position: fixed;
@@ -175,11 +161,11 @@
 
         .modal-content {
             background-color: var(--white);
-            margin: 5% auto; /* Weniger Abstand von oben */
+            margin: 5% auto;
             padding: 30px;
             border-radius: 8px;
             width: 90%;
-            max-width: 650px; /* Etwas breiter für das Bild */
+            max-width: 650px;
             position: relative;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             animation: slideIn 0.3s;
@@ -196,7 +182,6 @@
             cursor: pointer;
         }
         
-        /* --- NEU: Container für das Bild im Modal --- */
         #modal-image-container {
             width: 100%;
             margin-bottom: 20px;
@@ -228,20 +213,13 @@
             color: var(--primary-color);
         }
         
-        #modal-details p {
-            margin: 8px 0;
-        }
-        
+        #modal-details p { margin: 8px 0; }
         #modal-content-html {
             margin-top: 20px;
             padding-top: 20px;
             border-top: 1px solid var(--light-gray);
         }
-        
-        #modal-content-html p {
-            line-height: 1.6;
-        }
-        
+        #modal-content-html p { line-height: 1.6; }
         #modal-tags span {
             display: inline-block;
             background-color: var(--secondary-color);
@@ -253,10 +231,8 @@
             margin-bottom: 5px;
         }
 
-        /* Animationen */
         @keyframes fadeIn { from {opacity: 0} to {opacity: 1} }
         @keyframes slideIn { from {transform: translateY(-50px)} to {transform: translateY(0)} }
-
     </style>
 </head>
 <body>
@@ -281,13 +257,10 @@
         </div>
     </div>
 
-    <!-- Modal für Termindetails -->
     <div id="event-modal" class="modal">
         <div class="modal-content">
             <span id="close-modal" class="close-button">×</span>
-            <!-- --- NEU: Platzhalter für das Bild --- -->
             <div id="modal-image-container"></div>
-            
             <h2 id="modal-title"></h2>
             <p id="modal-date"></p>
             <div id="modal-details">
@@ -316,10 +289,7 @@
 
             const formatGermanDate = (date) => {
                 if (!date) return 'Keine Angabe';
-                const options = {
-                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-                    hour: '2-digit', minute: '2-digit', hour12: false
-                };
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
                 return new Intl.DateTimeFormat('de-DE', options).format(date) + ' Uhr';
             };
             
@@ -329,13 +299,8 @@
                     if (!response.ok) throw new Error(`HTTP-Fehler! Status: ${response.status}`);
                     const data = await response.json();
                     if (data && data.length > 0 && data[0].nostrfeed) {
-                        allEvents = data[0].nostrfeed.map(event => ({
-                            ...event,
-                            start: new Date(event.starts),
-                            end: new Date(event.ends)
-                        }));
+                        allEvents = data[0].nostrfeed.map(event => ({ ...event, start: new Date(event.starts), end: new Date(event.ends) }));
                     } else {
-                        console.warn('Keine nostrfeed-Daten in der Antwort gefunden.');
                         allEvents = [];
                     }
                 } catch (error) {
@@ -394,7 +359,6 @@
                         const eventEl = document.createElement('div');
                         eventEl.classList.add('event');
                         eventEl.textContent = event.title;
-                        eventEl.dataset.eventId = event.ID;
                         eventEl.addEventListener('click', (e) => {
                             e.stopPropagation();
                             showEventModal(event);
@@ -403,31 +367,42 @@
                     });
                     calendarDaysEl.appendChild(dayEl);
                 }
+
+                // --- ÄNDERUNG HIER: Füllt die restlichen Zellen der letzten Woche ---
+                // Berechnet den Wochentag des letzten Monatstages (0=So, 1=Mo, ...)
+                const lastDayOfWeek = lastDayOfMonth.getDay();
+                // Passt den Wochentag an unsere Ansicht an (1=Mo, ..., 7=So)
+                const adjustedLastDayOfWeek = lastDayOfWeek === 0 ? 7 : lastDayOfWeek;
+                
+                // Fügt leere Platzhalter-Tage hinzu, bis die Woche voll ist
+                if (adjustedLastDayOfWeek !== 7) {
+                    for (let i = adjustedLastDayOfWeek; i < 7; i++) {
+                        const dayEl = document.createElement('div');
+                        dayEl.classList.add('day', 'other-month');
+                        // Wichtig: Es wird keine Tagesnummer hinzugefügt.
+                        calendarDaysEl.appendChild(dayEl);
+                    }
+                }
             };
             
-            /**
-             * Zeigt das Modal mit den Details eines Termins an
-             * @param {object} event - Das Termin-Objekt
-             */
             const showEventModal = (event) => {
-                // --- ÄNDERUNG HIER: Logik zum Anzeigen des Bildes ---
                 const modalImageContainer = document.getElementById('modal-image-container');
-                modalImageContainer.innerHTML = ''; // Vorheriges Bild entfernen
+                modalImageContainer.innerHTML = '';
                 if (event.image) {
                     const img = document.createElement('img');
                     img.src = event.image;
-                    img.alt = `Bild für ${event.title}`; // Guter Stil für Barrierefreiheit
+                    img.alt = `Bild für ${event.title}`;
                     modalImageContainer.appendChild(img);
                     modalImageContainer.style.display = 'block';
                 } else {
-                    modalImageContainer.style.display = 'none'; // Verstecken, wenn kein Bild da ist
+                    modalImageContainer.style.display = 'none';
                 }
                 
                 document.getElementById('modal-title').textContent = event.title;
                 document.getElementById('modal-summary').textContent = event.summary || 'Keine Zusammenfassung vorhanden.';
-                document.getElementById('modal-location').innerHTML = event.location.startsWith('http') 
+                document.getElementById('modal-location').innerHTML = event.location && event.location.startsWith('http') 
                     ? `<a href="${event.location}" target="_blank" rel="noopener noreferrer">${event.location}</a>` 
-                    : event.location;
+                    : event.location || 'Kein Ort angegeben.';
                 
                 const startStr = formatGermanDate(event.start);
                 const endStr = new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '2-digit' }).format(event.end);
@@ -465,8 +440,9 @@
             });
 
             const init = async () => {
+                loaderEl.style.display = 'block';
                 await fetchEvents();
-                if (loaderEl) loaderEl.style.display = 'none';
+                loaderEl.style.display = 'none';
                 renderCalendar();
             };
 
