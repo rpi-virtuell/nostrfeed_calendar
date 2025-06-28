@@ -69,7 +69,7 @@
              background: linear-gradient(45deg, #4e54c8, #8f94fb);
         }
 
-        /* --- NEU: Container für die Overlays (Datum & Tags) --- */
+        /* Container für die Overlays (Datum & Tags) */
         .tile-overlay {
             position: absolute;
             top: 0;
@@ -78,21 +78,21 @@
             padding: 15px;
             display: flex;
             justify-content: space-between;
-            align-items: flex-start; /* Elemente oben ausrichten */
-            box-sizing: border-box; /* Padding in die Breite einrechnen */
+            align-items: flex-start;
+            box-sizing: border-box;
             gap: 10px;
         }
 
         /* Datums-Bubble */
         .date-bubble {
             background-color: var(--white);
-            border-radius: 8px; /* Stärkere Abrundung */
+            border-radius: 8px;
             text-align: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             font-weight: bold;
             line-height: 1.1;
-            flex-shrink: 0; /* Verhindert, dass die Bubble schrumpft */
-            overflow: hidden; /* Stellt sicher, dass der rote Header die Ecken nicht überlappt */
+            flex-shrink: 0;
+            overflow: hidden;
         }
         .date-bubble-month {
             background-color: var(--date-red);
@@ -104,7 +104,6 @@
         .date-bubble-day {
             color: var(--font-color);
             padding: 5px 10px;
-            /* --- ÄNDERUNG: Größere Schrift --- */
             font-size: 2em;
         }
 
@@ -135,7 +134,7 @@
             line-height: 1.3;
         }
         .tile-meta p {
-            margin: 8px 0; /* Etwas mehr Abstand */
+            margin: 8px 0;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -149,7 +148,7 @@
         }
 
         /* Lade- & Fehlermeldungen */
-        #loader, #no-events { text-align: center; padding: 40px; font-size: 1.2em; width: 100%; }
+        #loader, #no-events { text-align: center; padding: 40px; font-size: 1.2em; grid-column: 1 / -1; }
 
         /* Modal (unverändert) */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); animation: fadeIn 0.3s; }
@@ -176,107 +175,31 @@
     </div>
 
     <div id="event-modal" class="modal">
-        <!-- Modal Inhalt ist unverändert -->
+        <div class="modal-content">
+            <span id="close-modal" class="close-button">×</span>
+            <div id="modal-image-container"></div>
+            <h2 id="modal-title"></h2>
+            <p id="modal-date"></p>
+            <div id="modal-details">
+                <p><strong>Zusammenfassung:</strong> <span id="modal-summary"></span></p>
+                <p><strong>Ort:</strong> <span id="modal-location"></span></p>
+                <p><strong>Tags:</strong> <span id="modal-tags"></span></p>
+            </div>
+            <div id="modal-content-html"></div>
+        </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const endpoint = 'https://n8n.rpi-virtuell.de/webhook/nostre_termine';
             
-            const eventWallEl = document.getElementById('edu-event-wall');
+            // KORREKTE UND VOLLSTÄNDIGE VARIABLEN-DEKLARATION
             const eventWallEl = document.getElementById('edu-event-wall');
             const loaderEl = document.getElementById('loader');
             const modal = document.getElementById('event-modal');
             const closeModalBtn = document.getElementById('close-modal');
             
             let allEvents = [];
-
-            // Helper zum Formatieren des Datums für das Modal
-            const formatGermanDate = (date) => {
-                if (!date) return 'Keine Angabe';
-                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
-                return new Intl.DateTimeFormat('de-DE', options).format(date) + ' Uhr';
-            };
-            
-            // Daten vom Endpunkt abrufen
-            const fetchEvents = async () => {
-                try {
-                    const response = await fetch(endpoint);
-                    if (!response.ok) throw new Error(`HTTP-Fehler! Status: ${response.status}`);
-                    const data = await response.json();
-                    if (data && data.length > 0 && data[0].nostrfeed) {
-                        allEvents = data[0].nostrfeed.map(event => ({
-                            ...event,
-                            start: new Date(event.starts),
-                            end: new Date(event.ends)
-                        })).sort((a, b) => a.start - b.start); // Termine nach Datum sortieren
-                    } else {
-                        allEvents = [];
-                    }
-                } catch (error) {
-                    console.error('Fehler beim Abrufen der Termine:', error);
-                    eventWallEl.innerHTML = `<div id="no-events" style="color: red;">Fehler beim Laden der Termine.</div>`;
-                }
-            };
-
-            const renderEventWall = () => {
-                eventWallEl.innerHTML = '';
-                
-                if (!allEvents || allEvents.length === 0) {
-                    eventWallEl.innerHTML = `<div id="no-events">Aktuell keine Termine gefunden.</div>`;
-                    return;
-                }
-
-                allEvents.forEach(event => {
-                    const tile = document.createElement('div');
-                    tile.className = 'event-tile';
-                    tile.addEventListener('click', () => showEventModal(event));
-
-                    // Datum, Uhrzeit und Jahr für die Kachel formatieren
-                    const day = event.start.getDate();
-                    // --- ÄNDERUNG: Monat als kurze Abkürzung ---
-                    const month = new Intl.DateTimeFormat('de-DE', { month: 'short' }).format(event.start);
-                    const year = event.start.getFullYear();
-                    const time = new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '2-digit' }).format(event.start);
-
-                    const tags = event.tags ? event.tags.split(',').map(t => t.trim()).slice(0, 3) : [];
-                    const tagsHTML = tags.map(tag => `<span>${tag}</span>`).join('');
-
-                    // SVG-Icons
-                    const locationIcon = `<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`;
-                    const organizerIcon = `<svg viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>`;
-                    // --- NEU: Uhr-Icon ---
-                    const clockIcon = `<svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>`;
-
-                    // --- ÄNDERUNG: Angepasstes HTML-Template mit .tile-overlay und neuer Zeile für Zeit/Jahr ---
-                    tile.innerHTML = `
-                        <div class="tile-header ${event.image ? '' : 'no-image'}" style="background-image: url('${event.image || ''}')">
-                            <div class="tile-overlay">
-                                <div class="date-bubble">
-                                    <div class="date-bubble-month">${month}</div>
-                                    <div class="date-bubble-day">${day}</div>
-                                </div>
-                                <div class="tile-tags">${tagsHTML}</div>
-                            </div>
-                        </div>
-                        <div class="tile-body">
-                            <h3 class="tile-title">${event.title}</h3>
-                            <div class="tile-meta">
-                                <p>${clockIcon}<span>${time} Uhr / ${year}</span></p>
-                                ${event.location ? `<p>${locationIcon}<span>${event.location}</span></p>` : ''}
-                                ${event.summary ? `<p>${organizerIcon}<span>${event.summary}</span></p>` : ''}
-                            </div>
-                        </div>
-                    `;
-                    eventWallEl.appendChild(tile);
-                });
-            };
-
-            // Rest des Scripts (fetchEvents, showEventModal, init, etc.) ist unverändert.
-            // ... (Hier würde der restliche, unveränderte JavaScript-Code folgen)
-
-            const modal = document.getElementById('event-modal');
-            const closeModalBtn = document.getElementById('close-modal');
 
             const formatGermanDate = (date) => {
                 if (!date) return 'Keine Angabe';
@@ -302,6 +225,54 @@
                     console.error('Fehler beim Abrufen der Termine:', error);
                     eventWallEl.innerHTML = `<div id="no-events" style="color: red;">Fehler beim Laden der Termine.</div>`;
                 }
+            };
+            
+            const renderEventWall = () => {
+                eventWallEl.innerHTML = '';
+                
+                if (allEvents.length === 0) {
+                    eventWallEl.innerHTML = `<div id="no-events">Aktuell keine Termine gefunden.</div>`;
+                    return;
+                }
+
+                allEvents.forEach(event => {
+                    const tile = document.createElement('div');
+                    tile.className = 'event-tile';
+                    tile.addEventListener('click', () => showEventModal(event));
+
+                    const day = event.start.getDate();
+                    const month = new Intl.DateTimeFormat('de-DE', { month: 'short' }).format(event.start);
+                    const year = event.start.getFullYear();
+                    const time = new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '2-digit' }).format(event.start);
+
+                    const tags = event.tags ? event.tags.split(',').map(t => t.trim()).slice(0, 3) : [];
+                    const tagsHTML = tags.map(tag => `<span>${tag}</span>`).join('');
+
+                    const locationIcon = `<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>`;
+                    const organizerIcon = `<svg viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>`;
+                    const clockIcon = `<svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>`;
+
+                    tile.innerHTML = `
+                        <div class="tile-header ${event.image ? '' : 'no-image'}" style="background-image: url('${event.image || ''}')">
+                            <div class="tile-overlay">
+                                <div class="date-bubble">
+                                    <div class="date-bubble-month">${month}</div>
+                                    <div class="date-bubble-day">${day}</div>
+                                </div>
+                                <div class="tile-tags">${tagsHTML}</div>
+                            </div>
+                        </div>
+                        <div class="tile-body">
+                            <h3 class="tile-title">${event.title}</h3>
+                            <div class="tile-meta">
+                                <p>${clockIcon}<span>${time} Uhr / ${year}</span></p>
+                                ${event.location ? `<p>${locationIcon}<span>${event.location}</span></p>` : ''}
+                                ${event.summary ? `<p>${organizerIcon}<span>${event.summary}</span></p>` : ''}
+                            </div>
+                        </div>
+                    `;
+                    eventWallEl.appendChild(tile);
+                });
             };
             
             const showEventModal = (event) => {
@@ -349,6 +320,10 @@
 
             const init = async () => {
                 await fetchEvents();
+                // Versteckt den Loader nur, wenn er noch existiert
+                if (loaderEl) {
+                    loaderEl.style.display = 'none';
+                }
                 renderEventWall();
             };
 
