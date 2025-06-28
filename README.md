@@ -22,6 +22,10 @@ Das System besteht aus drei n8n-Workflows, die das Datenmanagement zwischen Word
 - Ein zweiter n8n-Workflow holt die Event-Daten aus dem Nostr-Netzwerk.
 - Die Daten werden so aufbereitet, dass sie von den HTML-Seiten (`index.html` und `event-wall.html`) direkt verarbeitet und dargestellt werden können.
 - Dabei wird ein Filter angewendet, der nur Events von bestimmten Autoren (identifiziert durch ihre `npub`) berücksichtigt.
+- **Demoseiten**: 
+ >- [Kalender](https://rpi-virtuell.github.io/nostrfeed_calendar/)
+ >- [Kachel](https://rpi-virtuell.github.io/nostrfeed_calendar/event-wall.html)
+ 
 
 ### 3. Events löschen (Debugging)
 
