@@ -26,3 +26,25 @@ Das System besteht aus drei n8n-Workflows, die das Datenmanagement zwischen Word
 ### 3. Events löschen (Debugging)
 
 - Ein dritter n8n-Workflow dient zum Löschen von Events. Dies ist hauptsächlich für Debugging-Zwecke vorgesehen.
+
+
+
+# Konzept
+
+ - > Termine aus relilab in Nostr veröffentlichen
+ - > Termine aus Nostr filtern und in HTML Views visualisieren
+ - > Nicht realisiert: Nostr Events in Wordpress importieren.
+
+ **Aktueller Stand und Vorschlag zur Anzeige von Nostr-Terminen in WordPress**
+
+ Aktuell ist kein automatischer Rückfluss von Daten aus Nostr nach WordPress implementiert. Obwohl ein solcher Datenabgleich technisch möglich wäre, widerspräche er der Grundidee des Projekts: WordPress soll als einfache, kuratierte Eingabemaske dienen, während Nostr als dezentraler Verteiler für die Termine fungiert.
+
+ Anstatt die Termine zurück in die WordPress-Datenbank zu importieren, sollte die Kalenderansicht auf der WordPress-Seite die Daten direkt aus dem Nostr-Netzwerk anzeigen.
+
+ Dafür gibt es zwei einfache Lösungsansätze:
+
+ 1.  **Iframe-Einbettung:** Die fertige Kalender- oder Kachelansicht wird als simple Iframe-Seite in WordPress integriert.
+ 2.  **WordPress-Plugin:** Ein kleines Plugin wird entwickelt, das die Termindaten live vom Nostr-Endpunkt abruft und direkt auf einer WordPress-Seite darstellt.
+
+ **Der Vorteil:** Dieser Ansatz bewahrt einen dezentralen Workflow. WordPress bleibt die kontrollierte Quelle für die *Eingabe*, kann aber als Anzeigeort *alle* relevanten Termine aus dem Nostr-Netzwerk für den Nutzer sichtbar machen.
+
