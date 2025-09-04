@@ -1,4 +1,19 @@
-document.addEventListener('DOMContentLoaded', () => {
+(function(start){
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    // DOM ist schon bereit → sofort starten
+    start();
+  }
+})(function(){
+  // Nostr-Direct Options (werden nur genutzt, wenn window.NostreAPI vorhanden ist)
+  const NOSTR_OPTIONS = {
+    // relays: ["wss://relilab.nostr1.com","wss://relay.tchncs.de"],
+    // allowed_npub: ["54a340072ccc625516c8d572b638a828c5b857074511302fb4392f26e34e1913"],
+    // sinceDays: 365,
+    // limit: 1000,
+    // timeoutMs: 8000,
+  };
   const endpoint = 'https://n8n.rpi-virtuell.de/webhook/nostre_termine';
 
   // === CONFIG ===
@@ -232,9 +247,46 @@ document.addEventListener('DOMContentLoaded', () => {
     const set = new Set(events.map(e => e.monthKey));
     return Array.from(set).sort();
   };
+  // Hilfsfunktion: falls nötig, Felder aus NostreAPI-Items auf dein Schema mappen
+  const normalizeFromNostr = (it) => ({
+    ID: it.ID,
+    title: it.title,
+    starts: it.starts,       // ISO-String aus nostre-api.js
+    ends: it.ends,           // ISO-String aus nostre-api.js
+    status: it.status,
+    location: it.location,   // bereits HTML-Link (Zoom-Handling passiert dort)
+    tags: it.tags,           // kann String "a, b, c" sein -> buildEvent ruft normalizeTags()
+    summary: it.summary,     // bereits HTML
+    content: it.content,     // bereits HTML
+    pubkey: it.pubkey,
+    image: it.image,
+    location_url: it.location_url,
+  });
 
   // Fetch
   const fetchEvents = async () => {
+    // 1) Versuch: direkte Nostr-Abfrage über nostre-api.js (falls geladen)
+    try {
+      if (window.NostreAPI && typeof window.NostreAPI.getNostrFeed === 'function') {
+        const { nostrfeed } = await window.NostreAPI.getNostrFeed(NOSTR_OPTIONS);
+
+        if (Array.isArray(nostrfeed) && nostrfeed.length > 0) {
+          const list = nostrfeed
+            .map(normalizeFromNostr)
+            .map(buildEvent)
+            .sort((a, b) => a.start - b.start);
+
+          allEvents = list;
+          filteredEvents = list.slice();
+          console.log(`Nostr direct fetch: ${list.length} events loaded.`);
+          return; // ✅ fertig, kein Fallback nötig
+        }
+      }
+    } catch (err) {
+      console.warn('Nostr direct fetch fehlgeschlagen – Fallback auf n8n:', err);
+    }
+
+    // 2) Fallback: n8n-Webhook wie gehabt
     try {
       const res = await fetch(endpoint);
       if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -245,6 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       allEvents = list;
       filteredEvents = list.slice();
+      console.log(`n8n-Webhook: ${list.length} events loaded.`);
     } catch(err) {
       console.error('Fehler beim Abruf:', err);
       const fallback = [{
@@ -263,6 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }];
       allEvents = fallback.map(buildEvent);
       filteredEvents = allEvents.slice();
+      console.log(`Fallback: ${allEvents.length} events loaded.`);
     }
   };
 
@@ -460,11 +514,37 @@ document.addEventListener('DOMContentLoaded', () => {
           tagSuggest.classList.remove('open');
         });
       });
+      tagSuggest.innerHTML = out.map(t =>
+        `<button type="button" class="suggest-item" data-key="${t.key}">
+          ${t.label} <span class="count">(${t.count})</span>
+        </button>`
+      ).join('');
     };
+    
+    // Initial render
     renderList();
+    // Use mousedown so the selection fires *before* the input loses focus via blur,
+    // which previously prevented the click handler from firing in some browsers.
+    tagSuggest.addEventListener('mousedown', (e) => {
+      const btn = e.target.closest('button');   // <— reicht
+      if (!btn || !tagSuggest.contains(btn)) return;
+      e.preventDefault(); // verhindert Blur, Auswahl greift sicher
+      const key = btn.getAttribute('data-key');
+      const item = tags.find(x => x.key === key);
+      addTagToState(item?.label || key);
+      tagSuggest.classList.remove('open');
+    });
+
+    // Open/close & filter interactions
     tagInput.addEventListener('focus', () => tagSuggest.classList.add('open'));
-    tagInput.addEventListener('blur', () => { setTimeout(() => tagSuggest.classList.remove('open'), 150); });
-    tagInput.addEventListener('input', () => { tagSuggest.classList.add('open'); renderList(tagInput.value); });
+    tagInput.addEventListener('blur', () => {
+      // small delay so a click can be processed if it happens
+      setTimeout(() => tagSuggest.classList.remove('open'), 120);
+    });
+    tagInput.addEventListener('input', () => {
+      tagSuggest.classList.add('open');
+      renderList(tagInput.value);
+    });
     tagInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -473,6 +553,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tagSuggest.classList.remove('open');
       }
     });
+  
   };
 
   // Month dropdown
