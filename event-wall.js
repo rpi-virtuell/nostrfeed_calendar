@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
   const endpoint = 'https://n8n.rpi-virtuell.de/webhook/nostre_termine';
 
+  // === CONFIG ===
+  const SUMMARY_WORD_LIMIT = 30; // <-- gewünschte Wortanzahl hier anpassen
+
   // Elements
   const eventWallEl = document.getElementById('edu-event-wall');
   const loaderEl = document.getElementById('loader');
@@ -58,6 +61,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const arr = Array.isArray(raw) ? raw : (raw ? String(raw).split(',') : []);
     return arr.map(t => t.trim()).filter(Boolean);
   };
+  const toPlainText = (html) => {
+    const div = document.createElement('div');
+    div.innerHTML = html || '';
+    return (div.textContent || div.innerText || '').replace(/\s+/g,' ').trim();
+  };
+  const truncateWords = (text, limit) => {
+    if (!text) return '';
+    const words = text.split(' ');
+    if (words.length <= limit) return text;
+    return words.slice(0, limit).join(' ') + '…';
+  };
 
   const buildEvent = (event) => {
     const start = new Date(event.starts || event.start || event.begin || event.date);
@@ -105,7 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
       filteredEvents = list.slice();
     } catch(err) {
       console.error('Fehler beim Abruf:', err);
-      // Fallback auf Beispiel-Datensatz
       const fallback = [{
         ID: "aHR0cHM6Ly9yZWxpbGFiLm9yZy8/cD0xOTU5Mg==",
         title: "Schöpfung und Urknall – Die Welt aus unterschiedlichen Perspektiven betrachten",
@@ -148,6 +161,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const tags = event.tagsArr.slice(0,3);
       const tagsHTML = tags.map(tag => `<button class="tag-badge" data-tag="${encodeURIComponent(tag)}" title="Nach Tag filtern">${tag}</button>`).join('');
 
+      const summaryPlain = toPlainText(event.summary || '');
+      const summaryShort = truncateWords(summaryPlain, SUMMARY_WORD_LIMIT);
+
       tile.innerHTML = `
         <div class="tile-header ${event.image ? '' : 'no-image'}" style="background-image:url('${event.image || ''}')">
           <div class="tile-overlay">
@@ -166,10 +182,9 @@ document.addEventListener('DOMContentLoaded', () => {
             ${event.location ? `<p>${locationIcon}<span>${event.location}</span></p>` : ''}
           </div>
           <div class="tile-ghost" aria-hidden="true"></div>
-          ${event.summary ? `<p class="tile-summary">${event.summary}</p>` : ''}
+          ${summaryShort ? `<p class="tile-summary">${summaryShort}</p>` : ''}
         </div>
       `;
-      // Make header tags clickable without opening modal
       tile.querySelectorAll('.tag-badge').forEach(btn => {
         btn.addEventListener('click', (ev) => {
           ev.stopPropagation();
@@ -200,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
       modalImageContainer.style.display = 'none';
     }
     document.getElementById('modal-title').textContent = event.title;
-    document.getElementById('modal-summary').textContent = event.summary || 'Keine Zusammenfassung vorhanden.';
+    document.getElementById('modal-summary').textContent = toPlainText(event.summary) || 'Keine Zusammenfassung vorhanden.';
     document.getElementById('modal-location').innerHTML =
       event.location && event.location.startsWith('http')
         ? `<a href="${event.location}" target="_blank" rel="noopener noreferrer">${event.location}</a>`
@@ -232,15 +247,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const applyFilters = () => {
     const q = state.searchQuery.trim().toLowerCase();
     filteredEvents = allEvents.filter(e => {
-      // Tag filter (ANY-of selected tags)
       const tagOK = state.selectedTags.size === 0
         ? true
         : Array.from(state.selectedTags).some(t => e.tagsLower.includes(t));
-      // Search across title and tags
       const searchOK = !q
         ? true
         : (e.title?.toLowerCase().includes(q) || e.tagsLower.some(t => t.includes(q)));
-      // Month
       const monthOK = !state.monthKey || e.monthKey === state.monthKey;
       return tagOK && searchOK && monthOK;
     });

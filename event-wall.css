@@ -75,16 +75,19 @@ h1{ text-align:center; color:var(--primary-color); margin:0 0 10px 0; }
   gap:30px;
   max-width:1600px;
   margin:0 auto;
+  align-items:stretch; /* grid items stretch to same row height */
 }
 #loader,#no-events{ text-align:center; padding:40px; font-size:1.2em; grid-column:1 / -1; }
 
 /* ===== Tile ===== */
 .event-tile{
+  display:flex;              /* make header + body stack */
+  flex-direction:column;
+  height:100%;               /* fill assigned grid row height */
   background:var(--white);
   border-radius:12px;
   box-shadow:var(--tile-shadow);
-  overflow:hidden;         /* ensures rounded corners; no content clipping in body */
-  display:flex; flex-direction:column;
+  overflow:hidden;
 }
 .event-tile:focus-within, .event-tile:hover{ box-shadow:0 10px 24px rgba(0,0,0,.22); }
 
@@ -95,7 +98,7 @@ h1{ text-align:center; color:var(--primary-color); margin:0 0 10px 0; }
   background-size:cover;
   background-position:center;
   color:var(--white);
-  flex-shrink:0;
+  flex:0 0 200px;            /* fixed header height */
 }
 .tile-header.no-image{ background:linear-gradient(45deg,#4e54c8,#8f94fb); }
 .tile-overlay{
@@ -117,10 +120,16 @@ h1{ text-align:center; color:var(--primary-color); margin:0 0 10px 0; }
   max-width:100%; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;
 }
 
-/* Body */
+/* Body fills rest of tile (no white gap) */
 .tile-body{
-  background:var(--primary-color); color:var(--white);
-  padding:18px; display:flex; flex-direction:column; gap:10px;
+  display:flex;              /* column for inner layout */
+  flex-direction:column;
+  flex:1 1 auto;             /* fill all remaining height below header */
+  min-height:0;              /* allow shrinking inside stretched item */
+  background:var(--primary-color);
+  color:var(--white);
+  padding:18px;
+  gap:10px;
 }
 .tile-body a{ color:var(--white); }
 .tile-title{ margin:0; line-height:1.35; font-size:1.05rem; }
@@ -131,7 +140,7 @@ h1{ text-align:center; color:var(--primary-color); margin:0 0 10px 0; }
 .tile-meta svg{ width:18px; height:18px; fill:var(--white); flex-shrink:0; margin-top:2px; }
 
 /* Ghost spacer + summary pinned to bottom */
-.tile-ghost{ flex:1 1 auto; }
+.tile-ghost{ flex:1 1 auto; min-height:0; }
 .tile-summary{ margin-top:auto; margin-bottom:0; color:#e6eefc; line-height:1.45; }
 
 /* ===== Modal ===== */
