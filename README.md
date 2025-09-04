@@ -52,3 +52,4 @@ Das System besteht aus drei n8n-Workflows, die das Datenmanagement zwischen Word
 
  **Der Vorteil:** Dieser Ansatz bewahrt einen dezentralen Workflow. WordPress bleibt die kontrollierte Quelle für die *Eingabe*, kann aber als Anzeigeort *alle* relevanten Termine aus dem Nostr-Netzwerk für den Nutzer sichtbar machen.
 
+# ToDo
