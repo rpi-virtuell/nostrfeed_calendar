@@ -1,0 +1,118 @@
+/* Dark theme overrides for event-wall
+
+   Usage options (pick one):
+   - Add <link rel="stylesheet" href="themes/dark.css" /> to <head> in   index.html
+   - Add class to <body>: <body class="theme-dark">
+   - Set data attribute on <html>: document.documentElement.setAttribute('data-theme','dark')
+
+   Make sure this file is loaded after `event-wall.css` or that the selector's
+   specificity matches how you toggle the theme (class vs data-attribute).
+*/
+
+/* Target both a body class and the html[data-theme] attribute for flexibility */
+.theme-dark,
+html[data-theme="dark"] {
+  /* semantic colors */
+  --color-primary: #6aa6ff;
+  --color-primary-contrast: #081220;
+  --color-secondary: #f59e0b;
+  --color-background: #071020;
+  --color-surface: #0b1220;
+  --color-text: #e6eefc;
+  --color-muted: #9aa6bb;
+  --color-danger: #ff6b6b;
+  --color-success: #2ecc71;
+
+  /* UI specifics */
+  --tile-shadow: 0 8px 28px rgba(0,0,0,.65);
+  --chip-bg: rgba(255,255,255,.04);
+  --chip-border: rgba(255,255,255,.06);
+  --border-color: rgba(255,255,255,.06);
+  --modal-overlay: rgba(0,0,0,.6);
+
+  /* legacy aliases (optional) */
+  --primary-color: var(--color-primary);
+  --secondary-color: var(--color-secondary);
+  --background-color: var(--color-background);
+  --font-color: var(--color-text);
+  --white: var(--color-surface);
+  --date-red: var(--color-danger);
+  --muted: var(--color-muted);
+}
+
+/* Small helper: invert images or adjust contrast inside tiles if needed */
+.theme-dark .tile-header.no-image{ background:linear-gradient(45deg,#243b55,#141926); }
+
+/* Additional element-level overrides to ensure a cohesive dark appearance */
+.theme-dark body{
+  background: var(--color-background);
+  color: var(--color-text);
+}
+
+.theme-dark .filter-toolbar{
+  background: var(--color-surface);
+  box-shadow: 0 6px 20px rgba(0,0,0,.6);
+  border-radius: var(--radius-lg);
+}
+
+.theme-dark .field{
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border-color);
+  color: var(--color-text);
+}
+
+.theme-dark .field input[type="text"],
+.theme-dark .field select{
+  background: transparent;
+  color: var(--color-text);
+}
+
+.theme-dark .tag-input{ color: var(--color-text); }
+
+.theme-dark .suggest{
+  background: var(--color-surface);
+  border-color: var(--border-color);
+  color: var(--color-text);
+}
+
+.theme-dark .btn{ background: var(--color-primary); color: var(--color-primary-contrast); }
+.theme-dark .btn.ghost{ background: rgba(255,255,255,0.04); color: var(--color-text); }
+
+.theme-dark .result-info{ color: var(--color-muted); }
+
+/* Cards / Tiles */
+.theme-dark .event-tile{ background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); box-shadow: var(--tile-shadow); border: 1px solid rgba(255,255,255,0.03); }
+.theme-dark .tile-header{ color: var(--color-text); }
+.theme-dark .tile-body{ background: rgba(10,18,30,0.85); color: var(--color-text); }
+.theme-dark .tile-title{ color: var(--color-text); /* Heller, primärer Lesetext */ }
+.theme-dark .tile-summary{ color: rgba(230,238,252,0.9); }
+.theme-dark .tile-meta p{ color: rgba(230,238,252,0.85); /* heller als vorher für bessere Lesbarkeit */ }
+
+.theme-dark .date-bubble{ background: rgba(255,255,255,0.06); box-shadow: 4px 6px 10px rgba(0,0,0,.6); }
+.theme-dark .date-bubble-year{ background: var(--color-primary); color: var(--color-primary-contrast); }
+
+/* Modal */
+.theme-dark .modal{ background: var(--modal-overlay); }
+.theme-dark .modal-content{ background: var(--color-surface); color: var(--color-text); box-shadow: 0 10px 30px rgba(0,0,0,.6); }
+
+/* chips / tags */
+.theme-dark .chip{ background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.04); color: var(--color-text); }
+.theme-dark .tile-tags .tag-badge, .theme-dark #modal-tags button{
+  /* Erhöhte Deckkraft und kontrastreichere Schrift für Tags */
+  background-color: var(--color-primary);
+  color: var(--color-text);
+  opacity: 0.98;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* inputs focus */
+.theme-dark .field:focus-within{ box-shadow: 0 0 0 4px rgba(106,166,255,0.06); }
+
+  [data-theme="dark"] {
+    --color-primary: #6aa6ff;
+    --color-background: #0b1220;
+    --color-surface: #091021;
+    --color-text: #e6eefc;
+    --color-muted: #9aa6bb;
+    --tile-shadow: 0 6px 20px rgba(0,0,0,.6);
+  }

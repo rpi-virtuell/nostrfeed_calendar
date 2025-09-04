@@ -1,16 +1,85 @@
-/* ===== Variables & Base ===== */
+/* ===== Theme variables & Base (Theme contract) ===== */
+/*
+  Alle Farben, Schriftarten und größen werden hier über CSS-Variablen
+  zentral definiert. Das ermöglicht einfaches Theming durch Überschreiben
+  der Variablen (z.B. über [data-theme="dark"] oder separate CSS-Dateien).
+
+  Empfehlung: Für zusätzliche Themes eine Datei wie `themes/dark.css`
+  anlegen und dort die gewünschten Variablen für den Scope [data-theme="dark"]
+  überschreiben. Die aktive Theme-ID kann dann z.B. als attribute auf
+  <html> gesetzt werden: <html data-theme="dark">.
+*/
 :root{
-  --primary-color:#2a73c2;
-  --secondary-color:#f5a623;
-  --background-color:#f4f7f6;
-  --font-color:#0f172a;
-  --white:#fff;
-  --tile-shadow:0 5px 15px rgba(0,0,0,.18);
-  --date-red:#d9534f;
-  --muted:#6b7280;
-  --chip-bg:#eef2ff;
-  --chip-border:#c7d2fe;
+  /* --- Fonts & typography --- */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "SFMono-Regular", Menlo, Monaco, "Roboto Mono", "Courier New", monospace;
+  --font-size-base: 16px;
+  --line-height-base: 1.45;
+
+  /* --- Spacing / radii --- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --space-xs: 6px;
+  --space-sm: 10px;
+  --space-md: 18px;
+
+  /* --- Colors (semantic) --- */
+  --color-primary: #2a73c2;       /* Hauptaktion, Links */
+  --color-primary-contrast: #ffffff;
+  --color-secondary: #f5a623;     /* Akzent */
+  --color-background: #f4f7f6;    /* Seitenhintergrund */
+  --color-surface: #ffffff;       /* Karten, Panels */
+  --color-text: #0f172a;          /* Haupttext */
+  --color-muted: #6b7280;         /* Sekundärer Text */
+  --color-danger: #d9534f;        /* Fehlermeldungen / wichtige Hinweise */
+  --color-success: #2f855a;
+  --color-warning: #f59e0b;
+
+  /* --- UI specifics --- */
+  --tile-shadow: 0 5px 15px rgba(0,0,0,.18);
+  --chip-bg: #eef2ff;
+  --chip-border: #c7d2fe;
+  --border-color: #e5e7eb;
+  --modal-overlay: rgba(0,0,0,.5);
+
+  /* --- Utility / accessibility --- */
+  --focus-ring: 2px solid rgba(42,115,194,.22);
+
+  /* Backwards compatibility aliases used in bestehenden Regeln */
+  --primary-color: var(--color-primary);
+  --secondary-color: var(--color-secondary);
+  --background-color: var(--color-background);
+  --font-color: var(--color-text);
+  --white: var(--color-surface);
+  --date-red: var(--color-danger);
+  --muted: var(--color-muted);
+  --chip-bg: var(--chip-bg);
+  --chip-border: var(--chip-border);
 }
+
+/* --- Beispiel: eingebaute alternative Themes (kann ausgelagert werden) --- */
+/*
+  Tipp: Lege stattdessen eine Datei `themes/dark.css` an mit dem Inhalt:
+
+  [data-theme="dark"] {
+    --color-primary: #6aa6ff;
+    --color-background: #0b1220;
+    --color-surface: #091021;
+    --color-text: #e6eefc;
+    --color-muted: #9aa6bb;
+    --tile-shadow: 0 6px 20px rgba(0,0,0,.6);
+  }
+
+  und binde diese Datei in HTML ein oder lade sie dynamisch. Um das Theme
+  zu aktivieren, setze per JavaScript:
+
+  document.documentElement.setAttribute('data-theme', 'dark');
+
+  Alternativ kann man Klassen verwenden: <html class="theme-dark"> und
+  in der Theme-Datei `.theme-dark { --color-primary: ... }` definieren.
+*/
+
 *{box-sizing:border-box}
 body{
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
