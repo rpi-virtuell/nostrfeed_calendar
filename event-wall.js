@@ -1,13 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-  
-  // Nostr-Direct Options (werden nur genutzt, wenn window.NostreAPI vorhanden ist)
-  const NOSTR_OPTIONS = {
-    // relays: ["wss://relilab.nostr1.com","wss://relay.tchncs.de"],
-    // allowed_npub: ["54a340072ccc625516c8d572b638a828c5b857074511302fb4392f26e34e1913"],
-    // sinceDays: 365,
-    // limit: 1000,
-    // timeoutMs: 8000,
-  };
   const endpoint = 'https://n8n.rpi-virtuell.de/webhook/nostre_termine';
 
   // === CONFIG ===
@@ -37,6 +28,134 @@ document.addEventListener('DOMContentLoaded', () => {
     searchQuery: '',
     monthKey: ''
   };
+
+
+  // ===== Permalink (hash) handling =====
+  let lastFilterHash = '';           // to restore filter hash when closing modal
+  let suppressHashChange = false;    // avoid loops when we change hash programmatically
+
+  const buildFilterHash = () => {
+    const parts = [];
+    if (state.selectedTags.size) {
+      const t = Array.from(state.selectedTags).map(encodeURIComponent).join('|');
+      parts.push(`tags:${t}`);
+    }
+    const q = state.searchQuery.trim();
+    if (q) parts.push(`query:${encodeURIComponent(q)}`);
+    if (state.monthKey) parts.push(`month:${state.monthKey}`);
+    return '#filter=' + parts.join(',');
+  };
+
+  const setHashSafely = (hash) => {
+    // default: replace (no history entry, no hashchange event)
+    if (location.hash === hash) return;
+    try {
+      history.replaceState(null, '', hash);
+    } catch (e) {
+      // fallback if replaceState unavailable
+      suppressHashChange = true;
+      location.hash = hash;
+      setTimeout(() => { suppressHashChange = false; }, 0);
+    }
+  };
+  const pushHash = (hash) => {
+    // push a history entry (for modal open), may trigger hashchange
+    if (location.hash === hash) return;
+    suppressHashChange = true;
+    location.hash = hash;
+    setTimeout(() => { suppressHashChange = false; }, 0);
+  };
+
+  const parseFilterSpec = (spec) => {
+    // Accept both comma-separated "key:value" and "key=value" pairs, tags split by '|' or ','
+    const out = { tags: [], query: '', monthKey: '' };
+    if (!spec) return out;
+    // Replace & ; with commas to be tolerant
+    const cleaned = spec.replace(/[;&]/g, ',');
+    cleaned.split(',').forEach(pair => {
+      if (!pair) return;
+      const [kRaw, vRaw=''] = pair.split(/[:=]/);
+      const key = (kRaw || '').trim().toLowerCase();
+      let val = (vRaw || '').trim();
+      if (!key) return;
+      if (key === 'tags') {
+        const items = val.split(/[|,]/).map(decodeURIComponent).map(s => s.trim()).filter(Boolean);
+        out.tags = items;
+      } else if (key === 'query' || key === 'q') {
+        try { val = decodeURIComponent(val); } catch(e) {}
+        out.query = val;
+      } else if (key === 'month') {
+        // Accept YYYY-MM or just MM; if only MM, map to current year
+        try { val = decodeURIComponent(val); } catch(e) {}
+        const mmOnly = /^([1-9]|1[0-2])$/.test(val);
+        if (mmOnly) {
+          const m = String(parseInt(val,10)).padStart(2,'0');
+          const y = new Date().getFullYear();
+          out.monthKey = `${y}-${m}`;
+        } else {
+          out.monthKey = val;
+        }
+      }
+    });
+    return out;
+  };
+
+  const applyHashFromLocation = () => {
+    const h = (location.hash || '').replace(/^#/, '');
+    if (!h) return false;
+
+    // Case 1: modal by id -> "#id:<ID>" or "#id=<ID>" or "#view=modal&id=<ID>"
+    const idMatch = h.match(/^(?:id[:=]|view=modal&id=)([^,&;]+)/i);
+    if (idMatch) {
+      const id = decodeURIComponent(idMatch[1]);
+      const matchEvent = allEvents.find(e => (e.ID || e.id || e.url) === id);
+      // keep current filters but update hash format
+      lastFilterHash = buildFilterHash();
+      if (matchEvent) showEventModal(matchEvent);
+      return true;
+    }
+
+    // Case 2: filter -> "#filter=..."
+    const filterMatch = h.match(/^filter=(.*)$/i);
+    if (filterMatch) {
+      const spec = parseFilterSpec(filterMatch[1]);
+      // Apply to state
+      state.selectedTags = new Set((spec.tags || []).map(s => s.toLowerCase()));
+      state.searchQuery = spec.query || '';
+      state.monthKey = spec.monthKey || '';
+
+      // Reflect in UI
+      searchInput.value = state.searchQuery;
+      monthSelect.value = state.monthKey;
+      renderSelectedTagsChips();
+
+      applyFilters();
+      return true;
+    }
+
+    return false;
+  };
+
+  const handleHashChange = () => {
+    if (suppressHashChange) return;
+    // If hash denotes a modal, we open it; if filter, we apply filter.
+    // If empty hash -> close modal (if open) and keep current filters.
+    const h = (location.hash || '');
+    if (!h) {
+      // close modal if open and show all events
+      modal.style.display = 'none';
+      // No hash means no filters -> render all
+      state.selectedTags.clear();
+      state.searchQuery = '';
+      state.monthKey = '';
+      searchInput.value = '';
+      monthSelect.value = '';
+      applyFilters();
+      return;
+    }
+    applyHashFromLocation();
+  };
+
 
   const toMonthKey = (date) => {
     const y = date.getFullYear();
@@ -114,46 +233,8 @@ document.addEventListener('DOMContentLoaded', () => {
     return Array.from(set).sort();
   };
 
-  // Hilfsfunktion: falls nötig, Felder aus NostreAPI-Items auf dein Schema mappen
-  const normalizeFromNostr = (it) => ({
-    ID: it.ID,
-    title: it.title,
-    starts: it.starts,       // ISO-String aus nostre-api.js
-    ends: it.ends,           // ISO-String aus nostre-api.js
-    status: it.status,
-    location: it.location,   // bereits HTML-Link (Zoom-Handling passiert dort)
-    tags: it.tags,           // kann String "a, b, c" sein -> buildEvent ruft normalizeTags()
-    summary: it.summary,     // bereits HTML
-    content: it.content,     // bereits HTML
-    pubkey: it.pubkey,
-    image: it.image,
-    location_url: it.location_url,
-  });
-
   // Fetch
   const fetchEvents = async () => {
-    // 1) Versuch: direkte Nostr-Abfrage über nostre-api.js (falls geladen)
-    try {
-      if (window.NostreAPI && typeof window.NostreAPI.getNostrFeed === 'function') {
-        const { nostrfeed } = await window.NostreAPI.getNostrFeed(NOSTR_OPTIONS);
-
-        if (Array.isArray(nostrfeed) && nostrfeed.length > 0) {
-          const list = nostrfeed
-            .map(normalizeFromNostr)
-            .map(buildEvent)
-            .sort((a, b) => a.start - b.start);
-
-          allEvents = list;
-          filteredEvents = list.slice();
-          console.log(`Nostr direct fetch: ${list.length} events loaded.`);
-          return; // ✅ fertig, kein Fallback nötig
-        }
-      }
-    } catch (err) {
-      console.warn('Nostr direct fetch fehlgeschlagen – Fallback auf n8n:', err);
-    }
-
-    // 2) Fallback: n8n-Webhook wie gehabt
     try {
       const res = await fetch(endpoint);
       if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -164,10 +245,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       allEvents = list;
       filteredEvents = list.slice();
-      console.log(`n8n fetch: ${list.length} events loaded.`);
     } catch(err) {
-      console.error('Fehler beim Abruf (n8n-Fallback):', err);
-      // dein statischer Fallback
+      console.error('Fehler beim Abruf:', err);
       const fallback = [{
         ID: "aHR0cHM6Ly9yZWxpbGFiLm9yZy8/cD0xOTU5Mg==",
         title: "Schöpfung und Urknall – Die Welt aus unterschiedlichen Perspektiven betrachten",
@@ -184,7 +263,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }];
       allEvents = fallback.map(buildEvent);
       filteredEvents = allEvents.slice();
-      console.log(`Fallback: ${allEvents.length} static events loaded.`);
     }
   };
 
@@ -288,10 +366,29 @@ document.addEventListener('DOMContentLoaded', () => {
       tagsContainer.appendChild(span);
     }
     document.getElementById('modal-content-html').innerHTML = event.content || '';
+    try { lastFilterHash = buildFilterHash(); } catch(e){}
+    pushHash('#id=' + encodeURIComponent(event.ID || event.id || event.url || ''));
     modal.style.display = 'block';
   };
-  closeModalBtn.addEventListener('click', () => modal.style.display = 'none');
-  window.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+  closeModalBtn.addEventListener('click', () => {
+    modal.style.display = 'none';
+    const targetHash = lastFilterHash || buildFilterHash();
+    setHashSafely(targetHash);
+    // Apply immediately so results show even if no hashchange fires
+    if (!targetHash || targetHash === '#filter=' || targetHash === '#') {
+      state.selectedTags.clear(); state.searchQuery=''; state.monthKey=''; searchInput.value=''; monthSelect.value='';
+    }
+    applyHashFromLocation() || applyFilters();
+  });
+  window.addEventListener('click', (e) => { if (e.target === modal) { 
+    modal.style.display = 'none';
+    const targetHash = lastFilterHash || buildFilterHash();
+    setHashSafely(targetHash);
+    if (!targetHash || targetHash === '#filter=' || targetHash === '#') {
+      state.selectedTags.clear(); state.searchQuery=''; state.monthKey=''; searchInput.value=''; monthSelect.value='';
+    }
+    applyHashFromLocation() || applyFilters();
+  } });
 
   // Filtering
   const applyFilters = () => {
@@ -308,6 +405,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     renderEventWall(filteredEvents);
     renderSelectedTagsChips();
+    if (modal.style.display !== 'block') {
+      setHashSafely(buildFilterHash());
+    }
   };
 
   const addTagToState = (tag) => {
@@ -343,45 +443,28 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // Tag suggest dropdown
-
   const buildTagSuggest = () => {
     const tags = getAllTagsWithCounts(allEvents);
-
     const renderList = (filter='') => {
       const f = filter.trim().toLowerCase();
       const out = (f
         ? tags.filter(t => t.label.toLowerCase().includes(f) || t.key.includes(f))
         : tags).slice(0, 200);
       tagSuggest.innerHTML = out.map(t =>
-        `<button type="button" class="suggest-item" data-key="${t.key}">${t.label} <span class="count">(${t.count})</span></button>`
+        `<button type="button" data-key="${t.key}">${t.label} <span class="count">(${t.count})</span></button>`
       ).join('');
+      tagSuggest.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const key = btn.getAttribute('data-key');
+          addTagToState(tags.find(x => x.key === key)?.label || key);
+          tagSuggest.classList.remove('open');
+        });
+      });
     };
-
-    // Initial render
     renderList();
-
-    // Use mousedown so the selection fires *before* the input loses focus via blur,
-    // which previously prevented the click handler from firing in some browsers.
-    tagSuggest.addEventListener('mousedown', (e) => {
-      const btn = e.target.closest('button.suggest-item');
-      if (!btn) return;
-      e.preventDefault(); // keep focus on input, avoid blur race
-      const key = btn.getAttribute('data-key');
-      const item = tags.find(x => x.key === key);
-      addTagToState(item?.label || key);
-      tagSuggest.classList.remove('open');
-    });
-
-    // Open/close & filter interactions
     tagInput.addEventListener('focus', () => tagSuggest.classList.add('open'));
-    tagInput.addEventListener('blur', () => {
-      // small delay so a click can be processed if it happens
-      setTimeout(() => tagSuggest.classList.remove('open'), 120);
-    });
-    tagInput.addEventListener('input', () => {
-      tagSuggest.classList.add('open');
-      renderList(tagInput.value);
-    });
+    tagInput.addEventListener('blur', () => { setTimeout(() => tagSuggest.classList.remove('open'), 150); });
+    tagInput.addEventListener('input', () => { tagSuggest.classList.add('open'); renderList(tagInput.value); });
     tagInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -391,7 +474,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   };
-;
 
   // Month dropdown
   const buildMonthSelect = () => {
@@ -429,7 +511,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loaderEl) loaderEl.style.display = 'none';
     buildTagSuggest();
     buildMonthSelect();
-    applyFilters();
+    const handled = applyHashFromLocation();
+    if (!handled) {
+      applyFilters();
+    } else {
+      // If handled was an #id modal, ensure list is visible underneath
+      if ((location.hash || '').toLowerCase().startsWith('#id')) {
+        state.selectedTags.clear(); state.searchQuery=''; state.monthKey='';
+        searchInput.value=''; monthSelect.value='';
+        applyFilters();
+      }
+    }
+    window.addEventListener('hashchange', handleHashChange);
   };
   init();
 });
