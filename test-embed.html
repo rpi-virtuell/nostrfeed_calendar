@@ -3,11 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Termin-Übersicht (edu-event-wall)</title>
+  <title>Termin-Übersicht</title>
 </head>
-<body  class="theme-dark">
+<body>
   <h1>Aktuelle Termine</h1>
-  <div id="eventwall"></div>
+  <div id="eventwall" 
+    data-theme="relilab"
+    data-show-filterbar="true"
+    data-filter="tags:kita"
+    data-relays="wss://relilab.nostr1.com,wss://relay.tchncs.de,wss://relay-rpi.edufeed.org"
+    data-limit="1000"
+    data-npub="npub12j35qpeve33929kg64etvw9g9rzms4c8g5gnqta58yhjdc6wryfse3phmu"
+    ></div>
   <script src="embed-wall.js"></script>
 </body>
 </html>

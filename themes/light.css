@@ -1,0 +1,45 @@
+/* Light theme overrides for event-wall
+
+   Usage options (pick one):
+   - Add <link rel="stylesheet" href="themes/light.css" /> to <head> in   index.html
+   - Add class to <body>: <body class="theme-light">
+   - Set data attribute on <html>: document.documentElement.setAttribute('data-theme','light')
+
+   Make sure this file is loaded after `event-wall.css` or that the selector's
+   specificity matches how you toggle the theme (class vs data-attribute).
+*/
+
+/* Target both a body class and the html[data-theme] attribute for flexibility */
+.theme-light,
+html[data-theme="light"] {
+  /* semantic colors */
+    /* --- Spacing / radii --- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --space-xs: 6px;
+  --space-sm: 10px;
+  --space-md: 18px;
+
+  /* --- Colors (semantic) --- */
+  --color-primary: #e4e6ee;       /* Hauptaktion, Links */
+  --color-primary-contrast: #000000;
+  --color-secondary: #f5a623;     /* Akzent */
+  --color-background: #f4f7f6;    /* Seitenhintergrund */
+  --color-surface: #ffffff;       /* Karten, Panels */
+  --color-heading: #636363;          /* Überschrift */
+  --color-text: #0f172a;          /* Haupttext */
+  --color-muted: #6b7280;         /* Sekundärer Text */
+  --color-danger: #d9534f;        /* Fehlermeldungen / wichtige Hinweise */
+  --color-success: #2f855a;
+  --color-warning: #f59e0b;
+
+  /* --- UI specifics --- */
+  --tile-shadow: 0 5px 15px rgba(0,0,0,.18);
+  --chip-bg: #eef2ff;
+  --chip-border: #c7d2fe;
+  --border-color: #e5e7eb;
+  --modal-overlay: rgba(0,0,0,.5);
+
+
+}

@@ -43,4 +43,18 @@ Dieses Projekt zeigt Termine aus einem WordPress-System in zwei verschiedenen We
 
  **Der Vorteil:** Dieser Ansatz bewahrt einen dezentralen Workflow. WordPress bleibt die kontrollierte Quelle für die *Eingabe*, kann aber als Anzeigeort *alle* relevanten Termine aus dem Nostr-Netzwerk für den Nutzer sichtbar machen.
 
+## Media Konvertierung
+
+Die `mdToHtml()` Funktion in [`nostre-api.js`](nostre-api.js) unterstützt nun automatische Konvertierung von:
+
+- **Bilder**: Markdown-Syntax `![](url)` oder `![alt](url)`
+- **Videos**: Direkte YouTube und Vimeo URLs werden automatisch in Embed-Iframes konvertiert
+
+**Beispiele:**
+- `![](https://example.com/image.jpg)` → `<img src="https://example.com/image.jpg" class="md-image">`
+- `https://youtu.be/dQw4w9WgXcQ` → YouTube Embed-Iframe
+- `https://vimeo.com/148751763` → Vimeo Embed-Iframe
+
+Detaillierte Dokumentation: [MEDIA_CONVERSION.md](MEDIA_CONVERSION.md)
+
 # ToDo

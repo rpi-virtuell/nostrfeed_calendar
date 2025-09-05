@@ -7,13 +7,15 @@
   }
 })(function(){
   // Nostr-Direct Options (werden nur genutzt, wenn window.NostreAPI vorhanden ist)
-  const NOSTR_OPTIONS = {
-    // relays: ["wss://relilab.nostr1.com","wss://relay.tchncs.de"],
-    // allowed_npub: ["54a340072ccc625516c8d572b638a828c5b857074511302fb4392f26e34e1913"],
-    // sinceDays: 365,
-    // limit: 1000,
-    // timeoutMs: 8000,
-  };
+  // Merge externe Optionen (von embed-wall.js via window.NOSTR_OPTIONS) mit Defaults
+  const NOSTR_OPTIONS = Object.assign({
+    relays: undefined,
+    allowed_npub: undefined,
+    sinceDays: 365,
+    limit: 1000,
+    timeoutMs: 8000,
+  }, (window.NOSTR_OPTIONS || {}));
+  console.debug('[NOSTR_OPTIONS]', NOSTR_OPTIONS);
   const endpoint = 'https://n8n.rpi-virtuell.de/webhook/nostre_termine';
 
   // === CONFIG ===
@@ -283,41 +285,41 @@
         }
       }
     } catch (err) {
-      console.warn('Nostr direct fetch fehlgeschlagen – Fallback auf n8n:', err);
+      console.warn('Nostr direct fetch fehlgeschlagen:', err);
     }
 
-    // 2) Fallback: n8n-Webhook wie gehabt
-    try {
-      const res = await fetch(endpoint);
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json();
-      let list = [];
-      if (Array.isArray(data) && data.length > 0 && data[0].nostrfeed) {
-        list = data[0].nostrfeed.map(buildEvent).sort((a,b) => a.start - b.start);
-      }
-      allEvents = list;
-      filteredEvents = list.slice();
-      console.log(`n8n-Webhook: ${list.length} events loaded.`);
-    } catch(err) {
-      console.error('Fehler beim Abruf:', err);
-      const fallback = [{
-        ID: "aHR0cHM6Ly9yZWxpbGFiLm9yZy8/cD0xOTU5Mg==",
-        title: "Schöpfung und Urknall – Die Welt aus unterschiedlichen Perspektiven betrachten",
-        starts: "2025-09-29T17:00:00.000+02:00",
-        ends: "2025-09-29T19:00:00.000+02:00",
-        status: "planned",
-        location: '<a href="https://veranstaltungen-ebz.elk-wue.de/kurs/25PTZ-063">Link zum Online-Event</a>',
-        tags: ["Grundschule", "schöpfung", "urknall", "Theologisieren", "Sekundarstufe I", "ptz", "Bibel"],
-        summary: "„Hört mich Gott auch, wenn ich die Hände nicht falte?“ Mit Kindern über das Beten nachdenken.",
-        content: "<strong>Achtung nur mit Anmeldung!</strong> Kinder sind wissbegierig …",
-        pubkey: "54a340072ccc625516c8d572b638a828c5b857074511302fb4392f26e34e1913",
-        image: "https://relilab.org/wp-content/uploads/2022/05/location-4496459_1280-300x300.png",
-        location_url: "https://veranstaltungen-ebz.elk-wue.de/kurs/25PTZ-063"
-      }];
-      allEvents = fallback.map(buildEvent);
-      filteredEvents = allEvents.slice();
-      console.log(`Fallback: ${allEvents.length} events loaded.`);
-    }
+    // // 2) Fallback: n8n-Webhook wie gehabt
+    // try {
+    //   const res = await fetch(endpoint);
+    //   if (!res.ok) throw new Error('HTTP ' + res.status);
+    //   const data = await res.json();
+    //   let list = [];
+    //   if (Array.isArray(data) && data.length > 0 && data[0].nostrfeed) {
+    //     list = data[0].nostrfeed.map(buildEvent).sort((a,b) => a.start - b.start);
+    //   }
+    //   allEvents = list;
+    //   filteredEvents = list.slice();
+    //   console.log(`n8n-Webhook: ${list.length} events loaded.`);
+    // } catch(err) {
+    //   console.error('Fehler beim Abruf:', err);
+    //   const fallback = [{
+    //     ID: "aHR0cHM6Ly9yZWxpbGFiLm9yZy8/cD0xOTU5Mg==",
+    //     title: "Schöpfung und Urknall – Die Welt aus unterschiedlichen Perspektiven betrachten",
+    //     starts: "2025-09-29T17:00:00.000+02:00",
+    //     ends: "2025-09-29T19:00:00.000+02:00",
+    //     status: "planned",
+    //     location: '<a href="https://veranstaltungen-ebz.elk-wue.de/kurs/25PTZ-063">Link zum Online-Event</a>',
+    //     tags: ["Grundschule", "schöpfung", "urknall", "Theologisieren", "Sekundarstufe I", "ptz", "Bibel"],
+    //     summary: "„Hört mich Gott auch, wenn ich die Hände nicht falte?“ Mit Kindern über das Beten nachdenken.",
+    //     content: "<strong>Achtung nur mit Anmeldung!</strong> Kinder sind wissbegierig …",
+    //     pubkey: "54a340072ccc625516c8d572b638a828c5b857074511302fb4392f26e34e1913",
+    //     image: "https://relilab.org/wp-content/uploads/2022/05/location-4496459_1280-300x300.png",
+    //     location_url: "https://veranstaltungen-ebz.elk-wue.de/kurs/25PTZ-063"
+    //   }];
+    //   allEvents = fallback.map(buildEvent);
+    //   filteredEvents = allEvents.slice();
+    //   console.log(`Fallback: ${allEvents.length} events loaded.`);
+    // }
   };
 
   // Rendering
@@ -346,8 +348,10 @@
       const summaryPlain = toPlainText(event.summary || '');
       const summaryShort = truncateWords(summaryPlain, SUMMARY_WORD_LIMIT);
 
+      const headerStyle = event.image ? ` style="background-image:url('${event.image}')"` : '';
+
       tile.innerHTML = `
-        <div class="tile-header ${event.image ? '' : 'no-image'}" style="background-image:url('${event.image || ''}')">
+        <div class="tile-header ${event.image ? '' : 'no-image'}"${headerStyle}>
           <div class="tile-overlay">
             <div class="date-bubble" aria-hidden="true">
               <div class="date-bubble-year">${year}</div>
@@ -367,7 +371,11 @@
           ${summaryShort ? `<p class="tile-summary">${summaryShort}</p>` : ''}
         </div>
       `;
+      // Only attach tag click handlers when the filter toolbar is visible.
+      const filterToolbar = document.querySelector('.filter-toolbar');
+      const filterVisible = filterToolbar && window.getComputedStyle(filterToolbar).display !== 'none';
       tile.querySelectorAll('.tag-badge').forEach(btn => {
+        if (!filterVisible) return; // do not enable tag-clicks when filters are hidden
         btn.addEventListener('click', (ev) => {
           ev.stopPropagation();
           const tag = decodeURIComponent(btn.getAttribute('data-tag'));
