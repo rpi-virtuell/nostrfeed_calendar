@@ -22,30 +22,147 @@
 
   // Sehr leichte Markdown→HTML-Konvertierung (ohne externe Libs)
   function mdToHtml(md = "") {
+    console.log("md:", md);
     if (!md) return "";
     let s = String(md);
 
-    // Escape HTML
-    s = s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    // Remove existing HTML anchors to avoid producing nested/broken links.
+    // Keep anchor inner text but strip the tag and attributes.
+    try {
+      s = s.replace(/<a\b[^>]*>(.*?)<\/a>/gi, '$1');
+      // Remove any remaining HTML tags (keep their text)
+      s = s.replace(/<[^>]+>/g, '');
+    } catch (e) {
+      // if regex fails for some reason, fall back to raw string
+      s = String(md);
+    }
+
+    // Helper: escape text when injecting into HTML
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    // Helper: normalize URL; if no scheme but looks like domain, prefix https://
+    function normalizeUrl(url) {
+      try {
+        url = String(url).trim();
+        if (/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(url)) return url; // has scheme
+        if (/^\/\//.test(url) && typeof location !== 'undefined') return location.protocol + url; // //host/path
+        // if looks like domain (contains a dot and no spaces) assume https
+        if (/^[^\s]+\.[^\s]{2,}$/i.test(url)) return 'https://' + url;
+        return url;
+      } catch (e) { return url; }
+    }
+
+      // Use tokens to protect generated HTML (anchors/images) from later regexes
+      const __tokens = [];
+      function __pushToken(html) {
+        const i = __tokens.length;
+        __tokens.push(html);
+        return "___HTML_TOKEN_" + i + "___";
+      }
+
+      // Inline formatting for link text: escape then convert **bold**, *italic*, `code`
+      function inlineFormat(raw) {
+        const esc = escapeHtml(raw);
+        // code first
+        let out = esc.replace(/`([^`]+)`/g, function(_, c) { return '<code>' + c + '</code>'; });
+        out = out.replace(/\*\*([^*]+)\*\*/g, function(_, b) { return '<strong>' + b + '</strong>'; });
+        out = out.replace(/\*([^*]+)\*/g, function(_, i) { return '<em>' + i + '</em>'; });
+        return out;
+      }
+
+      // Images: allow URLs with or without scheme inside parentheses: ![alt](url)
+      // allow optional whitespace inside the parentheses and add lazy loading
+      s = s.replace(/!\[([^\]]*)]\(\s*([^\)\s]+)\s*\)/g, function (_, alt, url) {
+        const u = normalizeUrl(url);
+        // allow only http(s) or protocol-relative URLs for images
+        if (!/^https?:\/\//i.test(u) && !/^\/\//.test(u)) return '';
+        const safeAlt = escapeHtml(alt || '');
+        let href;
+        try { href = encodeURI(u); } catch (e) { href = escapeHtml(u); }
+        return __pushToken('<img class="md-img" loading="lazy" src="' + href + '" alt="' + safeAlt + '">');
+      });
+
+      // Links [text](url)
+      s = s.replace(/\[([^\]]+)]\(([^)\s]+)\)/g, function (_, text, url) {
+        const u = normalizeUrl(url);
+        if (!/^https?:\/\//i.test(u) && !/^\/\//.test(u)) return escapeHtml(text);
+        let href;
+        try { href = encodeURI(u); } catch (e) { href = escapeHtml(u); }
+
+        // Build label: preserve HTML tokens (images) and apply inline formatting to plain text parts
+        const tokenRe = /___HTML_TOKEN_(\d+)___/g;
+        let last = 0;
+        let label = '';
+        let m;
+        while ((m = tokenRe.exec(text)) !== null) {
+          const idx = Number(m[1]);
+          const before = text.slice(last, m.index);
+          if (before) label += inlineFormat(before);
+          label += (__tokens[idx] || '');
+          last = tokenRe.lastIndex;
+        }
+        if (last < text.length) label += inlineFormat(text.slice(last));
+
+        return __pushToken('<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + label + '</a>');
+      });
+
+      // Autolink plain URLs (https://... or www.domain.tld) → protected anchor token
+      s = s.replace(/(^|[^\"'=\]>])((?:https?:\/\/|www\.)[^\s<]+)/g, function (_, prefix, url) {
+        let u = url;
+        if (/^www\./i.test(u)) u = 'https://' + u;
+        if (!/^https?:\/\//i.test(u)) return prefix + escapeHtml(url);
+        let href;
+        try { href = encodeURI(u); } catch (e) { href = escapeHtml(u); }
+        return prefix + __pushToken('<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(url) + '</a>');
+      });
 
     // Links [text](url)
-    s = s.replace(/\[([^\]]+)]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2">$1</a>');
-    // **bold**
-    s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
-    // *italic*
-    s = s.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+    s = s.replace(/\[([^\]]+)]\(([^)\s]+)\)/g, function (_, text, url) {
+      const u = normalizeUrl(url);
+      if (!/^https?:\/\//i.test(u) && !/^\/\//.test(u)) return escapeHtml(text);
+      let href;
+      try { href = encodeURI(u); } catch (e) { href = escapeHtml(u); }
+      return '<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(text) + '</a>';
+    });
+
+    // Autolink plain URLs (https://... or www.domain.tld) → <a href="...">...</a>
+    s = s.replace(/(^|[^\"'=\]>])((?:https?:\/\/|www\.)[^\s<]+)/g, function (_, prefix, url) {
+      let u = url;
+      if (/^www\./i.test(u)) u = 'https://' + u;
+      if (!/^https?:\/\//i.test(u)) return prefix + escapeHtml(url);
+      let href;
+      try { href = encodeURI(u); } catch (e) { href = escapeHtml(u); }
+      return prefix + '<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(url) + '</a>';
+    });
+  // **bold**
+  s = s.replace(/\*\*([^*]+)\*\*/g, function (_, t) { return '<strong>' + escapeHtml(t) + '</strong>'; });
+  // *italic*
+  s = s.replace(/\*([^*]+)\*/g, function (_, t) { return '<em>' + escapeHtml(t) + '</em>'; });
     // Headings
-    s = s.replace(/(^|\n)###\s*(.+)/g, "$1<h3>$2</h3>");
-    s = s.replace(/(^|\n)##\s*(.+)/g, "$1<h2>$2</h2>");
-    s = s.replace(/(^|\n)#\s*(.+)/g, "$1<h1>$2</h1>");
-    // Inline code
-    s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
+  s = s.replace(/(^|\n)###\s*(.+)/g, function(_, pre, t){ return pre + '<h3>' + escapeHtml(t) + '</h3>'; });
+  s = s.replace(/(^|\n)##\s*(.+)/g, function(_, pre, t){ return pre + '<h2>' + escapeHtml(t) + '</h2>'; });
+  s = s.replace(/(^|\n)#\s*(.+)/g, function(_, pre, t){ return pre + '<h1>' + escapeHtml(t) + '</h1>'; });
+  // Inline code
+  s = s.replace(/`([^`]+)`/g, function(_, c){ return '<code>' + escapeHtml(c) + '</code>'; });
 
     // Absätze rudimentär
     s = s
       .split(/\n{2,}/)
-      .map((block) => (/^<h[1-6]>/.test(block) ? block : `<p>${block.replace(/\n/g, "<br>")}</p>`))
+      .map((block) => (/^<(h[1-6]|img|iframe)/.test(block) ? block : `<p>${block.replace(/\n/g, "<br>")}</p>`))
       .join("\n");
+
+    // Restore tokens
+    if (__tokens.length) {
+      s = s.replace(/___HTML_TOKEN_(\d+)___/g, function(_, idx) {
+        const i = Number(idx);
+        return __tokens[i] || '';
+      });
+    }
 
     return s;
   }

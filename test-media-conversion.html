@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Media Konvertierung</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-case { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .input { background: #f5f5f5; padding: 10px; margin-bottom: 10px; }
+        .output { background: #e8f5e8; padding: 10px; }
+        .md-image { max-width: 100%; height: auto; border: 2px solid #4CAF50; }
+        .md-video { width: 100%; height: 315px; border: 2px solid #2196F3; }
+    </style>
+</head>
+<body>
+    <h1>Test Media Konvertierung</h1>
+    
+    <div class="test-case">
+        <h3>Bild ohne Alt-Text</h3>
+        <div class="input">![](https://relilab.org/wp-content/uploads/2025/01/Logo-fuer-relilab-beitraege-1024x256.png)</div>
+        <div class="output" id="test1"></div>
+    </div>
+
+    <div class="test-case">
+        <h3>Bild mit Alt-Text</h3>
+        <div class="input">![Relilab Logo](https://relilab.org/wp-content/uploads/2025/01/Logo-fuer-relilab-beitraege-1024x256.png)</div>
+        <div class="output" id="test2"></div>
+    </div>
+
+    <div class="test-case">
+        <h3>YouTube Video</h3>
+        <div class="input">https://www.youtube.com/watch?v=dQw4w9WgXcQ</div>
+        <div class="output" id="test3"></div>
+    </div>
+
+    <div class="test-case">
+        <h3>YouTube Short URL</h3>
+        <div class="input">https://youtu.be/dQw4w9WgXcQ</div>
+        <div class="output" id="test4"></div>
+    </div>
+
+    <div class="test-case">
+        <h3>Vimeo Video</h3>
+        <div class="input">https://vimeo.com/148751763</div>
+        <div class="output" id="test5"></div>
+    </div>
+
+    <div class="test-case">
+        <h3>Kombinierter Text mit Bild und Video</h3>
+        <div class="input">Hier ist ein Bild: ![](https://relilab.org/wp-content/uploads/2025/01/Logo-fuer-relilab-beitraege-1024x256.png)
+
+Und hier ein YouTube Video: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+
+**Fetter Text** und *kursiver Text*.</div>
+        <div class="output" id="test6"></div>
+    </div>
+
+    <script src="nostre-api.js"></script>
+    <script>
+        // Testfälle ausführen
+        const testCases = [
+            { id: 'test1', md: '![](https://relilab.org/wp-content/uploads/2025/01/Logo-fuer-relilab-beitraege-1024x256.png)' },
+            { id: 'test2', md: '![Relilab Logo](https://relilab.org/wp-content/uploads/2025/01/Logo-fuer-relilab-beitraege-1024x256.png)' },
+            { id: 'test3', md: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' },
+            { id: 'test4', md: 'https://youtu.be/dQw4w9WgXcQ' },
+            { id: 'test5', md: 'https://vimeo.com/148751763' },
+            { id: 'test6', md: 'Hier ist ein Bild: ![](https://relilab.org/wp-content/uploads/2025/01/Logo-fuer-relilab-beitraege-1024x256.png)\n\nUnd hier ein YouTube Video: https://www.youtube.com/watch?v=dQw4w9WgXcQ\n\n**Fetter Text** und *kursiver Text*.' }
+        ];
+
+        testCases.forEach(test => {
+            const outputElement = document.getElementById(test.id);
+            outputElement.innerHTML = NostreAPI.mdToHtml(test.md);
+        });
+    </script>
+</body>
+</html>
