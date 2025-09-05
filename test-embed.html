@@ -3,11 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Termin-Übersicht (edu-event-wall)</title>
+  <title>Termin-Übersicht</title>
 </head>
-<body  class="theme-dark">
-  <h1>Aktuelle Termine</h1>
-  <div id="eventwall"></div>
+<body  class="theme-default">
+  <h1>Aktuelle Termine (Theme light)</h1>
+  <div id="eventwall" 
+    data-theme="default" 
+    data-filter="tags:kognitive aktivierung|kita"
+    data-relays="wss://nostr-01.bolt.observer,wss://relay.damus.io,wss://relay.nostr.info,wss://nostr-pub.wellorder.net,wss://brb.io"
+    data-limit="500"
+    data-npub="npub1znexzv4m5c6m3g4y7u9y5v5j5x5x5e5q5h5k5l5m5n5p5q5r5s5t5u5v5w5x5y5z5,npub1znexzv4m5c6m3g4y7u9y5v5j5x5x5e5q5h5k5l5m5n5p5q5r5s5t5u5v5w5x5y5z6"
+    ></div>
   <script src="embed-wall.js"></script>
 </body>
 </html>

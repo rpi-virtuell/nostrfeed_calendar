@@ -40,11 +40,33 @@
 
   // ---- 2) KONFIG AUS GLOBALEN KONSTANTEN ----
   const detectTheme = () => {
-    if (typeof window.THEME === 'string') return window.THEME;
-    if (document.body.classList.contains('theme-dark')) return 'dark';
-    return 'light';
+    // 1) explicit global override
+    if (typeof window.THEME === 'string' && window.THEME.trim()) return window.THEME.trim();
+
+    // 2) data-theme attribute on <html> or <body>
+    const htmlData = document.documentElement && document.documentElement.getAttribute && document.documentElement.getAttribute('data-theme');
+    if (htmlData) return htmlData.trim();
+    const bodyData = document.body && document.body.getAttribute && document.body.getAttribute('data-theme');
+    if (bodyData) return bodyData.trim();
+
+    // 3) any class matching theme-<name> on <html> or <body>
+    const findThemeFromClass = (el) => {
+      if (!el || !el.classList) return null;
+      for (const c of Array.from(el.classList)) {
+        const m = c.match(/^theme-(.+)$/i);
+        if (m && m[1]) return m[1].toLowerCase();
+      }
+      return null;
+    };
+    const byHtmlClass = findThemeFromClass(document.documentElement);
+    if (byHtmlClass) return byHtmlClass;
+    const byBodyClass = findThemeFromClass(document.body);
+    if (byBodyClass) return byBodyClass;
+
+    // fallback
+    return 'default';
   };
-  const THEME = detectTheme().toLowerCase();  // "light" | "dark" | custom
+  const THEME = String(detectTheme()).toLowerCase();  // "light" | "dark" | custom
   const DEFAULT_RELAYS = window.DEFAULT_RELAYS || ["wss://relilab.nostr1.com"];
   const DEFAULT_ALLOWED = window.DEFAULT_ALLOWED || [];
   const DEFAULT_LIMIT = Number(window.DEFAULT_LIMIT || 1000);
@@ -86,7 +108,6 @@
   // ---- 5) DOM-Gerüst für Wall einfügen ----
   const injectMarkup = (container) => {
     container.innerHTML = `
-      <p class="subhead">Klicke auf Tags oder nutze die Filterleiste, um die Ansicht einzugrenzen.</p>
       <section class="filter-toolbar" aria-label="Terminfilter">
         <div class="filter-row">
           <div class="field tagbox" style="flex:1 1 360px;">
@@ -145,7 +166,7 @@
     // Styles laden
     const cssPromises = [loadCSS(BASE_URL + "event-wall.css")];
     // Theme CSS optional; bei "dark" versuchen wir themes/dark.css zusätzlich
-    if (THEME && THEME !== "light") {
+    if (THEME && THEME !== "default") {
       cssPromises.push(loadCSS(BASE_URL + "themes/" + THEME + ".css").catch(() => {}));
     }
 
