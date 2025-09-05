@@ -1,0 +1,13 @@
+<script>
+  // optional eigene Defaults:
+  window.NostreAPI_AUTORUN = true;
+</script>
+<script src="nostre-api.js"></script>
+<script>
+  // zusätzlich das Ergebnis direkt für die UI abgreifen:
+  window.addEventListener("nostrfeed-ready", (ev) => {
+    const { nostrfeed } = ev.detail;
+    // hier ins DOM rendern …
+    console.log("Ready (UI):", nostrfeed);
+  });
+</script>

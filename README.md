@@ -2,15 +2,6 @@
 
 Dieses Projekt zeigt Termine aus einem WordPress-System in zwei verschiedenen Web-Ansichten an. Die Daten werden über n8n-Workflows und das Nostr-Protokoll synchronisiert.
 
-## Ansichten
-
-- **Kalender-Ansicht (`index.html`)**: Eine traditionelle Kalenderdarstellung der Termine.
-- **Event-Wall (`event-wall.html`)**: Eine moderne Kachelansicht für die Events.
-
-## Wie es funktioniert
-
-Das System besteht aus drei n8n-Workflows, die das Datenmanagement zwischen WordPress, Nostr und den HTML-Ansichten übernehmen.
-
 ### 1. WordPress zu Nostr
 
 - Ein n8n-Workflow ruft Termindaten über die WordPress REST-API ab.
@@ -23,8 +14,8 @@ Das System besteht aus drei n8n-Workflows, die das Datenmanagement zwischen Word
 - Die Daten werden so aufbereitet, dass sie von den HTML-Seiten (`index.html` und `event-wall.html`) direkt verarbeitet und dargestellt werden können.
 - Dabei wird ein Filter angewendet, der nur Events von bestimmten Autoren (identifiziert durch ihre `npub`) berücksichtigt.
 - **Demoseiten**: 
- >- [Kalender](https://rpi-virtuell.github.io/nostrfeed_calendar/)
- >- [Kachel](https://rpi-virtuell.github.io/nostrfeed_calendar/event-wall.html)
+ >- [Kachel](https://rpi-virtuell.github.io/nostrfeed_calendar/)
+ >- [Kalender](https://rpi-virtuell.github.io/nostrfeed_calendar/calendar-view.html)
  
 
 ### 3. Events löschen (Debugging)
@@ -52,3 +43,4 @@ Das System besteht aus drei n8n-Workflows, die das Datenmanagement zwischen Word
 
  **Der Vorteil:** Dieser Ansatz bewahrt einen dezentralen Workflow. WordPress bleibt die kontrollierte Quelle für die *Eingabe*, kann aber als Anzeigeort *alle* relevanten Termine aus dem Nostr-Netzwerk für den Nutzer sichtbar machen.
 
+# ToDo
