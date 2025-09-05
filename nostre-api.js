@@ -20,9 +20,68 @@
     try { return new Date(n * 1000).toISOString(); } catch { return null; }
   };
 
+  // --- bech32 / npub helpers (minimal, for client-side npub -> hex conversion) ---
+  // based on BIP-0173 style decoding (no external deps)
+  const CHARSET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
+  function bech32Polymod(values) {
+    const GENERATORS = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3];
+    let chk = 1;
+    for (let p = 0; p < values.length; ++p) {
+      const top = chk >> 25;
+      chk = ((chk & 0x1ffffff) << 5) ^ values[p];
+      for (let i = 0; i < 5; ++i) if ((top >> i) & 1) chk ^= GENERATORS[i];
+    }
+    return chk;
+  }
+  function bech32HrpExpand(hrp) {
+    const out = [];
+    for (let i = 0; i < hrp.length; ++i) out.push(hrp.charCodeAt(i) >> 5);
+    out.push(0);
+    for (let i = 0; i < hrp.length; ++i) out.push(hrp.charCodeAt(i) & 31);
+    return out;
+  }
+  function bech32Decode(bech) {
+    try {
+      const lower = bech.toLowerCase();
+      const pos = lower.lastIndexOf('1');
+      if (pos < 1 || pos + 7 > lower.length) return null;
+      const hrp = lower.slice(0, pos);
+      const data = [];
+      for (let i = pos + 1; i < lower.length; ++i) {
+        const c = lower.charAt(i);
+        const v = CHARSET.indexOf(c);
+        if (v === -1) return null;
+        data.push(v);
+      }
+      if (bech32Polymod(bech32HrpExpand(hrp).concat(data)) !== 1) return null;
+      return { hrp, data: data.slice(0, data.length - 6) };
+    } catch (e) { return null; }
+  }
+  function fromWords(words) {
+    let acc = 0, bits = 0;
+    const out = [];
+    for (let i = 0; i < words.length; ++i) {
+      acc = (acc << 5) | words[i];
+      bits += 5;
+      while (bits >= 8) {
+        bits -= 8;
+        out.push((acc >> bits) & 0xff);
+      }
+    }
+    return out;
+  }
+  function npubToHex(npub) {
+    if (!npub || typeof npub !== 'string') return null;
+    if (/^[0-9a-f]{64}$/i.test(npub)) return npub.toLowerCase();
+    const dec = bech32Decode(npub);
+    if (!dec || (dec.hrp !== 'npub' && dec.hrp !== 'nprofile')) return null;
+    const bytes = fromWords(dec.data);
+    if (!bytes || bytes.length === 0) return null;
+    return bytes.map(b => ('0' + b.toString(16)).slice(-2)).join('');
+  }
+
   // Sehr leichte Markdown→HTML-Konvertierung (ohne externe Libs)
   function mdToHtml(md = "") {
-    console.log("md:", md);
     if (!md) return "";
     let s = String(md);
 
@@ -249,7 +308,10 @@
   } = {}) {
     // entspricht: alowed_npubs + read last 1000 events
     const since = nowSec() - Math.max(0, Number(sinceDays)) * 24 * 60 * 60;
-    const filter = { kinds: [31923], limit: Number(limit) || 1000, authors: allowed_npub, since };
+  // sanitize allowed_npub: convert bech32 npub -> hex, filter invalid
+  const authors = (Array.isArray(allowed_npub) ? allowed_npub : []).map(s => npubToHex(s)).filter(Boolean);
+  const filter = { kinds: [31923], limit: Number(limit) || 1000, since };
+  if (authors.length) filter.authors = authors;
 
     const rawEvents = await queryNostrEvents({ relays, filter, timeoutMs });
 
@@ -274,7 +336,6 @@
       const image = tagValue(tags, "image");
       const contentMd = ev.content || "";
       const pubkey = ev.pubkey || "";
-
       const { location, location_url } = toLocationHtml(locationRaw);
       const summaryShort = shorten(summaryRaw, 300);
       const summaryHtml = mdToHtml(summaryShort);

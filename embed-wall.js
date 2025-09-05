@@ -43,6 +43,14 @@
     // 1) explicit global override
     if (typeof window.THEME === 'string' && window.THEME.trim()) return window.THEME.trim();
 
+    // 1b) existing container with data-theme (falls schon im Markup vorhanden)
+    try {
+      const containerPre = document.getElementById('eventwall');
+      if (containerPre && containerPre.getAttribute && containerPre.getAttribute('data-theme')) {
+        return containerPre.getAttribute('data-theme').trim();
+      }
+    } catch(_) {}
+
     // 2) data-theme attribute on <html> or <body>
     const htmlData = document.documentElement && document.documentElement.getAttribute && document.documentElement.getAttribute('data-theme');
     if (htmlData) return htmlData.trim();
@@ -66,7 +74,7 @@
     // fallback
     return 'default';
   };
-  const THEME = String(detectTheme()).toLowerCase();  // "light" | "dark" | custom
+  let THEME = String(detectTheme()).toLowerCase();  // "light" | "dark" | custom
   const DEFAULT_RELAYS = window.DEFAULT_RELAYS || ["wss://relilab.nostr1.com"];
   const DEFAULT_ALLOWED = window.DEFAULT_ALLOWED || [];
   const DEFAULT_LIMIT = Number(window.DEFAULT_LIMIT || 1000);
@@ -100,8 +108,10 @@
       el.id = "eventwall";
       document.body.appendChild(el);
     }
-    // Theme als data-Attribut (CSS nutzt Variablen/Scopes)
-    el.setAttribute("data-theme", THEME);
+    // Theme als data-Attribut nur setzen, wenn nicht bereits per Markup definiert
+    if (!el.hasAttribute('data-theme')) {
+      el.setAttribute("data-theme", THEME);
+    }
     return el;
   };
 
@@ -159,42 +169,77 @@
   // ---- 6) BOOTSTRAP ----
   document.addEventListener("DOMContentLoaded", async () => {
     const container = getContainer();
+
+    // ---- 6a) DATA-ATTRIBUTE AUSLESEN ----
+    const ds = container.dataset || {};
+    // Theme override
+    if (ds.theme) {
+      THEME = String(ds.theme).toLowerCase();
+      container.setAttribute('data-theme', THEME);
+    }
+
+    // Parse helpers
+    const parseList = (val) => (val ? val.split(/[,\s]+/).map(s=>s.trim()).filter(Boolean) : []);
+
+    const relays = parseList(ds.relays).length ? parseList(ds.relays) : DEFAULT_RELAYS;
+    const allowed_npub = parseList(ds.npub).length ? parseList(ds.npub) : DEFAULT_ALLOWED;
+    const limit = ds.limit ? Number(ds.limit) || DEFAULT_LIMIT : DEFAULT_LIMIT;
+    const filterSpec = ds.filter || '';
+    const showFilterBar = (ds.showFilterbar || ds.showFilterBar || 'true').toLowerCase() !== 'false';
+
+    console.log("[DEBUG] Event Wall Konfiguration:", {
+      BASE_URL,
+      THEME,
+      relays,
+      allowed_npub,
+      limit,
+      filterSpec,
+      showFilterBar,
+    });
+
+
+    // Set initial hash for filter before event-wall.js geladen wird
+    // Only set when there is no meaningful existing hash. Treat '#', '#filter' or '#filter=' as empty.
+    const isHashMeaningful = () => {
+      const h = (location.hash || '').replace(/^#/, '');
+      if (!h) return false; // '' or no hash
+      // if filter present but empty (filter= or filter) treat as not meaningful
+      const m = h.match(/^filter(?:=(.*))?$/i);
+      if (m) {
+        const val = (m[1] || '').trim();
+        return !!val; // meaningful only when a value exists
+      }
+      // any other non-empty hash we consider meaningful
+      return true;
+    };
+
+    if (filterSpec && !isHashMeaningful()) {
+      // kein encode nötig für Leerzeichen, Parser verarbeitet sie; optional könnte encodeURIComponent genutzt werden
+      location.hash = '#filter=' + filterSpec;
+    }
+
+    // Globale Optionen für event-wall.js
+    window.NOSTR_OPTIONS = {
+      relays,
+      allowed_npub,
+      limit
+    };
+
     injectMarkup(container);
-    
-    
-    
+    if (!showFilterBar) {
+      const ft = container.querySelector('.filter-toolbar');
+      if (ft) ft.style.display = 'none';
+    }
+
     // Styles laden
     const cssPromises = [loadCSS(BASE_URL + "event-wall.css")];
-    // Theme CSS optional; bei "dark" versuchen wir themes/dark.css zusätzlich
     if (THEME && THEME !== "default") {
       cssPromises.push(loadCSS(BASE_URL + "themes/" + THEME + ".css").catch(() => {}));
     }
+    try { await Promise.all(cssPromises); } catch(_) {}
 
-    try {
-      await Promise.all(cssPromises);
-    } catch (_) {
-      // CSS-Fehler ignorieren wir hier bewusst, damit die App trotzdem startet
-    }
-
-    
-    // Globale Defaults für event-wall.js verfügbar machen (falls genutzt)
-    window.NOSTR_OPTIONS = {
-      relays: DEFAULT_RELAYS,
-      allowed_npub: DEFAULT_ALLOWED,
-      limit: DEFAULT_LIMIT
-      // sinceDays, timeoutMs etc. könnten bei Bedarf ergänzt werden
-    };
+    // API + Hauptlogik
     await loadJS(BASE_URL + 'nostre-api.js').catch(() => {});
-      window.NOSTR_OPTIONS = {
-      relays: DEFAULT_RELAYS,
-      allowed_npub: DEFAULT_ALLOWED,
-      limit: DEFAULT_LIMIT
-    };
-    // Hauptlogik
     await loadJS(BASE_URL + "event-wall.js");
-    // Falls du direkte Nostr-Abfrage brauchst, zuerst nostre-api.js:
-    // (event-wall.js nutzt es optional, wenn vorhanden)
-    
-
   });
 })();
