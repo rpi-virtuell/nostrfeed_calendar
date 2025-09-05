@@ -246,6 +246,7 @@
 
   // ————— Nostr Query (Browser WebSockets) —————
   function queryNostrEvents({ relays, filter, timeoutMs = 8000 }) {
+    // console.log("queryNostrEvents:", { relays, filter, timeoutMs });
     return new Promise((resolve) => {
       const subId = "sub-" + Math.random().toString(36).slice(2, 10);
       const eventsById = new Map();
@@ -292,6 +293,7 @@
           ws.addEventListener("close", onCloseLike);
           ws.addEventListener("error", onCloseLike);
         } catch {
+          console.warn("Failed to connect to relay", url);
           // ignore bad URLs
         }
       });
@@ -314,6 +316,7 @@
   if (authors.length) filter.authors = authors;
 
     const rawEvents = await queryNostrEvents({ relays, filter, timeoutMs });
+    // console.log("rawEvents:", rawEvents.length);
 
     // only future termine: starts > now
     const now = nowSec();

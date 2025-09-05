@@ -75,6 +75,32 @@
     return 'default';
   };
   let THEME = String(detectTheme()).toLowerCase();  // "light" | "dark" | custom
+  // Apply theme classes to document and container so theme CSS using
+  // .theme-<name> selectors works even when CSS is loaded later.
+  const applyThemeClasses = (theme) => {
+    if (!theme) return;
+    const cls = 'theme-' + String(theme).toLowerCase();
+    // remove existing theme-* classes from html and body
+    const removeOld = (el) => {
+      if (!el || !el.classList) return;
+      Array.from(el.classList).forEach(c => { if (/^theme-/.test(c)) el.classList.remove(c); });
+    };
+    removeOld(document.documentElement);
+    removeOld(document.body);
+    // add new
+    try { document.documentElement.classList.add(cls); } catch(_) {}
+    try { document.body.classList.add(cls); } catch(_) {}
+    // also add to existing container if present
+    try {
+      const cont = document.getElementById('eventwall');
+      if (cont && cont.classList) {
+        Array.from(cont.classList).forEach(c => { if (/^theme-/.test(c)) cont.classList.remove(c); });
+        cont.classList.add(cls);
+      }
+    } catch(_) {}
+  };
+  // ensure document/body get the initial theme class immediately
+  try { applyThemeClasses(THEME); } catch(_) {}
   const DEFAULT_RELAYS = window.DEFAULT_RELAYS || ["wss://relilab.nostr1.com"];
   const DEFAULT_ALLOWED = window.DEFAULT_ALLOWED || [];
   const DEFAULT_LIMIT = Number(window.DEFAULT_LIMIT || 1000);
@@ -176,6 +202,8 @@
     if (ds.theme) {
       THEME = String(ds.theme).toLowerCase();
       container.setAttribute('data-theme', THEME);
+  // Apply classes immediately after override
+  try { applyThemeClasses(THEME); } catch(_) {}
     }
 
     // Parse helpers
@@ -226,6 +254,8 @@
     };
 
     injectMarkup(container);
+  // ensure the newly injected container also has the theme class
+  try { applyThemeClasses(THEME); } catch(_) {}
     if (!showFilterBar) {
       const ft = container.querySelector('.filter-toolbar');
       if (ft) ft.style.display = 'none';

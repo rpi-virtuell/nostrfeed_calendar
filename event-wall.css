@@ -70,7 +70,7 @@
   und binde diese Datei in HTML ein oder lade sie dynamisch. Um das Theme
   zu aktivieren, setze per JavaScript:
 
-  document.documentElement.setAttribute('data-theme', 'dark');
+  document.documentElement.setAttribute('data-theme', 'liht');
 
   Alternativ kann man Klassen verwenden: <html class="theme-dark"> und
   in der Theme-Datei `.theme-dark { --color-primary: ... }` definieren.
