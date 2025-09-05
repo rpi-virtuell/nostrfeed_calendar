@@ -346,8 +346,10 @@
       const summaryPlain = toPlainText(event.summary || '');
       const summaryShort = truncateWords(summaryPlain, SUMMARY_WORD_LIMIT);
 
+      const headerStyle = event.image ? ` style="background-image:url('${event.image}')"` : '';
+
       tile.innerHTML = `
-        <div class="tile-header ${event.image ? '' : 'no-image'}" style="background-image:url('${event.image || ''}')">
+        <div class="tile-header ${event.image ? '' : 'no-image'}"${headerStyle}>
           <div class="tile-overlay">
             <div class="date-bubble" aria-hidden="true">
               <div class="date-bubble-year">${year}</div>

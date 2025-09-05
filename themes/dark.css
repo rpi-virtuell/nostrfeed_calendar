@@ -16,12 +16,13 @@ html[data-theme="dark"] {
   --color-primary: #6aa6ff;
   --color-primary-contrast: #081220;
   --color-secondary: #f59e0b;
-  --color-background: #071020;
-  --color-surface: #0b1220;
+  --color-background: #222e42;
+  --color-surface: #222e4296;
   --color-text: #e6eefc;
   --color-muted: #9aa6bb;
   --color-danger: #ff6b6b;
   --color-success: #2ecc71;
+  --color-body-background: rgba(44, 60, 85, 0.95);
 
   /* UI specifics */
   --tile-shadow: 0 8px 28px rgba(0,0,0,.65);
@@ -49,14 +50,8 @@ html[data-theme="dark"] {
   color: var(--color-text);
 }
 
-.theme-dark .filter-toolbar{
-  background: var(--color-surface);
-  box-shadow: 0 6px 20px rgba(0,0,0,.6);
-  border-radius: var(--radius-lg);
-}
-
 .theme-dark .field{
-  background: rgba(255,255,255,0.03);
+  background: black;
   border: 1px solid var(--border-color);
   color: var(--color-text);
 }
@@ -65,15 +60,24 @@ html[data-theme="dark"] {
 .theme-dark .field select{
   background: transparent;
   color: var(--color-text);
+  background-color: var(--color-surface);
 }
-
+.theme-dark .field label{ color: var(--color-text); }
 .theme-dark .tag-input{ color: var(--color-text); }
 
-.theme-dark .suggest{
+.theme-dark .suggest, .suggest button{
   background: var(--color-surface);
   border-color: var(--border-color);
+  color: var(--color-muted);
+}
+.theme-dark .suggest:hover, .suggest button:hover{
+  background: var(--color-surface);
   color: var(--color-text);
 }
+
+.theme-dark a{ color: var(--color-primary); }
+.theme-dark a:hover{ color: var(--color-primary-contrast); }
+.theme-dark .tile-meta svg{ filter: invert(1) brightness(0.8); }
 
 .theme-dark .btn{ background: var(--color-primary); color: var(--color-primary-contrast); }
 .theme-dark .btn.ghost{ background: rgba(255,255,255,0.04); color: var(--color-text); }
@@ -83,26 +87,30 @@ html[data-theme="dark"] {
 /* Cards / Tiles */
 .theme-dark .event-tile{ background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); box-shadow: var(--tile-shadow); border: 1px solid rgba(255,255,255,0.03); }
 .theme-dark .tile-header{ color: var(--color-text); }
-.theme-dark .tile-body{ background: rgba(10,18,30,0.85); color: var(--color-text); }
+.theme-dark .tile-body{ background: var(--color-body-background); color: var(--color-text); }
 .theme-dark .tile-title{ color: var(--color-text); /* Heller, primärer Lesetext */ }
 .theme-dark .tile-summary{ color: rgba(230,238,252,0.9); }
 .theme-dark .tile-meta p{ color: rgba(230,238,252,0.85); /* heller als vorher für bessere Lesbarkeit */ }
 
-.theme-dark .date-bubble{ background: rgba(255,255,255,0.06); box-shadow: 4px 6px 10px rgba(0,0,0,.6); }
-.theme-dark .date-bubble-year{ background: var(--color-primary); color: var(--color-primary-contrast); }
+.theme-dark .date-bubble{ background: var(--color-text); box-shadow: 4px 6px 10px rgba(0,0,0,.6); }
+.theme-dark .date-bubble-day{ color: var(--color-primary-contrast); }
+
 
 /* Modal */
 .theme-dark .modal{ background: var(--modal-overlay); }
-.theme-dark .modal-content{ background: var(--color-surface); color: var(--color-text); box-shadow: 0 10px 30px rgba(0,0,0,.6); }
+.theme-dark .modal-content{ background: var(--color-body-background); color: var(--color-text); box-shadow: 0 10px 30px rgba(0,0,0,.6); }
 
 /* chips / tags */
 .theme-dark .chip{ background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.04); color: var(--color-text); }
 .theme-dark .tile-tags .tag-badge, .theme-dark #modal-tags button{
   /* Erhöhte Deckkraft und kontrastreichere Schrift für Tags */
-  background-color: var(--color-primary);
-  color: var(--color-text);
+  background-color: var(--color-secondary);
+  color: var(--color-primary-contrast);
   opacity: 0.98;
   border: 1px solid rgba(255,255,255,0.06);
+}
+.theme-dark #modal-date{
+  color: var(--color-text);
 }
 
 /* inputs focus */
