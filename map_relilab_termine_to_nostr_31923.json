@@ -229,14 +229,14 @@
             },
             {
               "id": "3642668f-f6b1-4281-9d65-6e56eabf655b",
-              "name": "starts",
-              "value": "={{  $json.tags .filter(item => item[0] === 'starts') .map(item => item[1]).join(',').toDateTime('s')  }}",
+              "name": "start",
+              "value": "={{  $json.tags .filter(item => item[0] === 'start') .map(item => item[1]).join(',').toDateTime('s')  }}",
               "type": "string"
             },
             {
               "id": "0631f2f0-4c71-444a-9caa-c4fc85eb846e",
-              "name": "ends",
-              "value": "={{  $json.tags .filter(item => item[0] === 'ends') .map(item => item[1]).join(',').toDateTime('s')  }}",
+              "name": "end",
+              "value": "={{  $json.tags .filter(item => item[0] === 'end') .map(item => item[1]).join(',').toDateTime('s')  }}",
               "type": "string"
             },
             {
@@ -327,7 +327,7 @@
     },
     {
       "parameters": {
-        "jsCode": "\n// Hilfsfunktion zum Dekodieren von einfachen HTML-Entitäten im Titel\nfunction decodeHtmlEntities(text) {\n  if (!text) return \"\";\n  return text.replace(/&#(\\d+);/g, (match, dec) => {\n    return String.fromCharCode(dec);\n  }).replace(/&/g, '&');\n}\n\n// Loop over input items\nfor (const item of $input.all()) {\n  const results = [];\n  //Identifier aus guid.base64\n  const d_tag = item.json.d; \n  // Titel extrahieren und bereinigen\n  let title = \"\";\n  try {\n    const parsedTitle = JSON.parse(item.json.title);\n    title = decodeHtmlEntities(parsedTitle.rendered);\n  } catch (e) {\n    title = decodeHtmlEntities(item.json.title);\n  }\n  // Start- und End-Datum in Unix-Timestamp (Sekunden) umwandeln\n  const start_timestamp = Math.floor(new Date(item.json.start.replace(' ', 'T') + 'Z').getTime() / 1000);\n  const end_timestamp = Math.floor(new Date(item.json.end.replace(' ', 'T') + 'Z').getTime() / 1000);\n  // --- 2. Nostr 'tags'-Array erstellen ---\n\n  const tags = [];\n\n  tags.push([\"d\", d_tag]);\n  tags.push([\"title\", title]);\n  tags.push([\"starts\", start_timestamp.toString()]);\n  tags.push([\"ends\", end_timestamp.toString()]);\n  tags.push([\"status\", \"planned\"]);\n\n  if (item.json.summary) {\n    tags.push([\"summary\", item.json.summary]);\n  }\n  if (item.json.location) {\n    tags.push([\"location\", item.json.location]);\n  }\n  if (item.json.image) {\n    tags.push([\"image\", item.json.image]);\n  }\n  // pusht alle keywords vom format [\"t\", \"relilab\"] in den nostrtags root\n  if (item.json.keywords && Array.isArray(item.json.keywords)) {\n    tags.push(...item.json.keywords);\n  }\n  \n  item.json.tags = tags;\n}\n\nreturn $input.all();"
+        "jsCode": "\n// Hilfsfunktion zum Dekodieren von einfachen HTML-Entitäten im Titel\nfunction decodeHtmlEntities(text) {\n  if (!text) return \"\";\n  return text.replace(/&#(\\d+);/g, (match, dec) => {\n    return String.fromCharCode(dec);\n  }).replace(/&/g, '&');\n}\n\n// Loop over input items\nfor (const item of $input.all()) {\n  const results = [];\n  //Identifier aus guid.base64\n  const d_tag = item.json.d; \n  // Titel extrahieren und bereinigen\n  let title = \"\";\n  try {\n    const parsedTitle = JSON.parse(item.json.title);\n    title = decodeHtmlEntities(parsedTitle.rendered);\n  } catch (e) {\n    title = decodeHtmlEntities(item.json.title);\n  }\n  // Start- und End-Datum in Unix-Timestamp (Sekunden) umwandeln\n  const start_timestamp = Math.floor(new Date(item.json.start.replace(' ', 'T') + 'Z').getTime() / 1000);\n  const end_timestamp = Math.floor(new Date(item.json.end.replace(' ', 'T') + 'Z').getTime() / 1000);\n  // --- 2. Nostr 'tags'-Array erstellen ---\n\n  const tags = [];\n\n  tags.push([\"d\", d_tag]);\n  tags.push([\"title\", title]);\n  tags.push([\"start\", start_timestamp.toString()]);\n  tags.push([\"end\", end_timestamp.toString()]);\n  tags.push([\"status\", \"planned\"]);\n\n  if (item.json.summary) {\n    tags.push([\"summary\", item.json.summary]);\n  }\n  if (item.json.location) {\n    tags.push([\"location\", item.json.location]);\n  }\n  if (item.json.image) {\n    tags.push([\"image\", item.json.image]);\n  }\n  // pusht alle keywords vom format [\"t\", \"relilab\"] in den nostrtags root\n  if (item.json.keywords && Array.isArray(item.json.keywords)) {\n    tags.push(...item.json.keywords);\n  }\n  \n  item.json.tags = tags;\n}\n\nreturn $input.all();"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -380,7 +380,7 @@
           "conditions": [
             {
               "id": "1dde9d1e-627c-46c0-9ed1-0ce1c115621b",
-              "leftValue": "={{  $json.tags .filter(item => item[0] === 'starts') .map(item => item[1]).join(',').toDateTime('s').toMillis()  }}",
+              "leftValue": "={{  $json.tags .filter(item => item[0] === 'start') .map(item => item[1]).join(',').toDateTime('s').toMillis()  }}",
               "rightValue": "={{ new Date().toDateTime().toMillis() }}",
               "operator": {
                 "type": "number",

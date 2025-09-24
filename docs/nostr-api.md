@@ -15,14 +15,14 @@ Damit kannst du Nostr-Events (Kind **31923**, NIP-52 Kalender) **direkt aus Rela
 * **Direktabruf aus Nostr-Relays:**
   Verwendet native `WebSocket`-Verbindungen zu Relays (z. B. `wss://relilab.nostr1.com`), filtert auf `kinds:[31923]`, `authors:[…]`, `since`.
 * **Feldmapping wie n8n:**
-  Tags werden extrahiert (`title`, `starts`, `ends`, `status`, `location`, `t`, `image`, `summary`) und zu lesbaren Feldern umgebaut:
+  Tags werden extrahiert (`title`, `start`, `end`, `status`, `location`, `t`, `image`, `summary`) und zu lesbaren Feldern umgebaut:
 
-  * `starts`/`ends` → ISO-Zeitstempel
+  * `start`/`end` → ISO-Zeitstempel
   * `location` „Zoom:…” → klickbarer Link + `location_url`
   * `summary`/`content` → einfache **Markdown→HTML**-Konvertierung (HTML vorher ge-escaped)
   * `tags` → kommaseparierte Zeichenkette
 * **Filter:**
-  Nur **zukünftige** Termine (`starts > now`) werden zurückgegeben.
+  Nur **zukünftige** Termine (`start > now`) werden zurückgegeben.
 * **Ausgabe:**
   `{ nostrfeed: [...] }` – kompatibel zu deinem bisherigen Webhook-Response.
 
@@ -114,8 +114,8 @@ Ein Event in `nostrfeed` enthält u. a.:
 {
   "ID": "…",
   "title": "…",
-  "starts": "2025-09-29T17:00:00.000Z",
-  "ends":   "2025-09-29T19:00:00.000Z",
+  "start": "2025-09-29T17:00:00.000Z",
+  "end":   "2025-09-29T19:00:00.000Z",
   "status": "planned",
   "location": "<a href=\"https://…\">Link zum Online-Event</a>",
   "location_url": "https://…",
@@ -186,7 +186,7 @@ Ein Event in `nostrfeed` enthält u. a.:
 * **CSP pflegen:** `connect-src` für alle genutzten Relays whitelisten.
 * **Fehler sichtbar machen:** Ladeindikator/Retry/Toast – dein Code hat bereits Loader & Fallback.
 * **Tags normalisieren:** Lowercase-Matching für Filter (du machst das bereits).
-* **Zeitzonen prüfen:** `starts/ends` sind ISO – bei Anzeige lokal formatieren (du nutzt `Intl.DateTimeFormat`, passt).
+* **Zeitzonen prüfen:** `start/end` sind ISO – bei Anzeige lokal formatieren (du nutzt `Intl.DateTimeFormat`, passt).
 * **UI-Sicherheit:** HTML nur an **vorgesehene Container** binden; keine Inline-Scripts zulassen.
 
 ---
@@ -227,7 +227,7 @@ const NOSTR_OPTIONS = {
 
 const normalizeFromNostr = (it) => ({
   ID: it.ID, title: it.title,
-  starts: it.starts, ends: it.ends, status: it.status,
+  start: it.start, end: it.end, status: it.status,
   location: it.location, location_url: it.location_url,
   tags: it.tags, summary: it.summary, content: it.content,
   pubkey: it.pubkey, image: it.image,

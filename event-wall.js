@@ -219,8 +219,8 @@
   };
 
   const buildEvent = (event) => {
-    const start = new Date(event.starts || event.start || event.begin || event.date);
-    const end = new Date(event.ends || event.end || event.finish || start);
+    const start = new Date(event.start || event.start || event.begin || event.date);
+    const end = new Date(event.end || event.end || event.finish || start);
     const tagsArr = normalizeTags(event.tags);
     return {
       ...event,
@@ -253,8 +253,8 @@
   const normalizeFromNostr = (it) => ({
     ID: it.ID,
     title: it.title,
-    starts: it.starts,       // ISO-String aus nostre-api.js
-    ends: it.ends,           // ISO-String aus nostre-api.js
+    start: it.start,       // ISO-String aus nostre-api.js
+    end: it.end,           // ISO-String aus nostre-api.js
     status: it.status,
     location: it.location,   // bereits HTML-Link (Zoom-Handling passiert dort)
     tags: it.tags,           // kann String "a, b, c" sein -> buildEvent ruft normalizeTags()
@@ -305,8 +305,8 @@
     //   const fallback = [{
     //     ID: "aHR0cHM6Ly9yZWxpbGFiLm9yZy8/cD0xOTU5Mg==",
     //     title: "Schöpfung und Urknall – Die Welt aus unterschiedlichen Perspektiven betrachten",
-    //     starts: "2025-09-29T17:00:00.000+02:00",
-    //     ends: "2025-09-29T19:00:00.000+02:00",
+    //     start: "2025-09-29T17:00:00.000+02:00",
+    //     end: "2025-09-29T19:00:00.000+02:00",
     //     status: "planned",
     //     location: '<a href="https://veranstaltungen-ebz.elk-wue.de/kurs/25PTZ-063">Link zum Online-Event</a>',
     //     tags: ["Grundschule", "schöpfung", "urknall", "Theologisieren", "Sekundarstufe I", "ptz", "Bibel"],

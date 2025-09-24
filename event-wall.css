@@ -195,6 +195,7 @@ h1{ text-align:center; color:var(--color-heading); margin:0 0 10px 0; }
   color:var(--color-primary-contrast);
   padding:18px;
   gap:10px;
+  font-size: 1.0rem;
 }
 .tile-body a{ color:var(--color-primary-contrast); }
 .tile-title{ margin:0; line-height:1.35; font-size:1.05rem; }
