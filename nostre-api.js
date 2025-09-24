@@ -318,17 +318,17 @@
     const rawEvents = await queryNostrEvents({ relays, filter, timeoutMs });
     // console.log("rawEvents:", rawEvents.length);
 
-    // only future termine: starts > now
+    // only future termine: start > now
     const now = nowSec();
-    const futureEvents = rawEvents.filter((ev) => Number(tagValue(ev.tags, "starts") || 0) > now);
+    const futureEvents = rawEvents.filter((ev) => Number(tagValue(ev.tags, "start") || 0) > now);
 
     // convert to readable fields + Zoom Link + shorten summary + md→html
     const processed = futureEvents.map((ev) => {
       const tags = Array.isArray(ev.tags) ? ev.tags : [];
       const id = tagValue(tags, "d");
       const title = tagValue(tags, "title");
-      const startsSec = Number(tagValue(tags, "starts") || 0);
-      const endsSec = Number(tagValue(tags, "ends") || 0);
+      const startsSec = Number(tagValue(tags, "start") || 0);
+      const endsSec = Number(tagValue(tags, "end") || 0);
       const startsIso = secsToIso(startsSec);
       const endsIso = secsToIso(endsSec);
       const status = tagValue(tags, "status");
@@ -347,8 +347,8 @@
       return {
         ID: id,
         title,
-        starts: startsIso,
-        ends: endsIso,
+        start: startsIso,
+        end: endsIso,
         status,
         location,        // HTML-Link
         location_url,    // extrahierte URL

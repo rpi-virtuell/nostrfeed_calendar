@@ -299,7 +299,7 @@
                     if (!response.ok) throw new Error(`HTTP-Fehler! Status: ${response.status}`);
                     const data = await response.json();
                     if (data && data.length > 0 && data[0].nostrfeed) {
-                        allEvents = data[0].nostrfeed.map(event => ({ ...event, start: new Date(event.starts), end: new Date(event.ends) }));
+                        allEvents = data[0].nostrfeed.map(event => ({ ...event, start: new Date(event.start), end: new Date(event.end) }));
                     } else {
                         allEvents = [];
                     }
