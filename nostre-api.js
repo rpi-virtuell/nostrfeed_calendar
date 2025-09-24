@@ -7,7 +7,7 @@
 (function () {
   "use strict";
 
-  const DEFAULT_RELAYS = ["wss://relilab.nostr1.com"];
+  const DEFAULT_RELAYS = ["wss://relay-rpi.edufeed.org"];
   const DEFAULT_ALLOWED = ["54a340072ccc625516c8d572b638a828c5b857074511302fb4392f26e34e1913"];
   const DEFAULT_LIMIT = 1000;
 
