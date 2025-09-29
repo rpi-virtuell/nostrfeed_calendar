@@ -300,7 +300,8 @@
     });
   }
 
-  // ————— Pipeline = n8n-Workflow —————
+  // ————— Pipeline —————
+  console.log('[DEBUG] getNostrFeed, ',DEFAULT_RELAYS,DEFAULT_ALLOWED);
   async function getNostrFeed({
     relays = DEFAULT_RELAYS,
     allowed_npub = DEFAULT_ALLOWED,
@@ -316,6 +317,7 @@
   if (authors.length) filter.authors = authors;
 
     const rawEvents = await queryNostrEvents({ relays, filter, timeoutMs });
+    console.log('[DEBUG] rawEvents',rawEvents);
     // console.log("rawEvents:", rawEvents.length);
 
     // only future termine: start > now
@@ -366,7 +368,7 @@
 
   // ————— Public API —————
   const NostreAPI = { getNostrFeed };
-
+  console.log('[DEBUG] NostreAPI',NostreAPI);
   // Support: global namespace und ES-Module
   if (typeof window !== "undefined") {
     window.NostreAPI = NostreAPI;
