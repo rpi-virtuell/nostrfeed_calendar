@@ -112,15 +112,17 @@ h1{ text-align:center; color:var(--color-heading); margin:0 0 10px 0; }
   border-radius:var(--radius-sm);
   padding:8px 10px;
 }
+#reset-filters{ border: 1px solid var(--color-filter-field-border); border-radius:var(--radius-sm);  cursor:pointer; background:var(--color-filter-field-bg); }
 .field label{ font-size:.85rem; color:#374151; white-space:nowrap; }
 .field input[type="text"]{ border:none; outline:none; background:transparent; min-width:200px; flex:1; font-size:1rem; }
 .field select{ border:none; outline:none; background:transparent; font-size:1rem; }
-.btn{ background:var(--color-primary); color:var(--color-surface); border:none; border-radius:var(--radius-md); padding:10px 14px; cursor:pointer; }
+.btn{ background:var(--color-primary); color:var(--color-surface); border:none; border-radius:var(--radius-md); padding:10.5px 14px; cursor:pointer; }
 .btn.ghost{ background:#eef2f700; color:#334155; }
 .result-info{ margin-left:auto; color:#374151; font-size:.9rem; }
 .selected-tags{ display:flex; flex-wrap:wrap; gap:6px; }
 .chip{ display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:var(--radius-round); background:var(--chip-bg); border:1px solid var(--chip-border); font-size:.85rem; }
 .chip button{ border:none; background:transparent; cursor:pointer; font-weight:bold; line-height:1; padding:0 2px; }
+
 
 /* Tag Suggest */
 .tagbox{ position:relative; min-width:280px; }
