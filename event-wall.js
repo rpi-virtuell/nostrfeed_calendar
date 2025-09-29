@@ -288,38 +288,7 @@
       console.warn('Nostr direct fetch fehlgeschlagen:', err);
     }
 
-    // // 2) Fallback: n8n-Webhook wie gehabt
-    // try {
-    //   const res = await fetch(endpoint);
-    //   if (!res.ok) throw new Error('HTTP ' + res.status);
-    //   const data = await res.json();
-    //   let list = [];
-    //   if (Array.isArray(data) && data.length > 0 && data[0].nostrfeed) {
-    //     list = data[0].nostrfeed.map(buildEvent).sort((a,b) => a.start - b.start);
-    //   }
-    //   allEvents = list;
-    //   filteredEvents = list.slice();
-    //   console.log(`n8n-Webhook: ${list.length} events loaded.`);
-    // } catch(err) {
-    //   console.error('Fehler beim Abruf:', err);
-    //   const fallback = [{
-    //     ID: "aHR0cHM6Ly9yZWxpbGFiLm9yZy8/cD0xOTU5Mg==",
-    //     title: "Schöpfung und Urknall – Die Welt aus unterschiedlichen Perspektiven betrachten",
-    //     start: "2025-09-29T17:00:00.000+02:00",
-    //     end: "2025-09-29T19:00:00.000+02:00",
-    //     status: "planned",
-    //     location: '<a href="https://veranstaltungen-ebz.elk-wue.de/kurs/25PTZ-063">Link zum Online-Event</a>',
-    //     tags: ["Grundschule", "schöpfung", "urknall", "Theologisieren", "Sekundarstufe I", "ptz", "Bibel"],
-    //     summary: "„Hört mich Gott auch, wenn ich die Hände nicht falte?“ Mit Kindern über das Beten nachdenken.",
-    //     content: "<strong>Achtung nur mit Anmeldung!</strong> Kinder sind wissbegierig …",
-    //     pubkey: "54a340072ccc625516c8d572b638a828c5b857074511302fb4392f26e34e1913",
-    //     image: "https://relilab.org/wp-content/uploads/2022/05/location-4496459_1280-300x300.png",
-    //     location_url: "https://veranstaltungen-ebz.elk-wue.de/kurs/25PTZ-063"
-    //   }];
-    //   allEvents = fallback.map(buildEvent);
-    //   filteredEvents = allEvents.slice();
-    //   console.log(`Fallback: ${allEvents.length} events loaded.`);
-    // }
+   
   };
 
   // Rendering
@@ -351,24 +320,35 @@
       const headerStyle = event.image ? ` style="background-image:url('${event.image}')"` : '';
 
       tile.innerHTML = `
-        <div class="tile-header ${event.image ? '' : 'no-image'}"${headerStyle}>
-          <div class="tile-overlay">
-            <div class="date-bubble" aria-hidden="true">
-              <div class="date-bubble-year">${year}</div>
-              <div class="date-bubble-day">${day}</div>
-              <div class="date-bubble-month">${month}</div>
+        <div class="tile-tags">${tagsHTML}</div>
+        <div class="event-wrapper">
+          <div class="tile-header ${event.image ? '' : 'no-image'}"${headerStyle}>
+            <div class="tile-overlay">
+              <div class="date-bubble" aria-hidden="true">
+                <div class="date-bubble-year">${year}</div>
+                <div class="date-bubble-day">${day}</div>
+                <div class="date-bubble-month">${month}</div>
+              </div>
             </div>
-            <div class="tile-tags">${tagsHTML}</div>
           </div>
-        </div>
-        <div class="tile-body">
-          <h3 class="tile-title">${event.title}</h3>
-          <div class="tile-meta">
-            <p>${clockIcon}<span>${timeSpan}</span></p>
-            ${event.location ? `<p>${locationIcon}<span>${event.location}</span></p>` : ''}
+          <div class="tile-body">
+            <h3 class="tile-title">${event.title}</h3>
+            <div class="tile-meta">
+              <p>${clockIcon}<span>${timeSpan}</span></p>
+              ${event.location ? `<p>${locationIcon}<span>${event.location}</span></p>` : ''}
+              ${event.pubkey ? `<p><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><span>${event.pubkey}</span></p>` : ''}
+            </div>
+            <div class="tile-ghost" aria-hidden="true"></div>
+            ${summaryShort ? `<p class="tile-summary">${summaryShort}</p>` : ''}
           </div>
-          <div class="tile-ghost" aria-hidden="true"></div>
-          ${summaryShort ? `<p class="tile-summary">${summaryShort}</p>` : ''}
+          <div class="tile-toolbar">
+            <div class="tile-toolbar-left">
+              <!-- <button class="btn secondary edit-btn">Bearbeiten</button> -->
+            </div>
+            <div class="tile-toolbar-right">
+              <button class="btn primary show-btn">Details ansehen</button>
+            </div>
+          </div>
         </div>
       `;
       // Only attach tag click handlers when the filter toolbar is visible.
