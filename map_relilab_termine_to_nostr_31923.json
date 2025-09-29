@@ -141,7 +141,7 @@
         "content": "={{ $json.content }}",
         "kind": 31923,
         "tags": "={{ JSON.stringify($json.tags) }}",
-        "relay": "wss://relilab.nostr1.com, wss://relay-rpi.edufeed.org"
+        "relay": "wss://relay-rpi.edufeed.org"
       },
       "type": "n8n-nodes-nostrobots.nostrobots",
       "typeVersion": 1,
