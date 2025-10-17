@@ -107,7 +107,7 @@ class Nostr_Calendar_Block {
         // Load theme-specific CSS if themes exist
         $themes = ['light', 'dark', 'relilab', 'foerbico'];
         foreach ($themes as $theme) {
-            $theme_file = NOSTR_CALENDAR_BLOCK_PATH . 'assets/css/themes/' . $theme . '.css';
+            $theme_file = NOSTR_CALENDAR_BLOCK_DIR . 'assets/css/themes/' . $theme . '.css';
             if (file_exists($theme_file)) {
                 wp_enqueue_style(
                     'nostr-calendar-block-theme-' . $theme,
