@@ -58,7 +58,22 @@
 }
 
 [data-theme="foerbico"] .tile-body {
-  background: linear-gradient(135deg, #203A8F 0%, #002366 100%);
+  background: #F0F8FF;
+  color: var(--color-text);
+}
+
+[data-theme="foerbico"] .tile-body h3,
+[data-theme="foerbico"] .tile-body .tile-title {
+  color: var(--color-heading);
+}
+
+[data-theme="foerbico"] .tile-body p,
+[data-theme="foerbico"] .tile-body .tile-summary {
+  color: var(--color-text);
+}
+
+[data-theme="foerbico"] .tile-meta svg {
+  fill: var(--color-primary);
 }
 
 [data-theme="foerbico"] .filter-toolbar {
@@ -139,12 +154,17 @@
 
 /* Date bubble */
 [data-theme="foerbico"] .date-bubble {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-heading) 100%);
-  border: 2px solid var(--color-secondary);
+  background: #F0F8FF;
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
+}
+
+[data-theme="foerbico"] .date-bubble-day {
+  color: var(--color-primary);
 }
 
 [data-theme="foerbico"] .date-bubble-month {
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--color-primary);
 }
 
 /* Form elements */
