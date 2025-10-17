@@ -1,97 +1,99 @@
-# Nostr Calendar Block
+=== Nostr Calendar Block ===
+Contributors: rpi-virtuell
+Tags: nostr, events, calendar, gutenberg, block
+Requires at least: 5.8
+Tested up to: 6.4
+Requires PHP: 7.4
+Stable tag: 1.0.0
+License: GPL-2.0-or-later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Ein schlankes WordPress Gutenberg-Plugin zur Anzeige von Nostr Events als Event Wall.
+Ein schlankes WordPress Gutenberg-Plugin zur Anzeige von Nostr Events als Event Wall mit umfangreicher Filterung und Customization.
 
-## Features
+== Description ==
 
-- 📅 **Gutenberg-Block** - Einfaches Einfügen in Seiten/Beiträge
-- 🎨 **Customizable** - Theme-Optionen (Light, Dark, ReliLab)
-- 🏷️ **Filterbar** - Tags, Suche, Datum filtern (optional)
-- 📱 **Responsive** - Mobile-first Design
-- ⚡ **Lightweight** - Minimale Dependencies
-- 🌐 **Nostr-native** - Events direkt aus dem Nostr-Netzwerk
+Nostr Calendar Block ist ein modernes WordPress Gutenberg-Plugin zur Anzeige von Events aus dem Nostr-Netzwerk als elegante Event Wall.
 
-## Installation
+**Features:**
 
-1. Plugin-Ordner kopieren: `/wp-content/plugins/nostr-calendar-block/`
-2. In WordPress aktivieren
-3. Gutenberg-Editor öffnen
+* 📅 **Gutenberg-Block** - Einfaches Einfügen in Seiten/Beiträge
+* 🎨 **Customizable** - Theme-Optionen (Hell, Dunkel, ReliLab)
+* 🏷️ **Filterbar** - Tags, Suche, Datum filtern (optional)
+* 📱 **Responsive** - Mobile-first Design
+* ⚡ **Lightweight** - Minimale Dependencies, schnelle Ladezeiten
+* 🌐 **Nostr-native** - Events direkt aus dem Nostr-Netzwerk
+* 🔒 **Sicher** - Validierte Event-Daten mit Nostr-Signatur-Verifikation
+* 🌍 **Mehrsprachig** - Internationalisierung ready
+
+== Installation ==
+
+1. Plugin-Ordner in `/wp-content/plugins/` kopieren
+2. In WordPress im Admin-Bereich aktivieren
+3. Seite/Beitrag öffnen und Gutenberg-Editor starten
 4. Block "Nostr Event Wall" hinzufügen
 
-## Verwendung
+== Verwendung ==
 
-### Im Gutenberg-Editor
+**Im Gutenberg-Editor:**
 
 1. Block "Nostr Event Wall" einfügen
-2. Im Inspector Panel auf der rechten Seite anpassen:
-   - **Design**: Theme wählen (Hell, Dunkel, ReliLab)
-   - **Anzeige**: Filterleiste An/Aus, Max. Events, Filter
-   - **Relays**: Nostr Relay URLs hinzufügen
-   - **Autoren**: npub-Adressen filtern
+2. Im Inspector Panel anpassen:
+   * Design: Theme wählen (Hell, Dunkel, ReliLab)
+   * Anzeige: Filterleiste An/Aus, Max. Events, Custom Filter
+   * Relays: Nostr Relay URLs hinzufügen
+   * Autoren: npub-Adressen filtern
 
-### Shortcode (veraltet, aber unterstützt)
+**Block-Attribute:**
 
-```
-[nostrcal theme="light" filterbar=1 filter="" relays="wss://..." npub="npub1..." limit=1000]
-```
+* theme (string) - 'light', 'dark', 'relilab' (Standard: 'light')
+* showFilterbar (boolean) - Filterleiste anzeigen (Standard: true)
+* filter (string) - Filter-Spezifikation z.B. 'tags:kita|grundschule'
+* relays (array) - Nostr Relay URLs
+* npub (array) - Erlaubte Autoren (Nostr Public Keys)
+* limit (number) - Max. Anzahl Events (1-10000, Standard: 1000)
 
-## Block-Attribute
+== Frequently Asked Questions ==
 
-- **theme** (string) - `light`, `dark`, `relilab` (Standard: `light`)
-- **showFilterbar** (boolean) - Filterleiste anzeigen (Standard: `true`)
-- **filter** (string) - Filter-Spezifikation z.B. `tags:kita|grundschule`
-- **relays** (array) - Nostr Relay URLs
-- **npub** (array) - Erlaubte Autoren (Nostr Public Keys)
-- **limit** (number) - Max. Anzahl Events (1-10000, Standard: 1000)
+= Welche Nostr Relays kann ich verwenden? =
 
-## Dateistruktur
+Der Block funktioniert mit allen Standard-Nostr-Relays. Empfohlen sind:
+* wss://relay.damus.io
+* wss://relay.nostr.bg
+* wss://nostr.wine
 
-```
-nostr-calendar-block/
-├── nostr-calendar-block.php          # Plugin-Header
-├── includes/
-│   ├── class-plugin.php              # Hauptklasse
-│   └── class-renderer.php            # Block-Renderer
-├── src/
-│   └── blocks/event-wall/
-│       └── block.json                # Block-Definition
-├── assets/
-│   ├── js/
-│   │   ├── editor.js                 # Gutenberg Inspector
-│   │   ├── embed-wall.js             # Frontend-Initializer
-│   │   ├── event-wall.js             # Event-Wall Logik
-│   │   └── nostre-api.js             # Nostr API
-│   └── css/
-│       ├── editor.css                # Editor-Styles
-│       ├── event-wall.css            # Frontend-Styles
-│       └── themes/
-│           ├── light.css
-│           ├── dark.css
-│           └── relilab.css
-└── README.md                         # Diese Datei
-```
+= Kann ich mehrere Autoren filtern? =
 
-## Entwicklung
+Ja! Im "Autoren" Panel können Sie beliebig viele npub-Adressen hinzufügen. Events von allen diesen Autoren werden angezeigt.
 
-### Build (wenn nötig)
+= Wie funktioniert die Tag-Filterung? =
 
-```bash
-npm install
-npm run build
-```
+Verwenden Sie die Filter-Syntax: `tags:tag1|tag2,author:npub1...`
 
-### Debug
+= Ist das Plugin sicher? =
 
-In `nostr-calendar-block.php` den Debug-Modus aktivieren:
+Ja! Der Block validiert alle Event-Daten und verifiziert Nostr-Signaturen.
 
-```php
-define('NOSTR_CALENDAR_DEBUG', true);
-```
+== Screenshots ==
 
-## Kompatibilität
+1. Event Wall mit Light-Theme
+2. Gutenberg Inspector Panel mit Einstellungen
+3. Event Wall mit Dark-Theme
+4. Responsive Ansicht auf Mobile
 
-- WordPress 5.8+
-- PHP 7.4+
+== Changelog ==
+
+= 1.0.0 =
+* Initial Release
+* Gutenberg Block-Support
+* 3 vordefinierte Themes
+* Relay- und Author-Filterung
+* Responsive Design
+
+== Requirements ==
+
+* WordPress 5.8 oder höher
+* PHP 7.4 oder höher
+* Aktive Internetverbindung für Nostr-Events
 - Modern Browser (ES6+)
 
 ## Lizenz
