@@ -39,10 +39,19 @@ class Nostr_Calendar_Block {
         $block_json_path = NOSTR_CALENDAR_BLOCK_DIR . 'src/blocks/event-wall/block.json';
         
         if (!file_exists($block_json_path)) {
+            error_log('Block JSON nicht gefunden: ' . $block_json_path);
             return;
         }
 
-        register_block_type($block_json_path);
+        // Register with render callback
+        register_block_type($block_json_path, [
+            'render_callback' => [$this, 'render_block']
+        ]);
+    }
+
+    public function render_block($attributes) {
+        // Delegate to renderer class
+        return Nostr_Calendar_Block_Renderer::render($attributes, '');
     }
 
     public function enqueue_editor_assets() {

@@ -3,9 +3,7 @@
  * Block renderer
  */
 
-namespace Nostr_Calendar_Block;
-
-class Renderer {
+class Nostr_Calendar_Block_Renderer {
     public static function render($attributes, $content) {
         $defaults = [
             'theme' => 'light',

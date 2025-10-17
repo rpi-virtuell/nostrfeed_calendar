@@ -218,6 +218,13 @@
     return words.slice(0, limit).join(' ') + '…';
   };
 
+  const showError = (message) => {
+    if (loaderEl) {
+      loaderEl.innerHTML = `<div style="color: red; padding: 20px; text-align: center;">${message}</div>`;
+    }
+    console.error('[Event Wall Error]', message);
+  };
+
   const buildEvent = (event) => {
     const start = new Date(event.start || event.start || event.begin || event.date);
     const end = new Date(event.end || event.end || event.finish || start);
@@ -270,6 +277,7 @@
     // 1) Versuch: direkte Nostr-Abfrage über nostre-api.js (falls geladen)
     try {
       if (window.NostreAPI && typeof window.NostreAPI.getNostrFeed === 'function') {
+        console.log('[fetchEvents] Versuche Nostr direct fetch mit Optionen:', NOSTR_OPTIONS);
         const { nostrfeed } = await window.NostreAPI.getNostrFeed(NOSTR_OPTIONS);
 
         if (Array.isArray(nostrfeed) && nostrfeed.length > 0) {
@@ -280,15 +288,70 @@
 
           allEvents = list;
           filteredEvents = list.slice();
-          console.log(`Nostr direct fetch: ${list.length} events loaded.`);
+          console.log(`[fetchEvents] ✅ Nostr direct fetch erfolgreich: ${list.length} events geladen.`);
           return; // ✅ fertig, kein Fallback nötig
         }
       }
     } catch (err) {
-      console.warn('Nostr direct fetch fehlgeschlagen:', err);
+      console.warn('[fetchEvents] Nostr direct fetch fehlgeschlagen:', err);
     }
 
-   
+    // 2) Fallback: REST-API
+    console.log('[fetchEvents] Versuche REST-API Fallback...');
+    try {
+      const response = await fetch(endpoint, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('[fetchEvents] REST-API Response:', data);
+
+      // Parse REST response
+      const events = data?.[0]?.nostrfeed || data?.nostrfeed || [];
+      
+      if (!Array.isArray(events)) {
+        console.warn('[fetchEvents] REST-API gab keine Array zurück:', events);
+        allEvents = [];
+        filteredEvents = [];
+        return;
+      }
+
+      if (events.length === 0) {
+        console.log('[fetchEvents] REST-API hatte 0 Events');
+        allEvents = [];
+        filteredEvents = [];
+        return;
+      }
+
+      // Normalize and filter events
+      let list = events
+        .map(normalizeFromNostr)
+        .map(buildEvent);
+
+      // Apply npub filter if specified
+      if (NOSTR_OPTIONS.allowed_npub && NOSTR_OPTIONS.allowed_npub.length > 0) {
+        console.log('[fetchEvents] Filtere nach npub:', NOSTR_OPTIONS.allowed_npub);
+        const allowedLower = NOSTR_OPTIONS.allowed_npub.map(n => String(n).toLowerCase());
+        list = list.filter(e => {
+          const pubkeyLower = String(e.pubkey || '').toLowerCase();
+          return allowedLower.includes(pubkeyLower);
+        });
+      }
+
+      list.sort((a, b) => a.start - b.start);
+
+      allEvents = list;
+      filteredEvents = list.slice();
+      console.log(`[fetchEvents] ✅ REST-API erfolgreich: ${list.length} events geladen (nach Filter).`);
+    } catch (err) {
+      console.error('[fetchEvents] REST-API Fallback fehlgeschlagen:', err);
+      showError('Fehler beim Laden der Termine.');
+    }
   };
 
   // Rendering
