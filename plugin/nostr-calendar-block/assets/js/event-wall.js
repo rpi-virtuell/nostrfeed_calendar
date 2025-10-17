@@ -357,13 +357,23 @@
 
   // Rendering
   const renderEventWall = (list) => {
+    // Null-Checks für DOM-Elemente
+    if (!eventWallEl) {
+      console.warn('[event-wall.js] eventWallEl not found, cannot render events');
+      return;
+    }
+    
     eventWallEl.innerHTML = '';
     if (!list || list.length === 0) {
       eventWallEl.innerHTML = `<div id="no-events">Keine Treffer für die gewählten Filter.</div>`;
-      resultInfoEl.textContent = '0 Treffer';
+      if (resultInfoEl) {
+        resultInfoEl.textContent = '0 Treffer';
+      }
       return;
     }
-    resultInfoEl.textContent = list.length + (list.length === 1 ? ' Treffer' : ' Treffer');
+    if (resultInfoEl) {
+      resultInfoEl.textContent = list.length + (list.length === 1 ? ' Treffer' : ' Treffer');
+    }
     list.forEach(event => {
       const tile = document.createElement('article');
       tile.className = 'event-tile';
@@ -432,7 +442,9 @@
   };
 
   const updateResultInfo = () => {
-    resultInfoEl.textContent = filteredEvents.length + (filteredEvents.length === 1 ? ' Treffer' : ' Treffer');
+    if (resultInfoEl) {
+      resultInfoEl.textContent = filteredEvents.length + (filteredEvents.length === 1 ? ' Treffer' : ' Treffer');
+    }
   };
 
   // Modal
