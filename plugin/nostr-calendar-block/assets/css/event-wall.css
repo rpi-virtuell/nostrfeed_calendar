@@ -87,21 +87,25 @@ h1 { text-align: center; color: var(--color-heading); margin: 0 0 10px 0; }
 
 .nostr-event-wall .filter-row { 
   display: flex !important; 
-  flex-wrap: wrap; 
-  gap: 10px; 
-  align-items: center; 
-  width: 100%;
+  flex-direction: row !important; /* Horizontal anordnen */
+  flex-wrap: wrap !important; 
+  gap: 10px !important; 
+  align-items: center !important; 
+  width: 100% !important;
 }
 
-.field {
+.nostr-event-wall .field {
   position: relative;
-  display: flex;
+  display: flex !important;
+  flex-direction: row !important; /* Label und Input nebeneinander */
   align-items: center;
   gap: 8px;
   background: var(--color-filter-field-bg);
   border: 1px solid var(--color-filter-field-border);
   border-radius: var(--radius-sm);
   padding: 8px 10px;
+  flex: 1 1 auto; /* Wachsen und schrumpfen erlauben */
+  min-width: 200px; /* Mindestbreite für Felder */
 }
 
 #reset-filters { border: 1px solid var(--color-filter-field-border); border-radius: var(--radius-sm); cursor: pointer; background: var(--color-filter-field-bg); }

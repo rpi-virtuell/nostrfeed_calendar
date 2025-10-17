@@ -128,8 +128,10 @@
    * Build wall HTML structure
    */
   function buildWallMarkup(container, options) {
-    const filterbar = options.showFilterbar ? `
-      <section class="filter-toolbar" aria-label="Terminfilter">
+    // Filter-Toolbar ist IMMER im DOM, nur versteckt wenn showFilterbar=false
+    const filterbarStyle = options.showFilterbar ? '' : 'style="display:none"';
+    const filterbar = `
+      <section class="filter-toolbar" aria-label="Terminfilter" ${filterbarStyle}>
         <div class="filter-row">
           <div class="field tagbox" style="flex:1 1 360px;">
             <label for="tag-input">Tags</label>
@@ -155,7 +157,7 @@
           <div id="selected-tags" class="selected-tags" aria-live="polite"></div>
         </div>
       </section>
-    ` : '';
+    `;
 
     container.innerHTML = filterbar + `
       <div id="edu-event-wall" class="nostr-event-wall">
