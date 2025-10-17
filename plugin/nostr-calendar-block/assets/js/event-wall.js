@@ -476,25 +476,39 @@
     pushHash('#id=' + encodeURIComponent(event.ID || event.id || event.url || ''));
     modal.style.display = 'block';
   };
-  closeModalBtn.addEventListener('click', () => {
-    modal.style.display = 'none';
-    const targetHash = lastFilterHash || buildFilterHash();
-    setHashSafely(targetHash);
-    // Apply immediately so results show even if no hashchange fires
-    if (!targetHash || targetHash === '#filter=' || targetHash === '#') {
-      state.selectedTags.clear(); state.searchQuery=''; state.monthKey=''; searchInput.value=''; monthSelect.value='';
-    }
-    applyHashFromLocation() || applyFilters();
-  });
-  window.addEventListener('click', (e) => { if (e.target === modal) { 
-    modal.style.display = 'none';
-    const targetHash = lastFilterHash || buildFilterHash();
-    setHashSafely(targetHash);
-    if (!targetHash || targetHash === '#filter=' || targetHash === '#') {
-      state.selectedTags.clear(); state.searchQuery=''; state.monthKey=''; searchInput.value=''; monthSelect.value='';
-    }
-    applyHashFromLocation() || applyFilters();
-  } });
+  
+  // Bind modal close button (nur wenn vorhanden)
+  if (closeModalBtn) {
+    closeModalBtn.addEventListener('click', () => {
+      modal.style.display = 'none';
+      const targetHash = lastFilterHash || buildFilterHash();
+      setHashSafely(targetHash);
+      // Apply immediately so results show even if no hashchange fires
+      if (!targetHash || targetHash === '#filter=' || targetHash === '#') {
+        state.selectedTags.clear(); state.searchQuery=''; state.monthKey=''; searchInput.value=''; monthSelect.value='';
+      }
+      applyHashFromLocation() || applyFilters();
+    });
+  }
+  
+  // Close modal on backdrop click (nur wenn modal vorhanden)
+  if (modal) {
+    window.addEventListener('click', (e) => { 
+      if (e.target === modal) { 
+        modal.style.display = 'none';
+        const targetHash = lastFilterHash || buildFilterHash();
+        setHashSafely(targetHash);
+        if (!targetHash || targetHash === '#filter=' || targetHash === '#') {
+          state.selectedTags.clear(); 
+          state.searchQuery=''; 
+          state.monthKey=''; 
+          if (searchInput) searchInput.value=''; 
+          if (monthSelect) monthSelect.value='';
+        }
+        applyHashFromLocation() || applyFilters();
+      } 
+    });
+  }
 
   // Filtering
   const applyFilters = () => {
@@ -575,37 +589,40 @@
     
     // Initial render
     renderList();
-    // Use mousedown so the selection fires *before* the input loses focus via blur,
-    // which previously prevented the click handler from firing in some browsers.
-    tagSuggest.addEventListener('mousedown', (e) => {
-      const btn = e.target.closest('button');   // <— reicht
-      if (!btn || !tagSuggest.contains(btn)) return;
-      e.preventDefault(); // verhindert Blur, Auswahl greift sicher
-      const key = btn.getAttribute('data-key');
-      const item = tags.find(x => x.key === key);
-      addTagToState(item?.label || key);
-      tagSuggest.classList.remove('open');
-    });
-
-    // Open/close & filter interactions
-    tagInput.addEventListener('focus', () => tagSuggest.classList.add('open'));
-    tagInput.addEventListener('blur', () => {
-      // small delay so a click can be processed if it happens
-      setTimeout(() => tagSuggest.classList.remove('open'), 120);
-    });
-    tagInput.addEventListener('input', () => {
-      tagSuggest.classList.add('open');
-      renderList(tagInput.value);
-    });
-    tagInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        const val = tagInput.value.trim();
-        if (val) addTagToState(val);
+    
+    // Tag-Input Event-Listener (nur wenn Elemente vorhanden)
+    if (tagSuggest && tagInput) {
+      // Use mousedown so the selection fires *before* the input loses focus via blur,
+      // which previously prevented the click handler from firing in some browsers.
+      tagSuggest.addEventListener('mousedown', (e) => {
+        const btn = e.target.closest('button');   // <— reicht
+        if (!btn || !tagSuggest.contains(btn)) return;
+        e.preventDefault(); // verhindert Blur, Auswahl greift sicher
+        const key = btn.getAttribute('data-key');
+        const item = tags.find(x => x.key === key);
+        addTagToState(item?.label || key);
         tagSuggest.classList.remove('open');
-      }
-    });
-  
+      });
+
+      // Open/close & filter interactions
+      tagInput.addEventListener('focus', () => tagSuggest.classList.add('open'));
+      tagInput.addEventListener('blur', () => {
+        // small delay so a click can be processed if it happens
+        setTimeout(() => tagSuggest.classList.remove('open'), 120);
+      });
+      tagInput.addEventListener('input', () => {
+        tagSuggest.classList.add('open');
+        renderList(tagInput.value);
+      });
+      tagInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const val = tagInput.value.trim();
+          if (val) addTagToState(val);
+          tagSuggest.classList.remove('open');
+        }
+      });
+    }
   };
 
   // Month dropdown
@@ -619,24 +636,32 @@
     });
   };
 
-  // Wire up filter inputs
-  searchInput.addEventListener('input', () => {
-    state.searchQuery = searchInput.value;
-    applyFilters();
-  });
-  monthSelect.addEventListener('change', () => {
-    state.monthKey = monthSelect.value;
-    applyFilters();
-  });
-  resetBtn.addEventListener('click', () => {
-    state.selectedTags.clear();
-    state.searchQuery = '';
-    state.monthKey = '';
-    searchInput.value = '';
-    monthSelect.value = '';
-    tagInput.value = '';
-    applyFilters();
-  });
+  // Wire up filter inputs (nur wenn Elemente vorhanden)
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      state.searchQuery = searchInput.value;
+      applyFilters();
+    });
+  }
+  
+  if (monthSelect) {
+    monthSelect.addEventListener('change', () => {
+      state.monthKey = monthSelect.value;
+      applyFilters();
+    });
+  }
+  
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      state.selectedTags.clear();
+      state.searchQuery = '';
+      state.monthKey = '';
+      if (searchInput) searchInput.value = '';
+      if (monthSelect) monthSelect.value = '';
+      if (tagInput) tagInput.value = '';
+      applyFilters();
+    });
+  }
 
   // INIT
   const init = async () => {
