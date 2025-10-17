@@ -22,7 +22,8 @@
   const THEME_OPTIONS = [
     { label: 'Hell (Light)', value: 'light' },
     { label: 'Dunkel (Dark)', value: 'dark' },
-    { label: 'ReliLab', value: 'relilab' }
+    { label: 'ReliLab', value: 'relilab' },
+    { label: 'Foerbico', value: 'foerbico' }
   ];
 
   registerBlockType('nostr-calendar/event-wall', {

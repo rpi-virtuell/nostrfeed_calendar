@@ -104,6 +104,20 @@ class Nostr_Calendar_Block {
             NOSTR_CALENDAR_BLOCK_VERSION
         );
 
+        // Load theme-specific CSS if themes exist
+        $themes = ['light', 'dark', 'relilab', 'foerbico'];
+        foreach ($themes as $theme) {
+            $theme_file = NOSTR_CALENDAR_BLOCK_PATH . 'assets/css/themes/' . $theme . '.css';
+            if (file_exists($theme_file)) {
+                wp_enqueue_style(
+                    'nostr-calendar-block-theme-' . $theme,
+                    NOSTR_CALENDAR_BLOCK_URL . 'assets/css/themes/' . $theme . '.css',
+                    ['nostr-calendar-block-style'],
+                    NOSTR_CALENDAR_BLOCK_VERSION
+                );
+            }
+        }
+
         // Load Nostr API script first (required by embed-wall.js)
         wp_enqueue_script(
             'nostre-api',
