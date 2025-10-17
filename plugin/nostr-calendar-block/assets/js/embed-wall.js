@@ -67,6 +67,13 @@
   function initializeWall(container, index) {
     console.log('[embed-wall.js] Initializing wall container', index, container);
     
+    // Verhindere Doppel-Initialisierung
+    if (container.hasAttribute('data-initialized')) {
+      console.log('[embed-wall.js] Container already initialized, skipping');
+      return;
+    }
+    container.setAttribute('data-initialized', 'true');
+    
     const ds = container.dataset || {};
 
     // Parse theme

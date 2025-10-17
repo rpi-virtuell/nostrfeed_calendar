@@ -73,18 +73,25 @@ h1 { text-align: center; color: var(--color-heading); margin: 0 0 10px 0; }
 .subhead { text-align: center; color: var(--color-muted); margin: 0 0 20px 0; font-size: .95rem; }
 
 /* ===== Filter Toolbar ===== */
-.filter-toolbar {
-  max-width: 1600px;
-  margin: 0 auto 24px auto;
+.nostr-event-wall .filter-toolbar {
+  max-width: 1600px !important;
+  margin: 0 auto 24px auto !important;
   background: var(--color-filter-bg);
   border-radius: var(--radius-lg);
   box-shadow: var(--tile-shadow);
   padding: 12px;
-  display: grid;
+  display: block !important; /* Überschreibe Theme-Grid */
+  width: 100% !important;
   gap: 10px;
 }
 
-.filter-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.nostr-event-wall .filter-row { 
+  display: flex !important; 
+  flex-wrap: wrap; 
+  gap: 10px; 
+  align-items: center; 
+  width: 100%;
+}
 
 .field {
   position: relative;
