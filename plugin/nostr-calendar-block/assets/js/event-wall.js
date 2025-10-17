@@ -564,8 +564,13 @@
 
   // Tag suggest dropdown
   const buildTagSuggest = () => {
+    // Nur wenn tagSuggest Element vorhanden ist
+    if (!tagSuggest) return;
+    
     const tags = getAllTagsWithCounts(allEvents);
     const renderList = (filter='') => {
+      if (!tagSuggest) return; // Zusätzlicher Schutz
+      
       const f = filter.trim().toLowerCase();
       const out = (f
         ? tags.filter(t => t.label.toLowerCase().includes(f) || t.key.includes(f))
@@ -591,7 +596,7 @@
     renderList();
     
     // Tag-Input Event-Listener (nur wenn Elemente vorhanden)
-    if (tagSuggest && tagInput) {
+    if (tagInput) {
       // Use mousedown so the selection fires *before* the input loses focus via blur,
       // which previously prevented the click handler from firing in some browsers.
       tagSuggest.addEventListener('mousedown', (e) => {
