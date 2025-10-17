@@ -85,6 +85,11 @@ h1 { text-align: center; color: var(--color-heading); margin: 0 0 10px 0; }
   gap: 10px;
 }
 
+/* Versteckte Filter-Toolbar */
+.nostr-event-wall .filter-toolbar.hidden {
+  display: none !important;
+}
+
 .nostr-event-wall .filter-row { 
   display: flex !important; 
   flex-direction: row !important; /* Horizontal anordnen */
@@ -140,13 +145,24 @@ h1 { text-align: center; color: var(--color-heading); margin: 0 0 10px 0; }
 .suggest .count { color: #6b7280; font-size: .8rem; }
 
 /* ===== Grid ===== */
-#edu-event-wall, .nostr-event-wall {
+#edu-event-wall {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 30px;
-  max-width: 1600px;
+  max-width: 100%;
+  width: 100%;
   margin: 0 auto;
   align-items: stretch;
+  box-sizing: border-box;
+}
+
+/* Äußerer Container */
+.nostr-event-wall {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 0 20px;
+  box-sizing: border-box;
+  overflow: hidden; /* Verhindert horizontales Scrollen */
 }
 
 #loader, #no-events { text-align: center; padding: 40px; font-size: 1.2em; grid-column: 1 / -1; }

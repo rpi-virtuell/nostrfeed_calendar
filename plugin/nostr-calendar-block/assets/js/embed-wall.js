@@ -129,9 +129,9 @@
    */
   function buildWallMarkup(container, options) {
     // Filter-Toolbar ist IMMER im DOM, nur versteckt wenn showFilterbar=false
-    const filterbarStyle = options.showFilterbar ? '' : 'style="display:none"';
+    const filterbarClass = options.showFilterbar ? 'filter-toolbar' : 'filter-toolbar hidden';
     const filterbar = `
-      <section class="filter-toolbar" aria-label="Terminfilter" ${filterbarStyle}>
+      <section class="${filterbarClass}" aria-label="Terminfilter">
         <div class="filter-row">
           <div class="field tagbox" style="flex:1 1 360px;">
             <label for="tag-input">Tags</label>
