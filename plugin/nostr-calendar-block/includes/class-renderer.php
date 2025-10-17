@@ -5,6 +5,9 @@
 
 class Nostr_Calendar_Block_Renderer {
     public static function render($attributes, $content) {
+        error_log('[Nostr Calendar Renderer] render() called');
+        error_log('[Nostr Calendar Renderer] Attributes: ' . print_r($attributes, true));
+        
         $defaults = [
             'theme' => 'light',
             'showFilterbar' => true,
@@ -56,6 +59,8 @@ class Nostr_Calendar_Block_Renderer {
             '<div id="nostr-event-wall" class="nostr-event-wall" %s></div>',
             $attrs_str
         );
+
+        error_log('[Nostr Calendar Renderer] Output HTML: ' . $output);
 
         return $output;
     }

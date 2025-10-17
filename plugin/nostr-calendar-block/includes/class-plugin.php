@@ -39,19 +39,33 @@ class Nostr_Calendar_Block {
         $block_json_path = NOSTR_CALENDAR_BLOCK_DIR . 'src/blocks/event-wall/block.json';
         
         if (!file_exists($block_json_path)) {
-            error_log('Block JSON nicht gefunden: ' . $block_json_path);
+            error_log('[Nostr Calendar Block] Block JSON nicht gefunden: ' . $block_json_path);
             return;
         }
 
+        error_log('[Nostr Calendar Block] Registering block from: ' . $block_json_path);
+
         // Register with render callback
-        register_block_type($block_json_path, [
+        $registered = register_block_type($block_json_path, [
             'render_callback' => [$this, 'render_block']
         ]);
+
+        if ($registered) {
+            error_log('[Nostr Calendar Block] Block registered successfully: ' . $registered->name);
+        } else {
+            error_log('[Nostr Calendar Block] Block registration failed!');
+        }
     }
 
-    public function render_block($attributes) {
+    public function render_block($attributes, $content = '', $block = null) {
+        error_log('[Nostr Calendar Block] render_block called with attributes: ' . print_r($attributes, true));
+        
         // Delegate to renderer class
-        return Nostr_Calendar_Block_Renderer::render($attributes, '');
+        $output = Nostr_Calendar_Block_Renderer::render($attributes, $content);
+        
+        error_log('[Nostr Calendar Block] render_block output length: ' . strlen($output));
+        
+        return $output;
     }
 
     public function enqueue_editor_assets() {
