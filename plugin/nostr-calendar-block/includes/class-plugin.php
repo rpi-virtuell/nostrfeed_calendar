@@ -90,18 +90,30 @@ class Nostr_Calendar_Block {
             NOSTR_CALENDAR_BLOCK_VERSION
         );
 
-        // Load frontend script
+        // Load Nostr API script first (required by embed-wall.js)
         wp_enqueue_script(
-            'nostr-calendar-block-frontend',
-            NOSTR_CALENDAR_BLOCK_URL . 'assets/js/event-wall.js',
+            'nostre-api',
+            NOSTR_CALENDAR_BLOCK_URL . 'assets/js/nostre-api.js',
             [],
             NOSTR_CALENDAR_BLOCK_VERSION,
             true
         );
 
-        // Frontend script localization
+        // Load embed-wall.js (creates HTML structure and loads event-wall.js)
+        wp_enqueue_script(
+            'nostr-calendar-block-embed',
+            NOSTR_CALENDAR_BLOCK_URL . 'assets/js/embed-wall.js',
+            ['nostre-api'],
+            NOSTR_CALENDAR_BLOCK_VERSION,
+            true
+        );
+
+        // Note: event-wall.js wird von embed-wall.js dynamisch geladen
+        // nachdem die HTML-Struktur erstellt wurde
+
+        // Frontend script localization (für Kompatibilität)
         wp_localize_script(
-            'nostr-calendar-block-frontend',
+            'nostr-calendar-block-embed',
             'nostrCalendarBlockData',
             [
                 'apiEndpoint' => 'https://n8n.rpi-virtuell.de/webhook/nostre_termine',
