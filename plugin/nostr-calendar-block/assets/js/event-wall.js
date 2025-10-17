@@ -355,6 +355,10 @@
     }
   };
 
+  // i18n helper
+  const i18n = (window.nostrCalendarBlockData && window.nostrCalendarBlockData.i18n) || {};
+  const t = (key, fallback) => i18n[key] || fallback;
+
   // Rendering
   const renderEventWall = (list) => {
     // Null-Checks für DOM-Elemente
@@ -365,14 +369,14 @@
     
     eventWallEl.innerHTML = '';
     if (!list || list.length === 0) {
-      eventWallEl.innerHTML = `<div id="no-events">Keine Treffer für die gewählten Filter.</div>`;
+      eventWallEl.innerHTML = `<div id="no-events">${t('noResults', 'Keine Treffer für die gewählten Filter.')}</div>`;
       if (resultInfoEl) {
-        resultInfoEl.textContent = '0 Treffer';
+        resultInfoEl.textContent = `0 ${t('results', 'Treffer')}`;
       }
       return;
     }
     if (resultInfoEl) {
-      resultInfoEl.textContent = list.length + (list.length === 1 ? ' Treffer' : ' Treffer');
+      resultInfoEl.textContent = `${list.length} ${t('results', 'Treffer')}`;
     }
     list.forEach(event => {
       const tile = document.createElement('article');
@@ -443,29 +447,34 @@
 
   const updateResultInfo = () => {
     if (resultInfoEl) {
-      resultInfoEl.textContent = filteredEvents.length + (filteredEvents.length === 1 ? ' Treffer' : ' Treffer');
+      const i18n = (window.nostrCalendarBlockData && window.nostrCalendarBlockData.i18n) || {};
+      const t = (key, fallback) => i18n[key] || fallback;
+      resultInfoEl.textContent = `${filteredEvents.length} ${t('results', 'Treffer')}`;
     }
   };
 
   // Modal
   const showEventModal = (event) => {
+    const i18n = (window.nostrCalendarBlockData && window.nostrCalendarBlockData.i18n) || {};
+    const t = (key, fallback) => i18n[key] || fallback;
+    
     const modalImageContainer = document.getElementById('modal-image-container');
     modalImageContainer.innerHTML = '';
     if (event.image) {
       const img = document.createElement('img');
       img.src = event.image;
-      img.alt = `Bild für ${event.title}`;
+      img.alt = `${t('imageAlt', 'Bild für')} ${event.title}`;
       modalImageContainer.appendChild(img);
       modalImageContainer.style.display = 'block';
     } else {
       modalImageContainer.style.display = 'none';
     }
     document.getElementById('modal-title').textContent = event.title;
-    document.getElementById('modal-summary').textContent = toPlainText(event.summary) || 'Keine Zusammenfassung vorhanden.';
+    document.getElementById('modal-summary').textContent = toPlainText(event.summary) || t('noSummary', 'Keine Zusammenfassung vorhanden.');
     document.getElementById('modal-location').innerHTML =
       event.location && event.location.startsWith('http')
         ? `<a href="${event.location}" target="_blank" rel="noopener noreferrer">${event.location}</a>`
-        : (event.location || 'Kein Ort angegeben.');
+        : (event.location || t('noLocation', 'Kein Ort angegeben.'));
     document.getElementById('modal-date').textContent = formatEventTimeSpan(event.start, event.end);
 
     const tagsContainer = document.getElementById('modal-tags');
@@ -474,13 +483,13 @@
       event.tagsArr.forEach(tag => {
         const b = document.createElement('button');
         b.textContent = tag;
-        b.title = 'Nach Tag filtern';
+        b.title = t('filterByTag', 'Nach Tag filtern');
         b.addEventListener('click', (e) => { e.stopPropagation(); addTagToState(tag); });
         tagsContainer.appendChild(b);
       });
     } else {
       const span = document.createElement('span');
-      span.textContent = 'Keine';
+      span.textContent = t('noTags', 'Keine');
       tagsContainer.appendChild(span);
     }
     document.getElementById('modal-content-html').innerHTML = event.content || '';

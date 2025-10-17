@@ -128,30 +128,34 @@
    * Build wall HTML structure
    */
   function buildWallMarkup(container, options) {
+    // i18n strings
+    const i18n = (window.nostrCalendarBlockData && window.nostrCalendarBlockData.i18n) || {};
+    const t = (key, fallback) => i18n[key] || fallback;
+
     // Filter-Toolbar ist IMMER im DOM, nur versteckt wenn showFilterbar=false
     const filterbarClass = options.showFilterbar ? 'filter-toolbar' : 'filter-toolbar hidden';
     const filterbar = `
-      <section class="${filterbarClass}" aria-label="Terminfilter">
+      <section class="${filterbarClass}" aria-label="${t('tags', 'Tags')}">
         <div class="filter-row">
           <div class="field tagbox" style="flex:1 1 360px;">
-            <label for="tag-input">Tags</label>
+            <label for="tag-input">${t('tags', 'Tags')}</label>
             <input id="tag-input" class="tag-input" type="text"
-              placeholder="Tag suchen & Enter zum Hinzufügen"
+              placeholder="${t('tagPlaceholder', 'Tag suchen & Enter zum Hinzufügen')}"
               autocomplete="off" />
-            <div id="tag-suggest" class="suggest" role="listbox" aria-label="Tag-Vorschläge"></div>
+            <div id="tag-suggest" class="suggest" role="listbox" aria-label="${t('tags', 'Tags')}"></div>
           </div>
           <div class="field" style="flex:1 1 280px;">
-            <label for="search-input">Suche</label>
-            <input id="search-input" type="text" placeholder="Titel & Tags durchsuchen …" />
+            <label for="search-input">${t('search', 'Suche')}</label>
+            <input id="search-input" type="text" placeholder="${t('searchPlaceholder', 'Titel & Tags durchsuchen …')}" />
           </div>
           <div class="field" style="flex:0 0 220px;">
-            <label for="month-select">Monat</label>
-            <select id="month-select" aria-label="Monat wählen">
-              <option value="">Alle Monate</option>
+            <label for="month-select">${t('month', 'Monat')}</label>
+            <select id="month-select" aria-label="${t('month', 'Monat')}">
+              <option value="">${t('allMonths', 'Alle Monate')}</option>
             </select>
           </div>
-          <button id="reset-filters" class="btn ghost" title="Alle Filter zurücksetzen">Zurücksetzen</button>
-          <div class="result-info" id="result-info">0 Treffer</div>
+          <button id="reset-filters" class="btn ghost" title="${t('reset', 'Zurücksetzen')}">${t('reset', 'Zurücksetzen')}</button>
+          <div class="result-info" id="result-info">0 ${t('results', 'Treffer')}</div>
         </div>
         <div class="filter-row">
           <div id="selected-tags" class="selected-tags" aria-live="polite"></div>
@@ -161,19 +165,19 @@
 
     container.innerHTML = filterbar + `
       <div id="edu-event-wall" class="nostr-event-wall">
-        <div id="loader">Lade Termine...</div>
+        <div id="loader">${t('loading', 'Lade Termine...')}</div>
       </div>
 
       <div id="event-modal" class="modal" aria-modal="true" role="dialog" aria-labelledby="modal-title">
         <div class="modal-content">
-          <button id="close-modal" class="close-button" aria-label="Schließen">×</button>
+          <button id="close-modal" class="close-button" aria-label="${t('close', 'Schließen')}">×</button>
           <div id="modal-image-container"></div>
           <h2 id="modal-title"></h2>
           <p id="modal-date"></p>
           <div id="modal-details">
-            <p><strong>Zusammenfassung:</strong> <span id="modal-summary"></span></p>
-            <p><strong>Ort:</strong> <span id="modal-location"></span></p>
-            <p><strong>Tags:</strong> <span id="modal-tags"></span></p>
+            <p><strong>${t('summary', 'Zusammenfassung:')}:</strong> <span id="modal-summary"></span></p>
+            <p><strong>${t('location', 'Ort:')}:</strong> <span id="modal-location"></span></p>
+            <p><strong>${t('tags', 'Tags')}:</strong> <span id="modal-tags"></span></p>
           </div>
           <div id="modal-content-html"></div>
         </div>

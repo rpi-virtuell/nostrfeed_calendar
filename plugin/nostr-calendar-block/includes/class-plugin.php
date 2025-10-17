@@ -125,13 +125,33 @@ class Nostr_Calendar_Block {
         // Note: event-wall.js wird von embed-wall.js dynamisch geladen
         // nachdem die HTML-Struktur erstellt wurde
 
-        // Frontend script localization (für Kompatibilität)
+        // Frontend script localization (i18n strings + config)
         wp_localize_script(
             'nostr-calendar-block-embed',
             'nostrCalendarBlockData',
             [
                 'apiEndpoint' => 'https://n8n.rpi-virtuell.de/webhook/nostre_termine',
                 'ajaxUrl' => admin_url('admin-ajax.php'),
+                'i18n' => [
+                    'tags' => __('Tags', 'nostr-calendar-block'),
+                    'search' => __('Suche', 'nostr-calendar-block'),
+                    'month' => __('Monat', 'nostr-calendar-block'),
+                    'allMonths' => __('Alle Monate', 'nostr-calendar-block'),
+                    'reset' => __('Zurücksetzen', 'nostr-calendar-block'),
+                    'results' => __('Treffer', 'nostr-calendar-block'),
+                    'loading' => __('Lade Termine...', 'nostr-calendar-block'),
+                    'noResults' => __('Keine Treffer für die gewählten Filter.', 'nostr-calendar-block'),
+                    'tagPlaceholder' => __('Tag suchen & Enter zum Hinzufügen', 'nostr-calendar-block'),
+                    'searchPlaceholder' => __('Titel & Tags durchsuchen …', 'nostr-calendar-block'),
+                    'close' => __('Schließen', 'nostr-calendar-block'),
+                    'summary' => __('Zusammenfassung:', 'nostr-calendar-block'),
+                    'location' => __('Ort:', 'nostr-calendar-block'),
+                    'noSummary' => __('Keine Zusammenfassung vorhanden.', 'nostr-calendar-block'),
+                    'noLocation' => __('Kein Ort angegeben.', 'nostr-calendar-block'),
+                    'noTags' => __('Keine', 'nostr-calendar-block'),
+                    'filterByTag' => __('Nach Tag filtern', 'nostr-calendar-block'),
+                    'imageAlt' => __('Bild für', 'nostr-calendar-block'),
+                ]
             ]
         );
     }
