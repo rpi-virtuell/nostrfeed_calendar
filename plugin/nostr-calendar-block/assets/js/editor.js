@@ -219,6 +219,29 @@
       );
     },
 
-    save: () => null  // Dynamic rendering via PHP
+    save: function(props) {
+      const { attributes } = props;
+      const blockProps = wp.blockEditor.useBlockProps.save();
+
+      // Build data attributes
+      const dataAttrs = {
+        'data-theme': attributes.theme || 'light',
+        'data-show-filterbar': attributes.showFilterbar !== false ? 'true' : 'false',
+        'data-relays': (attributes.relays || ['wss://relay-rpi.edufeed.org/']).join(','),
+        'data-npub': (attributes.npub || ['npub12j35qpeve33929kg64etvw9g9rzms4c8g5gnqta58yhjdc6wryfse3phmu']).join(','),
+        'data-limit': attributes.limit || 1000
+      };
+
+      if (attributes.filter) {
+        dataAttrs['data-filter'] = attributes.filter;
+      }
+
+      return el('div', {
+        ...blockProps,
+        id: 'nostr-event-wall',
+        className: 'nostr-event-wall',
+        ...dataAttrs
+      });
+    }
   });
 })();
