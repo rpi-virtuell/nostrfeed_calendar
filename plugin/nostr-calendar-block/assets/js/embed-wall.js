@@ -3,9 +3,7 @@
  * Findet alle .nostr-event-wall Container und initialisiert sie.
  */
 (function() {
-  // Re-entry guard
-  if (window.__NOSTR_CALENDAR_INIT__) return;
-  window.__NOSTR_CALENDAR_INIT__ = true;
+  console.log('[embed-wall.js] Script loaded and executing');
 
   // Helper: loadJS
   const loadJS = (src) => new Promise((res, rej) => {
@@ -35,15 +33,26 @@
 
   // Initialize on DOM ready
   document.addEventListener('DOMContentLoaded', async () => {
+    console.log('[embed-wall.js] DOMContentLoaded event fired');
+    
     const wallContainers = document.querySelectorAll('.nostr-event-wall');
+    console.log('[embed-wall.js] Found containers:', wallContainers.length);
 
-    if (wallContainers.length === 0) return;
+    if (wallContainers.length === 0) {
+      console.warn('[embed-wall.js] No .nostr-event-wall containers found!');
+      return;
+    }
 
-    // Load core API
-    try {
-      await loadJS(assetsBase + 'js/nostre-api.js');
-    } catch (err) {
-      console.warn('Failed to load Nostr API:', err);
+    // Load core API (nur wenn noch nicht geladen)
+    if (!window.NostreAPI) {
+      console.log('[embed-wall.js] Loading nostre-api.js...');
+      try {
+        await loadJS(assetsBase + 'js/nostre-api.js');
+      } catch (err) {
+        console.warn('[embed-wall.js] Failed to load Nostr API:', err);
+      }
+    } else {
+      console.log('[embed-wall.js] NostreAPI already loaded');
     }
 
     // Process each wall container
@@ -56,6 +65,8 @@
    * Initialize a single event wall
    */
   function initializeWall(container, index) {
+    console.log('[embed-wall.js] Initializing wall container', index, container);
+    
     const ds = container.dataset || {};
 
     // Parse theme
@@ -75,7 +86,9 @@
     console.log('[embed-wall.js] Raw dataset:', ds);
 
     // Build wall markup
+    console.log('[embed-wall.js] Building wall markup...');
     buildWallMarkup(container, { showFilterbar });
+    console.log('[embed-wall.js] Wall markup created');
 
     // Set global options for event-wall.js
     window.NOSTR_OPTIONS = {
@@ -86,6 +99,7 @@
 
     // Load theme CSS if not default
     if (theme && theme !== 'light') {
+      console.log('[embed-wall.js] Loading theme CSS:', theme);
       const themeLink = document.createElement('link');
       themeLink.rel = 'stylesheet';
       themeLink.href = assetsBase + 'css/themes/' + theme + '.css';
@@ -93,8 +107,13 @@
     }
 
     // Load main wall script
-    loadJS(assetsBase + 'js/event-wall.js').catch(err => {
-      console.error('Failed to load event-wall.js:', err);
+    console.log('[embed-wall.js] Loading event-wall.js...');
+    loadJS(assetsBase + 'js/event-wall.js')
+      .then(() => {
+        console.log('[embed-wall.js] event-wall.js loaded successfully');
+      })
+      .catch(err => {
+        console.error('[embed-wall.js] Failed to load event-wall.js:', err);
     });
   }
 
