@@ -9,9 +9,9 @@ class Nostr_Calendar_Block_Renderer {
             'theme' => 'light',
             'showFilterbar' => true,
             'filter' => '',
-            'relays' => [],
+            'relays' => ['wss://relay-rpi.edufeed.org/'],
             'limit' => 1000,
-            'npub' => [],
+            'npub' => ['npub12j35qpeve33929kg64etvw9g9rzms4c8g5gnqta58yhjdc6wryfse3phmu'],
         ];
 
         $attributes = wp_parse_args($attributes, $defaults);

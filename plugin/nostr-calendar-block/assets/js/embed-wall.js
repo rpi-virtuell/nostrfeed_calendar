@@ -65,13 +65,14 @@
 
     // Parse attributes
     const parseList = (val) => (val ? val.split(/[,\s]+/).map(s => s.trim()).filter(Boolean) : []);
-    const relays = parseList(ds.relays) || ['wss://relilab.nostr1.com'];
-    const npub = parseList(ds.npub) || [];
+    const relays = parseList(ds.relays) || ['wss://relay-rpi.edufeed.org/'];
+    const npub = parseList(ds.npub) || ['npub12j35qpeve33929kg64etvw9g9rzms4c8g5gnqta58yhjdc6wryfse3phmu'];
     const limit = parseInt(ds.limit) || 1000;
     const filter = ds.filter || '';
     const showFilterbar = (ds.showFilterbar || 'true').toLowerCase() !== 'false';
 
-    console.log('[Nostr Calendar Block]', { theme, relays, npub, limit, filter, showFilterbar });
+    console.log('[embed-wall.js] Parsed attributes:', { theme, relays, npub, limit, filter, showFilterbar });
+    console.log('[embed-wall.js] Raw dataset:', ds);
 
     // Build wall markup
     buildWallMarkup(container, { showFilterbar });

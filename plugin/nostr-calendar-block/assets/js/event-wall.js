@@ -9,13 +9,14 @@
   // Nostr-Direct Options (werden nur genutzt, wenn window.NostreAPI vorhanden ist)
   // Merge externe Optionen (von embed-wall.js via window.NOSTR_OPTIONS) mit Defaults
   const NOSTR_OPTIONS = Object.assign({
-    relays: undefined,
-    allowed_npub: undefined,
+    relays: ['wss://relay-rpi.edufeed.org/'],
+    allowed_npub: ['npub12j35qpeve33929kg64etvw9g9rzms4c8g5gnqta58yhjdc6wryfse3phmu'],
     sinceDays: 365,
     limit: 1000,
     timeoutMs: 8000,
   }, (window.NOSTR_OPTIONS || {}));
-  console.debug('[NOSTR_OPTIONS]', NOSTR_OPTIONS);
+  console.log('[event-wall.js] NOSTR_OPTIONS merged:', JSON.stringify(NOSTR_OPTIONS, null, 2));
+  console.log('[event-wall.js] window.NOSTR_OPTIONS:', window.NOSTR_OPTIONS);
   const endpoint = 'https://n8n.rpi-virtuell.de/webhook/nostre_termine';
 
   // === CONFIG ===

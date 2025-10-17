@@ -53,11 +53,11 @@
       },
       relays: {
         type: 'array',
-        default: []
+        default: ['wss://relay-rpi.edufeed.org/']
       },
       npub: {
         type: 'array',
-        default: []
+        default: ['npub12j35qpeve33929kg64etvw9g9rzms4c8g5gnqta58yhjdc6wryfse3phmu']
       },
       limit: {
         type: 'number',
