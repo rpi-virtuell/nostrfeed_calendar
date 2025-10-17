@@ -1,0 +1,39 @@
+/* Editor Preview Styles */
+.nostr-event-wall-preview {
+  background: #f5f5f5;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.preview-icon {
+  font-size: 32px;
+}
+
+.preview-info {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #666;
+}
+
+.preview-info p {
+  margin: 5px 0;
+}
+
+.preview-info strong {
+  color: #333;
+}
