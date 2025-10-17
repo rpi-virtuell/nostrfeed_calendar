@@ -3,9 +3,7 @@
  * Main plugin class
  */
 
-namespace Nostr_Calendar_Block;
-
-class Plugin {
+class Nostr_Calendar_Block {
     private static $instance;
 
     public static function get_instance() {
@@ -16,19 +14,8 @@ class Plugin {
     }
 
     private function __construct() {
-        $this->setup_hooks();
         $this->load_dependencies();
-    }
-
-    private function setup_hooks() {
-        // Register block
-        add_action('init', [$this, 'register_block']);
-        
-        // Enqueue frontend assets
-        add_action('wp_enqueue_scripts', [$this, 'enqueue_frontend_assets']);
-        
-        // Enqueue editor assets
-        add_action('enqueue_block_editor_assets', [$this, 'enqueue_editor_assets']);
+        $this->setup_hooks();
     }
 
     private function load_dependencies() {
@@ -36,23 +23,56 @@ class Plugin {
         require_once NOSTR_CALENDAR_BLOCK_DIR . 'includes/class-renderer.php';
     }
 
-    public function register_block() {
-        // Register block type with block.json
-        register_block_type(
-            NOSTR_CALENDAR_BLOCK_DIR . 'src/blocks/event-wall',
-            [
-                'render_callback' => [$this, 'render_block'],
-                'script' => 'nostr-calendar-block-editor',
-                'style' => 'nostr-calendar-block-style',
-            ]
-        );
+    private function setup_hooks() {
+        // Register block at init priority 5
+        add_action('init', [$this, 'register_block'], 5);
+
+        // Enqueue editor assets in block editor
+        add_action('enqueue_block_editor_assets', [$this, 'enqueue_editor_assets']);
+
+        // Enqueue frontend styles and scripts
+        add_action('wp_enqueue_scripts', [$this, 'enqueue_frontend_assets']);
     }
 
-    public function render_block($attributes, $content) {
-        return Renderer::render($attributes, $content);
+    public function register_block() {
+        // Register block type from block.json
+        $block_json_path = NOSTR_CALENDAR_BLOCK_DIR . 'src/blocks/event-wall/block.json';
+        
+        if (!file_exists($block_json_path)) {
+            return;
+        }
+
+        register_block_type($block_json_path);
+    }
+
+    public function enqueue_editor_assets() {
+        // Editor specific assets - only in block editor
+        wp_enqueue_style(
+            'nostr-calendar-block-editor',
+            NOSTR_CALENDAR_BLOCK_URL . 'assets/css/editor.css',
+            [],
+            NOSTR_CALENDAR_BLOCK_VERSION
+        );
+
+        // Register and enqueue editor script
+        wp_enqueue_script(
+            'nostr-calendar-block-editor',
+            NOSTR_CALENDAR_BLOCK_URL . 'assets/js/editor.js',
+            ['wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-i18n'],
+            NOSTR_CALENDAR_BLOCK_VERSION,
+            false  // Load in head for proper registration
+        );
+
+        // Localize for translations
+        wp_set_script_translations('nostr-calendar-block-editor', 'nostr-calendar-block');
     }
 
     public function enqueue_frontend_assets() {
+        // Only load on frontend (not in editor)
+        if (is_admin()) {
+            return;
+        }
+
         // Load theme CSS
         wp_enqueue_style(
             'nostr-calendar-block-style',
@@ -61,36 +81,23 @@ class Plugin {
             NOSTR_CALENDAR_BLOCK_VERSION
         );
 
-        // Load embed script
+        // Load frontend script
         wp_enqueue_script(
-            'nostr-calendar-embed',
-            NOSTR_CALENDAR_BLOCK_URL . 'assets/js/embed-wall.js',
+            'nostr-calendar-block-frontend',
+            NOSTR_CALENDAR_BLOCK_URL . 'assets/js/event-wall.js',
             [],
             NOSTR_CALENDAR_BLOCK_VERSION,
             true
         );
-    }
 
-    public function enqueue_editor_assets() {
-        // Editor specific assets
-        wp_enqueue_script(
-            'nostr-calendar-block-editor',
-            NOSTR_CALENDAR_BLOCK_URL . 'assets/js/editor.js',
-            ['wp-blocks', 'wp-element', 'wp-editor', 'wp-components', 'wp-i18n'],
-            NOSTR_CALENDAR_BLOCK_VERSION,
-            true
+        // Frontend script localization
+        wp_localize_script(
+            'nostr-calendar-block-frontend',
+            'nostrCalendarBlockData',
+            [
+                'apiEndpoint' => 'https://n8n.rpi-virtuell.de/webhook/nostre_termine',
+                'ajaxUrl' => admin_url('admin-ajax.php'),
+            ]
         );
-
-        wp_enqueue_style(
-            'nostr-calendar-block-editor',
-            NOSTR_CALENDAR_BLOCK_URL . 'assets/css/editor.css',
-            [],
-            NOSTR_CALENDAR_BLOCK_VERSION
-        );
-
-        wp_localize_script('nostr-calendar-block-editor', 'nostrCalendarSettings', [
-            'defaultTheme' => 'light',
-            'availableThemes' => ['light', 'dark', 'relilab'],
-        ]);
     }
 }

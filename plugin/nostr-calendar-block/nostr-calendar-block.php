@@ -24,9 +24,8 @@ define('NOSTR_CALENDAR_BLOCK_VERSION', '1.0.0');
 // Load plugin files
 require_once NOSTR_CALENDAR_BLOCK_DIR . 'includes/class-plugin.php';
 
-// Initialize plugin
+// Initialize plugin on 'init' hook for proper block registration
 function nostr_calendar_block_init() {
-    return Nostr_Calendar_Block\Plugin::get_instance();
+    Nostr_Calendar_Block::get_instance();
 }
-
-add_action('plugins_loaded', 'nostr_calendar_block_init');
+add_action('init', 'nostr_calendar_block_init', 5);

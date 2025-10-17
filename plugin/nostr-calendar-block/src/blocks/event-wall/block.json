@@ -54,8 +54,5 @@
       "minimum": 1,
       "maximum": 10000
     }
-  },
-  "editorScript": "file:../../../assets/js/editor.js",
-  "editorStyle": "file:../../../assets/css/editor.css",
-  "style": "file:../../../assets/css/event-wall.css"
+  }
 }
