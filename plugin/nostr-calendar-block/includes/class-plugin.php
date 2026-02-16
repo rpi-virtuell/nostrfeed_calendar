@@ -19,57 +19,41 @@ class Nostr_Calendar_Block {
     }
 
     private function load_dependencies() {
-        // Load renderer
         require_once NOSTR_CALENDAR_BLOCK_DIR . 'includes/class-renderer.php';
     }
 
     private function setup_hooks() {
-        // Register block at init priority 5
         add_action('init', [$this, 'register_block'], 5);
-
-        // Enqueue editor assets in block editor
+        add_action('init', [$this, 'load_textdomain']);
         add_action('enqueue_block_editor_assets', [$this, 'enqueue_editor_assets']);
-
-        // Enqueue frontend styles and scripts
         add_action('wp_enqueue_scripts', [$this, 'enqueue_frontend_assets']);
     }
 
+    public function load_textdomain() {
+        load_plugin_textdomain(
+            'nostr-calendar-block',
+            false,
+            dirname(plugin_basename(NOSTR_CALENDAR_BLOCK_DIR . 'nostr-calendar-block.php')) . '/languages'
+        );
+    }
+
     public function register_block() {
-        // Register block type from block.json
         $block_json_path = NOSTR_CALENDAR_BLOCK_DIR . 'src/blocks/event-wall/block.json';
-        
+
         if (!file_exists($block_json_path)) {
-            error_log('[Nostr Calendar Block] Block JSON nicht gefunden: ' . $block_json_path);
             return;
         }
 
-        error_log('[Nostr Calendar Block] Registering block from: ' . $block_json_path);
-
-        // Register with render callback
-        $registered = register_block_type($block_json_path, [
+        register_block_type($block_json_path, [
             'render_callback' => [$this, 'render_block']
         ]);
-
-        if ($registered) {
-            error_log('[Nostr Calendar Block] Block registered successfully: ' . $registered->name);
-        } else {
-            error_log('[Nostr Calendar Block] Block registration failed!');
-        }
     }
 
     public function render_block($attributes, $content = '', $block = null) {
-        error_log('[Nostr Calendar Block] render_block called with attributes: ' . print_r($attributes, true));
-        
-        // Delegate to renderer class
-        $output = Nostr_Calendar_Block_Renderer::render($attributes, $content);
-        
-        error_log('[Nostr Calendar Block] render_block output length: ' . strlen($output));
-        
-        return $output;
+        return Nostr_Calendar_Block_Renderer::render($attributes, $content);
     }
 
     public function enqueue_editor_assets() {
-        // Editor specific assets - only in block editor
         wp_enqueue_style(
             'nostr-calendar-block-editor',
             NOSTR_CALENDAR_BLOCK_URL . 'assets/css/editor.css',
@@ -77,26 +61,28 @@ class Nostr_Calendar_Block {
             NOSTR_CALENDAR_BLOCK_VERSION
         );
 
-        // Register and enqueue editor script
         wp_enqueue_script(
             'nostr-calendar-block-editor',
             NOSTR_CALENDAR_BLOCK_URL . 'assets/js/editor.js',
             ['wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-i18n'],
             NOSTR_CALENDAR_BLOCK_VERSION,
-            false  // Load in head for proper registration
+            false
         );
 
-        // Localize for translations
         wp_set_script_translations('nostr-calendar-block-editor', 'nostr-calendar-block');
     }
 
     public function enqueue_frontend_assets() {
-        // Only load on frontend (not in editor)
         if (is_admin()) {
             return;
         }
 
-        // Load theme CSS
+        // Only load assets if block is used on this page
+        if (!has_block('nostr-calendar/event-wall')) {
+            return;
+        }
+
+        // Load base CSS
         wp_enqueue_style(
             'nostr-calendar-block-style',
             NOSTR_CALENDAR_BLOCK_URL . 'assets/css/event-wall.css',
@@ -104,21 +90,9 @@ class Nostr_Calendar_Block {
             NOSTR_CALENDAR_BLOCK_VERSION
         );
 
-        // Load theme-specific CSS if themes exist
-        $themes = ['light', 'dark', 'relilab', 'foerbico'];
-        foreach ($themes as $theme) {
-            $theme_file = NOSTR_CALENDAR_BLOCK_DIR . 'assets/css/themes/' . $theme . '.css';
-            if (file_exists($theme_file)) {
-                wp_enqueue_style(
-                    'nostr-calendar-block-theme-' . $theme,
-                    NOSTR_CALENDAR_BLOCK_URL . 'assets/css/themes/' . $theme . '.css',
-                    ['nostr-calendar-block-style'],
-                    NOSTR_CALENDAR_BLOCK_VERSION
-                );
-            }
-        }
+        // Note: theme CSS is loaded dynamically by embed-wall.js per container
 
-        // Load Nostr API script first (required by embed-wall.js)
+        // Load Nostr API script
         wp_enqueue_script(
             'nostre-api',
             NOSTR_CALENDAR_BLOCK_URL . 'assets/js/nostre-api.js',
@@ -127,7 +101,7 @@ class Nostr_Calendar_Block {
             true
         );
 
-        // Load embed-wall.js (creates HTML structure and loads event-wall.js)
+        // Load embed-wall.js (creates HTML structure)
         wp_enqueue_script(
             'nostr-calendar-block-embed',
             NOSTR_CALENDAR_BLOCK_URL . 'assets/js/embed-wall.js',
@@ -136,16 +110,23 @@ class Nostr_Calendar_Block {
             true
         );
 
-        // Note: event-wall.js wird von embed-wall.js dynamisch geladen
-        // nachdem die HTML-Struktur erstellt wurde
+        // Load event-wall.js (event logic)
+        wp_enqueue_script(
+            'nostr-calendar-block-wall',
+            NOSTR_CALENDAR_BLOCK_URL . 'assets/js/event-wall.js',
+            ['nostr-calendar-block-embed'],
+            NOSTR_CALENDAR_BLOCK_VERSION,
+            true
+        );
 
-        // Frontend script localization (i18n strings + config)
+        // Localize script data
         wp_localize_script(
             'nostr-calendar-block-embed',
             'nostrCalendarBlockData',
             [
                 'apiEndpoint' => 'https://n8n.rpi-virtuell.de/webhook/nostre_termine',
                 'ajaxUrl' => admin_url('admin-ajax.php'),
+                'locale' => str_replace('_', '-', get_locale()),
                 'i18n' => [
                     'tags' => __('Tags', 'nostr-calendar-block'),
                     'search' => __('Suche', 'nostr-calendar-block'),
@@ -165,6 +146,9 @@ class Nostr_Calendar_Block {
                     'noTags' => __('Keine', 'nostr-calendar-block'),
                     'filterByTag' => __('Nach Tag filtern', 'nostr-calendar-block'),
                     'imageAlt' => __('Bild für', 'nostr-calendar-block'),
+                    'loadError' => __('Fehler beim Laden der Termine.', 'nostr-calendar-block'),
+                    'details' => __('Details ansehen', 'nostr-calendar-block'),
+                    'removeTag' => __('Tag entfernen', 'nostr-calendar-block'),
                 ]
             ]
         );

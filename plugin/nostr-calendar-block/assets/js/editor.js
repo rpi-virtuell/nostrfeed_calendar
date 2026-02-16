@@ -26,9 +26,13 @@
     { label: 'Foerbico', value: 'foerbico' }
   ];
 
+  // Validation helpers
+  const isValidRelay = (url) => /^wss?:\/\/.+/.test(url);
+  const isValidNpub = (val) => /^npub1[a-z0-9]{58}$/i.test(val) || /^[0-9a-f]{64}$/i.test(val);
+
   registerBlockType('nostr-calendar/event-wall', {
     title: 'Nostr Event Wall',
-    description: 'Zeigt Events aus dem Nostr-Netzwerk an',
+    description: __('Zeigt Events aus dem Nostr-Netzwerk an', 'nostr-calendar-block'),
     category: 'widgets',
     icon: 'calendar',
     keywords: ['nostr', 'events', 'calendar'],
@@ -109,17 +113,20 @@
 
           // Relays Panel
           el(PanelBody, { title: __('Relays', 'nostr-calendar-block'), initialOpen: false },
-            (attributes.relays || []).map((relay, index) =>
-              el('div', { key: index, style: { marginBottom: '10px' } },
+            (attributes.relays || []).map((relay, index) => {
+              const valid = !relay || isValidRelay(relay);
+              return el('div', { key: index, style: { marginBottom: '10px' } },
                 el(TextControl, {
-                  label: `${__('Relay', 'nostr-calendar-block')} ${index + 1}`,
+                  label: __('Relay', 'nostr-calendar-block') + ' ' + (index + 1),
                   value: relay,
                   onChange: (value) => {
                     const relays = [...(attributes.relays || [])];
                     relays[index] = value;
                     setAttributes({ relays });
                   },
-                  placeholder: 'wss://relay.example.com'
+                  placeholder: 'wss://relay.example.com',
+                  className: valid ? '' : 'has-error',
+                  help: valid ? '' : __('URL muss mit wss:// oder ws:// beginnen', 'nostr-calendar-block')
                 }),
                 el(Button, {
                   isDestructive: true,
@@ -130,8 +137,8 @@
                     setAttributes({ relays });
                   }
                 }, __('Entfernen', 'nostr-calendar-block'))
-              )
-            ),
+              );
+            }),
             el(Button, {
               isPrimary: true,
               onClick: () => {
@@ -143,17 +150,20 @@
 
           // Authors Panel
           el(PanelBody, { title: __('Autoren (npub)', 'nostr-calendar-block'), initialOpen: false },
-            (attributes.npub || []).map((npub, index) =>
-              el('div', { key: index, style: { marginBottom: '10px' } },
+            (attributes.npub || []).map((npub, index) => {
+              const valid = !npub || isValidNpub(npub);
+              return el('div', { key: index, style: { marginBottom: '10px' } },
                 el(TextControl, {
-                  label: `${__('npub', 'nostr-calendar-block')} ${index + 1}`,
+                  label: __('npub', 'nostr-calendar-block') + ' ' + (index + 1),
                   value: npub,
                   onChange: (value) => {
                     const npubs = [...(attributes.npub || [])];
                     npubs[index] = value;
                     setAttributes({ npub: npubs });
                   },
-                  placeholder: 'npub1...'
+                  placeholder: 'npub1...',
+                  className: valid ? '' : 'has-error',
+                  help: valid ? '' : __('Ungültiger npub-Wert (erwartet npub1... oder 64-stelligen Hex-Key)', 'nostr-calendar-block')
                 }),
                 el(Button, {
                   isDestructive: true,
@@ -164,8 +174,8 @@
                     setAttributes({ npub: npubs });
                   }
                 }, __('Entfernen', 'nostr-calendar-block'))
-              )
-            ),
+              );
+            }),
             el(Button, {
               isPrimary: true,
               onClick: () => {
@@ -180,7 +190,7 @@
         el('div', blockProps,
           el('div', { className: 'nostr-event-wall-preview' },
             el('div', { className: 'preview-header' },
-              el('span', { className: 'preview-icon' }, '📅'),
+              el('span', { className: 'preview-icon' }, '\uD83D\uDCC5'),
               el('span', { className: 'preview-title' }, 'Nostr Event Wall')
             ),
             el('div', { className: 'preview-info' },
@@ -239,7 +249,6 @@
 
       return el('div', {
         ...blockProps,
-        id: 'nostr-event-wall',
         className: 'nostr-event-wall',
         ...dataAttrs
       });

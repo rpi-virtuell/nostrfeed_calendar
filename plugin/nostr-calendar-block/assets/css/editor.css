@@ -37,3 +37,14 @@
 .preview-info strong {
   color: #333;
 }
+
+/* Validation error styling for editor inputs */
+.has-error .components-text-control__input,
+.has-error input[type="text"] {
+  border-color: #d94f4f !important;
+  box-shadow: 0 0 0 1px #d94f4f;
+}
+
+.has-error .components-base-control__help {
+  color: #d94f4f;
+}

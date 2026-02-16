@@ -1,7 +1,7 @@
 /*! nostre-api.js – Vanilla JS (Browser) – n8n-Workflow re-implemented
  *  Output: { nostrfeed: [...] } – identisch zur bisherigen Webhook-Response
  *  Defaults:
- *    relays = ["wss://relilab.nostr1.com"]
+ *    relays = ["wss://relay-rpi.edufeed.org"]
  *    allowed_npub = ["54a340072ccc625516c8d572b638a828c5b857074511302fb4392f26e34e1913"]
  */
 (function () {
@@ -21,7 +21,6 @@
   };
 
   // --- bech32 / npub helpers (minimal, for client-side npub -> hex conversion) ---
-  // based on BIP-0173 style decoding (no external deps)
   const CHARSET = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
   function bech32Polymod(values) {
     const GENERATORS = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3];
@@ -86,17 +85,13 @@
     let s = String(md);
 
     // Remove existing HTML anchors to avoid producing nested/broken links.
-    // Keep anchor inner text but strip the tag and attributes.
     try {
       s = s.replace(/<a\b[^>]*>(.*?)<\/a>/gi, '$1');
-      // Remove any remaining HTML tags (keep their text)
       s = s.replace(/<[^>]+>/g, '');
     } catch (e) {
-      // if regex fails for some reason, fall back to raw string
       s = String(md);
     }
 
-    // Helper: escape text when injecting into HTML
     function escapeHtml(str) {
       return String(str)
         .replace(/&/g, "&amp;")
@@ -104,81 +99,42 @@
         .replace(/>/g, "&gt;");
     }
 
-    // Helper: normalize URL; if no scheme but looks like domain, prefix https://
     function normalizeUrl(url) {
       try {
         url = String(url).trim();
-        if (/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(url)) return url; // has scheme
-        if (/^\/\//.test(url) && typeof location !== 'undefined') return location.protocol + url; // //host/path
-        // if looks like domain (contains a dot and no spaces) assume https
+        if (/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(url)) return url;
+        if (/^\/\//.test(url) && typeof location !== 'undefined') return location.protocol + url;
         if (/^[^\s]+\.[^\s]{2,}$/i.test(url)) return 'https://' + url;
         return url;
       } catch (e) { return url; }
     }
 
-      // Use tokens to protect generated HTML (anchors/images) from later regexes
-      const __tokens = [];
-      function __pushToken(html) {
-        const i = __tokens.length;
-        __tokens.push(html);
-        return "___HTML_TOKEN_" + i + "___";
-      }
+    // Use tokens to protect generated HTML from later regexes
+    const __tokens = [];
+    function __pushToken(html) {
+      const i = __tokens.length;
+      __tokens.push(html);
+      return "___HTML_TOKEN_" + i + "___";
+    }
 
-      // Inline formatting for link text: escape then convert **bold**, *italic*, `code`
-      function inlineFormat(raw) {
-        const esc = escapeHtml(raw);
-        // code first
-        let out = esc.replace(/`([^`]+)`/g, function(_, c) { return '<code>' + c + '</code>'; });
-        out = out.replace(/\*\*([^*]+)\*\*/g, function(_, b) { return '<strong>' + b + '</strong>'; });
-        out = out.replace(/\*([^*]+)\*/g, function(_, i) { return '<em>' + i + '</em>'; });
-        return out;
-      }
+    // Inline formatting for link text
+    function inlineFormat(raw) {
+      const esc = escapeHtml(raw);
+      let out = esc.replace(/`([^`]+)`/g, function(_, c) { return '<code>' + c + '</code>'; });
+      out = out.replace(/\*\*([^*]+)\*\*/g, function(_, b) { return '<strong>' + b + '</strong>'; });
+      out = out.replace(/\*([^*]+)\*/g, function(_, i) { return '<em>' + i + '</em>'; });
+      return out;
+    }
 
-      // Images: allow URLs with or without scheme inside parentheses: ![alt](url)
-      // allow optional whitespace inside the parentheses and add lazy loading
-      s = s.replace(/!\[([^\]]*)]\(\s*([^\)\s]+)\s*\)/g, function (_, alt, url) {
-        const u = normalizeUrl(url);
-        // allow only http(s) or protocol-relative URLs for images
-        if (!/^https?:\/\//i.test(u) && !/^\/\//.test(u)) return '';
-        const safeAlt = escapeHtml(alt || '');
-        let href;
-        try { href = encodeURI(u); } catch (e) { href = escapeHtml(u); }
-        return __pushToken('<img class="md-img" loading="lazy" src="' + href + '" alt="' + safeAlt + '">');
-      });
-
-      // Links [text](url)
-      s = s.replace(/\[([^\]]+)]\(([^)\s]+)\)/g, function (_, text, url) {
-        const u = normalizeUrl(url);
-        if (!/^https?:\/\//i.test(u) && !/^\/\//.test(u)) return escapeHtml(text);
-        let href;
-        try { href = encodeURI(u); } catch (e) { href = escapeHtml(u); }
-
-        // Build label: preserve HTML tokens (images) and apply inline formatting to plain text parts
-        const tokenRe = /___HTML_TOKEN_(\d+)___/g;
-        let last = 0;
-        let label = '';
-        let m;
-        while ((m = tokenRe.exec(text)) !== null) {
-          const idx = Number(m[1]);
-          const before = text.slice(last, m.index);
-          if (before) label += inlineFormat(before);
-          label += (__tokens[idx] || '');
-          last = tokenRe.lastIndex;
-        }
-        if (last < text.length) label += inlineFormat(text.slice(last));
-
-        return __pushToken('<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + label + '</a>');
-      });
-
-      // Autolink plain URLs (https://... or www.domain.tld) → protected anchor token
-      s = s.replace(/(^|[^\"'=\]>])((?:https?:\/\/|www\.)[^\s<]+)/g, function (_, prefix, url) {
-        let u = url;
-        if (/^www\./i.test(u)) u = 'https://' + u;
-        if (!/^https?:\/\//i.test(u)) return prefix + escapeHtml(url);
-        let href;
-        try { href = encodeURI(u); } catch (e) { href = escapeHtml(u); }
-        return prefix + __pushToken('<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(url) + '</a>');
-      });
+    // Images: ![alt](url)
+    s = s.replace(/!\[([^\]]*)]\(\s*([^\)\s]+)\s*\)/g, function (_, alt, url) {
+      const u = normalizeUrl(url);
+      if (!/^https?:\/\//i.test(u) && !/^\/\//.test(u)) return '';
+      const safeAlt = escapeHtml(alt || '');
+      let href;
+      try { href = encodeURI(u); } catch (e) { href = escapeHtml(u); }
+      return __pushToken('<img class="md-img" loading="lazy" src="' + href + '" alt="' + safeAlt + '">');
+    });
 
     // Links [text](url)
     s = s.replace(/\[([^\]]+)]\(([^)\s]+)\)/g, function (_, text, url) {
@@ -186,30 +142,45 @@
       if (!/^https?:\/\//i.test(u) && !/^\/\//.test(u)) return escapeHtml(text);
       let href;
       try { href = encodeURI(u); } catch (e) { href = escapeHtml(u); }
-      return '<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(text) + '</a>';
+
+      const tokenRe = /___HTML_TOKEN_(\d+)___/g;
+      let last = 0;
+      let label = '';
+      let m;
+      while ((m = tokenRe.exec(text)) !== null) {
+        const idx = Number(m[1]);
+        const before = text.slice(last, m.index);
+        if (before) label += inlineFormat(before);
+        label += (__tokens[idx] || '');
+        last = tokenRe.lastIndex;
+      }
+      if (last < text.length) label += inlineFormat(text.slice(last));
+
+      return __pushToken('<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + label + '</a>');
     });
 
-    // Autolink plain URLs (https://... or www.domain.tld) → <a href="...">...</a>
+    // Autolink plain URLs
     s = s.replace(/(^|[^\"'=\]>])((?:https?:\/\/|www\.)[^\s<]+)/g, function (_, prefix, url) {
       let u = url;
       if (/^www\./i.test(u)) u = 'https://' + u;
       if (!/^https?:\/\//i.test(u)) return prefix + escapeHtml(url);
       let href;
       try { href = encodeURI(u); } catch (e) { href = escapeHtml(u); }
-      return prefix + '<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(url) + '</a>';
+      return prefix + __pushToken('<a href="' + href + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(url) + '</a>');
     });
-  // **bold**
-  s = s.replace(/\*\*([^*]+)\*\*/g, function (_, t) { return '<strong>' + escapeHtml(t) + '</strong>'; });
-  // *italic*
-  s = s.replace(/\*([^*]+)\*/g, function (_, t) { return '<em>' + escapeHtml(t) + '</em>'; });
-    // Headings
-  s = s.replace(/(^|\n)###\s*(.+)/g, function(_, pre, t){ return pre + '<h3>' + escapeHtml(t) + '</h3>'; });
-  s = s.replace(/(^|\n)##\s*(.+)/g, function(_, pre, t){ return pre + '<h2>' + escapeHtml(t) + '</h2>'; });
-  s = s.replace(/(^|\n)#\s*(.+)/g, function(_, pre, t){ return pre + '<h1>' + escapeHtml(t) + '</h1>'; });
-  // Inline code
-  s = s.replace(/`([^`]+)`/g, function(_, c){ return '<code>' + escapeHtml(c) + '</code>'; });
 
-    // Absätze rudimentär
+    // **bold**
+    s = s.replace(/\*\*([^*]+)\*\*/g, function (_, t) { return '<strong>' + escapeHtml(t) + '</strong>'; });
+    // *italic*
+    s = s.replace(/\*([^*]+)\*/g, function (_, t) { return '<em>' + escapeHtml(t) + '</em>'; });
+    // Headings
+    s = s.replace(/(^|\n)###\s*(.+)/g, function(_, pre, t){ return pre + '<h3>' + escapeHtml(t) + '</h3>'; });
+    s = s.replace(/(^|\n)##\s*(.+)/g, function(_, pre, t){ return pre + '<h2>' + escapeHtml(t) + '</h2>'; });
+    s = s.replace(/(^|\n)#\s*(.+)/g, function(_, pre, t){ return pre + '<h1>' + escapeHtml(t) + '</h1>'; });
+    // Inline code
+    s = s.replace(/`([^`]+)`/g, function(_, c){ return '<code>' + escapeHtml(c) + '</code>'; });
+
+    // Paragraphs
     s = s
       .split(/\n{2,}/)
       .map((block) => (/^<(h[1-6]|img|iframe)/.test(block) ? block : `<p>${block.replace(/\n/g, "<br>")}</p>`))
@@ -246,10 +217,10 @@
 
   // ————— Nostr Query (Browser WebSockets) —————
   function queryNostrEvents({ relays, filter, timeoutMs = 8000 }) {
-    // console.log("queryNostrEvents:", { relays, filter, timeoutMs });
     return new Promise((resolve) => {
       const subId = "sub-" + Math.random().toString(36).slice(2, 10);
       const eventsById = new Map();
+      const openSockets = [];
       let openCount = 0;
       let settled = false;
 
@@ -259,12 +230,19 @@
         if (settled) return;
         settled = true;
         clearTimeout(timer);
+        // Close any remaining open sockets
+        openSockets.forEach(function (ws) {
+          try { ws.close(); } catch (e) { /* ignore */ }
+        });
+        openSockets.length = 0;
         resolve(Array.from(eventsById.values()));
       }
 
       (relays || []).forEach((url) => {
         try {
           const ws = new WebSocket(url);
+          openSockets.push(ws);
+
           ws.addEventListener("open", () => {
             openCount++;
             ws.send(JSON.stringify(["REQ", subId, filter]));
@@ -276,7 +254,6 @@
             const type = msg && msg[0];
 
             if (type === "EVENT") {
-              // ["EVENT", subId, event]
               const event = msg[2];
               if (event && event.id && !eventsById.has(event.id)) {
                 eventsById.set(event.id, event);
@@ -293,7 +270,6 @@
           ws.addEventListener("close", onCloseLike);
           ws.addEventListener("error", onCloseLike);
         } catch {
-          console.warn("Failed to connect to relay", url);
           // ignore bad URLs
         }
       });
@@ -301,7 +277,6 @@
   }
 
   // ————— Pipeline —————
-  console.log('[DEBUG] getNostrFeed, ',DEFAULT_RELAYS,DEFAULT_ALLOWED);
   async function getNostrFeed({
     relays = DEFAULT_RELAYS,
     allowed_npub = DEFAULT_ALLOWED,
@@ -309,22 +284,16 @@
     limit = DEFAULT_LIMIT,
     timeoutMs = 8000,
   } = {}) {
-    // entspricht: alowed_npubs + read last 1000 events
     const since = nowSec() - Math.max(0, Number(sinceDays)) * 24 * 60 * 60;
-  // sanitize allowed_npub: convert bech32 npub -> hex, filter invalid
-  const authors = (Array.isArray(allowed_npub) ? allowed_npub : []).map(s => npubToHex(s)).filter(Boolean);
-  const filter = { kinds: [31923], limit: Number(limit) || 1000, since };
-  if (authors.length) filter.authors = authors;
+    const authors = (Array.isArray(allowed_npub) ? allowed_npub : []).map(s => npubToHex(s)).filter(Boolean);
+    const filter = { kinds: [31923], limit: Number(limit) || 1000, since };
+    if (authors.length) filter.authors = authors;
 
     const rawEvents = await queryNostrEvents({ relays, filter, timeoutMs });
-    console.log('[DEBUG] rawEvents',rawEvents);
-    // console.log("rawEvents:", rawEvents.length);
 
-    // only future termine: start > now
     const now = nowSec();
     const futureEvents = rawEvents.filter((ev) => Number(tagValue(ev.tags, "start") || 0) > now);
 
-    // convert to readable fields + Zoom Link + shorten summary + md→html
     const processed = futureEvents.map((ev) => {
       const tags = Array.isArray(ev.tags) ? ev.tags : [];
       const id = tagValue(tags, "d");
@@ -352,9 +321,9 @@
         start: startsIso,
         end: endsIso,
         status,
-        location,        // HTML-Link
-        location_url,    // extrahierte URL
-        tags: tagsStr,   // "t" join(", ")
+        location,
+        location_url,
+        tags: tagsStr,
         summary: summaryHtml,
         content: contentHtml,
         pubkey,
@@ -362,30 +331,24 @@
       };
     });
 
-    // Aggregate → { nostrfeed: [...] }
     return { nostrfeed: processed };
   }
 
   // ————— Public API —————
   const NostreAPI = { getNostrFeed };
-  console.log('[DEBUG] NostreAPI',NostreAPI);
-  // Support: global namespace und ES-Module
+
   if (typeof window !== "undefined") {
     window.NostreAPI = NostreAPI;
 
-    // Optionaler Auto-Run: vor dem Laden setzen: window.NostreAPI_AUTORUN = true
     if (window.NostreAPI_AUTORUN === true) {
       getNostrFeed().then((out) => {
-        // „Ausgeben“ wie früher: das Webhook-Resultat (ein Objekt) – hier geloggt:
-        console.log(out);
-        // und als Event für UI-Integration:
         window.dispatchEvent(new CustomEvent("nostrfeed-ready", { detail: out }));
       }).catch((err) => {
         console.error("nostre-api error:", err);
       });
     }
   }
- // optional CommonJS-Support, falls mal gebundled
+
   if (typeof module !== "undefined" && module.exports) {
     module.exports = NostreAPI;
   }

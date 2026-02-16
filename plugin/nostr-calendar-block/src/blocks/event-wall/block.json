@@ -24,7 +24,7 @@
     "theme": {
       "type": "string",
       "default": "light",
-      "enum": ["light", "dark", "relilab"]
+      "enum": ["light", "dark", "relilab", "foerbico"]
     },
     "showFilterbar": {
       "type": "boolean",
