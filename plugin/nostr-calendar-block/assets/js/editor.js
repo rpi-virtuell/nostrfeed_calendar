@@ -247,9 +247,12 @@
         dataAttrs['data-filter'] = attributes.filter;
       }
 
+      var classes = 'nostr-event-wall';
+      if (blockProps.className) classes += ' ' + blockProps.className;
+
       return el('div', {
         ...blockProps,
-        className: 'nostr-event-wall',
+        className: classes,
         ...dataAttrs
       });
     }

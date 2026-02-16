@@ -39,7 +39,7 @@
   --chip-border: #c7d2fe;
   --border-color: #e5e7eb;
   --modal-overlay: rgba(0,0,0,.5);
-  --focus-ring: 2px solid rgba(42,115,194,.22);
+  --focus-ring: 2px solid rgba(42,115,194,.55);
 }
 
 /* Dark theme */
@@ -113,6 +113,10 @@
   cursor: pointer;
   background: var(--color-filter-field-bg);
 }
+.nostr-event-wall [id$="reset-filters"]:focus {
+  outline: var(--focus-ring);
+  outline-offset: 1px;
+}
 
 .nostr-event-wall .field label { font-size: .85rem; color: #374151; white-space: nowrap; }
 .nostr-event-wall .field input[type="text"] { border: none; outline: none; background: transparent; min-width: 200px; flex: 1; font-size: 1rem; }
@@ -125,7 +129,8 @@
 .nostr-event-wall .selected-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 
 .nostr-event-wall .chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: var(--radius-round); background: var(--chip-bg); border: 1px solid var(--chip-border); font-size: .85rem; }
-.nostr-event-wall .chip button { border: none; background: transparent; cursor: pointer; font-weight: bold; line-height: 1; padding: 0 2px; }
+.nostr-event-wall .chip button { border: none; background: transparent; cursor: pointer; font-weight: bold; line-height: 1; padding: 0 2px; border-radius: var(--radius-sm); }
+.nostr-event-wall .chip button:focus { outline: var(--focus-ring); outline-offset: 1px; }
 
 /* Tag Suggest */
 .nostr-event-wall .tagbox { position: relative; min-width: 280px; }
@@ -140,7 +145,8 @@
 
 .nostr-event-wall .suggest.open { display: block; }
 .nostr-event-wall .suggest button { width: 100%; text-align: left; padding: 8px 10px; background: var(--color-surface); border: none; cursor: pointer; }
-.nostr-event-wall .suggest button:hover { background: #f3f4f6; }
+.nostr-event-wall .suggest button:hover,
+.nostr-event-wall .suggest button:focus { background: #f3f4f6; outline: var(--focus-ring); outline-offset: -2px; }
 .nostr-event-wall .suggest .count { color: #6b7280; font-size: .8rem; }
 
 /* ===== Grid ===== */
@@ -163,6 +169,10 @@
   box-sizing: border-box;
   overflow: hidden;
 }
+
+/* WordPress alignment support */
+.nostr-event-wall.alignwide { max-width: 1600px; width: 100%; }
+.nostr-event-wall.alignfull { max-width: none; width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw); padding: 0 20px; }
 
 .nostr-event-grid [id$="loader"],
 .nostr-event-grid .no-events {
@@ -276,8 +286,13 @@
   min-width: auto;
   max-width: 150px;
 }
+.nostr-event-wall .modal [id$="modal-tags"] button:focus {
+  outline: var(--focus-ring);
+  outline-offset: 1px;
+}
 
-.nostr-event-wall .tag-badge:hover { background-color: var(--color-primary); color: var(--color-surface); }
+.nostr-event-wall .tag-badge:hover,
+.nostr-event-wall .tag-badge:focus { background-color: var(--color-primary); color: var(--color-surface); outline: var(--focus-ring); outline-offset: 1px; }
 
 /* Body */
 .nostr-event-wall .tile-body {
@@ -316,7 +331,8 @@
   padding: 8px 12px;
 }
 
-.nostr-event-wall .tile-toolbar .btn:hover { background: var(--color-primary); color: var(--color-surface); }
+.nostr-event-wall .tile-toolbar .btn:hover,
+.nostr-event-wall .tile-toolbar .btn:focus { background: var(--color-primary); color: var(--color-surface); outline: var(--focus-ring); outline-offset: 1px; }
 
 /* Meta */
 .nostr-event-wall .tile-meta { display: flex; flex-direction: column; gap: 6px; }
@@ -330,7 +346,8 @@
 /* ===== Modal ===== */
 .nostr-event-wall .modal { display: none; position: fixed; z-index: 1000; inset: 0; overflow: auto; background: rgba(0,0,0,.5); animation: nostrFadeIn .3s; }
 .nostr-event-wall .modal-content { background: var(--color-surface); margin: 5% auto; padding: 30px; border-radius: var(--radius-sm); width: 90%; max-width: 680px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,.3); animation: nostrSlideIn .3s; }
-.nostr-event-wall .close-button { color: #334155; font-size: 28px; font-weight: bold; position: absolute; top: 10px; right: 20px; cursor: pointer; background: transparent; border: none; }
+.nostr-event-wall .close-button { color: #334155; font-size: 28px; font-weight: bold; position: absolute; top: 10px; right: 20px; cursor: pointer; background: transparent; border: none; border-radius: var(--radius-sm); }
+.nostr-event-wall .close-button:focus { outline: var(--focus-ring); outline-offset: 2px; }
 
 .nostr-event-wall .modal [id$="modal-image-container"] { width: 100%; margin-bottom: 20px; text-align: center; }
 .nostr-event-wall .modal [id$="modal-image-container"] img { max-width: 100%; max-height: 250px; height: auto; border-radius: var(--radius-sm); object-fit: cover; }

@@ -40,6 +40,37 @@
     };
   }
 
+  /** Sanitize HTML: strip dangerous tags and event handler attributes. */
+  function sanitizeHtml(html) {
+    if (!html) return '';
+    var tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    var dangerous = tmp.querySelectorAll('script,iframe,object,embed,form,input,textarea,select,button,link,meta,style,base');
+    for (var i = dangerous.length - 1; i >= 0; i--) dangerous[i].parentNode.removeChild(dangerous[i]);
+    var allEls = tmp.querySelectorAll('*');
+    for (var j = 0; j < allEls.length; j++) {
+      var el = allEls[j];
+      for (var k = el.attributes.length - 1; k >= 0; k--) {
+        var name = el.attributes[k].name.toLowerCase();
+        if (name.indexOf('on') === 0 || name === 'srcdoc' || name === 'formaction') el.removeAttribute(el.attributes[k].name);
+        if ((name === 'href' || name === 'src' || name === 'action') && /^\s*javascript:/i.test(el.attributes[k].value)) el.removeAttribute(el.attributes[k].name);
+      }
+    }
+    return tmp.innerHTML;
+  }
+
+  /** Focus trap for modal dialogs (WCAG 2.1) */
+  function trapFocus(modalEl) {
+    var focusable = modalEl.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])');
+    if (!focusable.length) return;
+    var first = focusable[0], last = focusable[focusable.length - 1];
+    modalEl.addEventListener('keydown', function (e) {
+      if (e.key !== 'Tab') return;
+      if (e.shiftKey) { if (document.activeElement === first) { e.preventDefault(); last.focus(); } }
+      else { if (document.activeElement === last) { e.preventDefault(); first.focus(); } }
+    });
+  }
+
   // i18n + locale (shared)
   const blockData = window.nostrCalendarBlockData || {};
   const i18n = blockData.i18n || {};
@@ -348,16 +379,13 @@
       var filterToolbar = container.querySelector('.filter-toolbar');
       var filterVisible = filterToolbar && window.getComputedStyle(filterToolbar).display !== 'none';
 
-      list.forEach(function (event) {
+      list.forEach(function (event, idx) {
         var tile = document.createElement('article');
         tile.className = 'event-tile';
         tile.setAttribute('tabindex', '0');
         tile.setAttribute('role', 'button');
         tile.setAttribute('aria-label', escapeHtml(event.title || ''));
-        tile.addEventListener('click', function () { showEventModal(event); });
-        tile.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showEventModal(event); }
-        });
+        tile.setAttribute('data-event-idx', idx);
 
         var day = event.start.getDate();
         var month = new Intl.DateTimeFormat(locale, { month: 'short' }).format(event.start).replace('.', '');
@@ -373,12 +401,6 @@
           btn.setAttribute('data-tag', encodeURIComponent(tag));
           btn.title = t('filterByTag', 'Nach Tag filtern');
           btn.textContent = tag;
-          if (filterVisible) {
-            btn.addEventListener('click', function (ev) {
-              ev.stopPropagation();
-              addTagToState(tag);
-            });
-          }
           tagsDiv.appendChild(btn);
         });
 
@@ -432,14 +454,7 @@
           var locPara = document.createElement('p');
           locPara.innerHTML = locationIcon;
           var locSpan = document.createElement('span');
-          // If location is already HTML (contains <a), use textContent of parsed version
-          if (/<a\s/i.test(event.location)) {
-            var tmp = document.createElement('div');
-            tmp.innerHTML = event.location.replace(/<script[\s\S]*?<\/script>/gi, '');
-            locSpan.textContent = tmp.textContent || event.location;
-          } else {
-            locSpan.textContent = event.location;
-          }
+          locSpan.textContent = toPlainText(event.location);
           locPara.appendChild(locSpan);
           meta.appendChild(locPara);
         }
@@ -490,9 +505,42 @@
       });
     };
 
+    // Event delegation on grid (single listener instead of per-tile)
+    if (eventWallEl) {
+      eventWallEl.addEventListener('click', function (e) {
+        var tagBtn = e.target.closest('.tag-badge');
+        if (tagBtn) {
+          e.stopPropagation();
+          var ft = container.querySelector('.filter-toolbar');
+          if (ft && window.getComputedStyle(ft).display !== 'none') {
+            var tag = decodeURIComponent(tagBtn.getAttribute('data-tag') || '');
+            if (tag) addTagToState(tag);
+          }
+          return;
+        }
+        var tile = e.target.closest('.event-tile');
+        if (tile) {
+          var idx = parseInt(tile.getAttribute('data-event-idx'), 10);
+          if (!isNaN(idx) && filteredEvents[idx]) showEventModal(filteredEvents[idx]);
+        }
+      });
+      eventWallEl.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        var tile = e.target.closest('.event-tile');
+        if (tile) {
+          e.preventDefault();
+          var idx = parseInt(tile.getAttribute('data-event-idx'), 10);
+          if (!isNaN(idx) && filteredEvents[idx]) showEventModal(filteredEvents[idx]);
+        }
+      });
+    }
+
+    var previouslyFocused = null;
+
     // Modal
     var showEventModal = function (event) {
       if (!modal) return;
+      previouslyFocused = document.activeElement;
 
       var modalImageContainer = $('modal-image-container');
       if (modalImageContainer) {
@@ -500,7 +548,8 @@
         if (event.image && /^https:\/\//i.test(event.image)) {
           var img = document.createElement('img');
           img.src = event.image;
-          img.alt = t('imageAlt', 'Bild für') + ' ' + (event.title || '');
+          img.setAttribute('loading', 'lazy');
+          img.alt = t('imageAlt', 'Bild für') + ' ' + (event.title || 'Event');
           modalImageContainer.appendChild(img);
           modalImageContainer.style.display = 'block';
         } else {
@@ -554,20 +603,25 @@
 
       var modalContentHtml = $('modal-content-html');
       if (modalContentHtml) {
-        // Sanitize: strip script tags
-        var sanitized = (event.content || '').replace(/<script[\s\S]*?<\/script>/gi, '');
-        modalContentHtml.innerHTML = sanitized;
+        modalContentHtml.innerHTML = sanitizeHtml(event.content || '');
       }
 
       try { lastFilterHash = buildFilterHash(); } catch (e) { /* ignore */ }
       pushHash('#id=' + encodeURIComponent(event.ID || event.id || event.url || ''));
       modal.style.display = 'block';
+      if (closeModalBtn) closeModalBtn.focus();
+      trapFocus(modal);
     };
 
     // Close modal
     var closeModal = function () {
       if (!modal) return;
       modal.style.display = 'none';
+      // Clear modal images to abort loading
+      var mic = $('modal-image-container');
+      if (mic) { var imgs = mic.querySelectorAll('img'); for (var ii = 0; ii < imgs.length; ii++) imgs[ii].src = ''; mic.innerHTML = ''; }
+      // Restore focus
+      if (previouslyFocused && typeof previouslyFocused.focus === 'function') { previouslyFocused.focus(); previouslyFocused = null; }
       var targetHash = lastFilterHash || buildFilterHash();
       setHashSafely(targetHash);
       if (!targetHash || targetHash === '#filter=' || targetHash === '#') {
@@ -695,10 +749,10 @@
         tagInput.addEventListener('blur', function () {
           setTimeout(function () { tagSuggest.classList.remove('open'); }, 120);
         });
-        tagInput.addEventListener('input', function () {
+        tagInput.addEventListener('input', debounce(function () {
           tagSuggest.classList.add('open');
           renderList(tagInput.value);
-        });
+        }, 150));
         tagInput.addEventListener('keydown', function (e) {
           if (e.key === 'Enter') {
             e.preventDefault();

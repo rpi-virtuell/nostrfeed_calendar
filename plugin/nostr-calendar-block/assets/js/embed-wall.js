@@ -147,7 +147,7 @@
             '</select>' +
           '</div>' +
           '<button id="' + pfx + 'reset-filters" class="btn ghost" title="' + t('reset', 'Zurücksetzen') + '">' + t('reset', 'Zurücksetzen') + '</button>' +
-          '<div class="result-info" id="' + pfx + 'result-info">0 ' + t('results', 'Treffer') + '</div>' +
+          '<div class="result-info" id="' + pfx + 'result-info" aria-live="polite" aria-atomic="true">0 ' + t('results', 'Treffer') + '</div>' +
         '</div>' +
         '<div class="filter-row">' +
           '<div id="' + pfx + 'selected-tags" class="selected-tags" aria-live="polite"></div>' +

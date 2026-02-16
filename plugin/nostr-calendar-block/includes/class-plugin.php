@@ -124,8 +124,7 @@ class Nostr_Calendar_Block {
             'nostr-calendar-block-embed',
             'nostrCalendarBlockData',
             [
-                'apiEndpoint' => 'https://n8n.rpi-virtuell.de/webhook/nostre_termine',
-                'ajaxUrl' => admin_url('admin-ajax.php'),
+                'apiEndpoint' => apply_filters('nostr_calendar_block_api_endpoint', 'https://n8n.rpi-virtuell.de/webhook/nostre_termine'),
                 'locale' => str_replace('_', '-', get_locale()),
                 'i18n' => [
                     'tags' => __('Tags', 'nostr-calendar-block'),
