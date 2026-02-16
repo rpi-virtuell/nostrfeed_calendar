@@ -81,8 +81,10 @@
   }
 
   // Sehr leichte Markdown→HTML-Konvertierung (ohne externe Libs)
+  const _mdCache = new Map();
   function mdToHtml(md = "") {
     if (!md) return "";
+    if (_mdCache.has(md)) return _mdCache.get(md);
     let s = String(md);
 
     // Remove existing HTML anchors to avoid producing nested/broken links.
@@ -103,11 +105,11 @@
     function normalizeUrl(url) {
       try {
         url = String(url).trim();
-        if (/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(url)) return url;
-        if (/^\/\//.test(url) && typeof location !== 'undefined') return location.protocol + url;
-        if (/^[^\s]+\.[^\s]{2,}$/i.test(url)) return 'https://' + url;
-        return url;
-      } catch (e) { return url; }
+        // Only allow http(s) URLs; reject protocol-relative and other schemes
+        if (/^https?:\/\//i.test(url)) return url;
+        if (/^[^\s/:]+\.[^\s]{2,}$/i.test(url)) return 'https://' + url;
+        return null;
+      } catch (e) { return null; }
     }
 
     // Use tokens to protect generated HTML from later regexes
@@ -130,7 +132,7 @@
     // Images: ![alt](url)
     s = s.replace(/!\[([^\]]*)]\(\s*([^\)\s]+)\s*\)/g, function (_, alt, url) {
       const u = normalizeUrl(url);
-      if (!/^https?:\/\//i.test(u) && !/^\/\//.test(u)) return '';
+      if (!u || !/^https?:\/\//i.test(u)) return '';
       const safeAlt = escapeHtml(alt || '');
       let href;
       try { href = encodeURI(u); } catch (e) { href = escapeHtml(u); }
@@ -140,7 +142,7 @@
     // Links [text](url)
     s = s.replace(/\[([^\]]+)]\(([^)\s]+)\)/g, function (_, text, url) {
       const u = normalizeUrl(url);
-      if (!/^https?:\/\//i.test(u) && !/^\/\//.test(u)) return escapeHtml(text);
+      if (!u || !/^https?:\/\//i.test(u)) return escapeHtml(text);
       let href;
       try { href = encodeURI(u); } catch (e) { href = escapeHtml(u); }
 
@@ -195,6 +197,7 @@
       });
     }
 
+    _mdCache.set(md, s);
     return s;
   }
 

@@ -119,8 +119,8 @@
 }
 
 .nostr-event-wall .field label { font-size: .85rem; color: var(--color-muted); white-space: nowrap; }
-.nostr-event-wall .field input[type="text"] { border: none; outline: none; background: transparent; min-width: 200px; flex: 1; font-size: 1rem; }
-.nostr-event-wall .field select { border: none; outline: none; background: transparent; font-size: 1rem; }
+.nostr-event-wall .field input[type="text"] { border: none; outline: none; background: transparent; color: var(--color-text); min-width: 200px; flex: 1; font-size: 1rem; }
+.nostr-event-wall .field select { border: none; outline: none; background: transparent; color: var(--color-text); font-size: 1rem; }
 
 .nostr-event-wall .btn { background: var(--color-primary); color: var(--color-surface); border: none; border-radius: var(--radius-md); padding: 10.5px 14px; cursor: pointer; }
 .nostr-event-wall .btn.ghost { background: transparent; color: var(--color-text); }
@@ -128,7 +128,7 @@
 .nostr-event-wall .result-info { margin-left: auto; color: var(--color-muted); font-size: .9rem; }
 .nostr-event-wall .selected-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 
-.nostr-event-wall .chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: var(--radius-round); background: var(--chip-bg); border: 1px solid var(--chip-border); font-size: .85rem; }
+.nostr-event-wall .chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: var(--radius-round); background: var(--chip-bg); border: 1px solid var(--chip-border); font-size: .85rem; color: var(--color-text); }
 .nostr-event-wall .chip button { border: none; background: transparent; cursor: pointer; font-weight: bold; line-height: 1; padding: 0 2px; border-radius: var(--radius-sm); }
 .nostr-event-wall .chip button:focus { outline: var(--focus-ring); outline-offset: 1px; }
 
