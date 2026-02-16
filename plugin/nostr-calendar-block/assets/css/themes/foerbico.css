@@ -142,13 +142,13 @@
   border: 2px solid var(--border-color);
 }
 
-[data-theme="foerbico"] #modal-title {
+[data-theme="foerbico"] .modal [id$="modal-title"] {
   color: var(--color-heading);
   border-bottom: 2px solid var(--color-secondary);
   padding-bottom: 10px;
 }
 
-[data-theme="foerbico"] #modal-details strong {
+[data-theme="foerbico"] .modal [id$="modal-details"] strong {
   color: var(--color-heading);
 }
 
@@ -200,13 +200,13 @@
 }
 
 /* Loading state */
-[data-theme="foerbico"] #loader {
+[data-theme="foerbico"] [id$="loader"] {
   color: var(--color-primary);
   font-weight: 500;
 }
 
 /* No events message */
-[data-theme="foerbico"] #no-events {
+[data-theme="foerbico"] .no-events {
   color: var(--color-muted);
   background: var(--chip-bg);
   border: 2px dashed var(--border-color);

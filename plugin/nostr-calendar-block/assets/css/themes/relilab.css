@@ -1,27 +1,17 @@
-/* relilab theme overrides for event-wall
+/* ReliLab theme overrides for nostr-calendar-block
+ *
+ * Loaded dynamically by embed-wall.js when data-theme="relilab" is set.
+ */
 
-   Usage options (pick one):
-   - Add <link rel="stylesheet" href="themes/relilab.css" /> to <head> in   index.html
-   - Add class to <body>: <body class="theme-relilab">
-   - Set data attribute on <html>: document.documentElement.setAttribute('data-theme','relilab')
-
-   Make sure this file is loaded after `event-wall.css` or that the selector's
-   specificity matches how you toggle the theme (class vs data-attribute).
-*/
-
-/* Target both a body class and the html[data-theme] attribute for flexibility */
-.theme-relilab,
-html[data-theme="relilab"] {
-    /* --- Spacing / radii --- */
+[data-theme="relilab"] {
   --radius-sm: 3px;
-  
-  --color-primary: #3b3634;       /* Hauptaktion, Links */
-  --primary-color: var(--color-primary);
-  
+  --color-primary: #3b3634;
 }
-.theme-relilab .tile-body{
-  background: linear-gradient(45deg,#d32fe4,#f5702f);
+
+[data-theme="relilab"] .tile-body {
+  background: linear-gradient(45deg, #d32fe4, #f5702f);
 }
-.theme-relilab.tile-header.no-image {
-  background: linear-gradient(45deg,#4e54c8,#8f94fb);
+
+[data-theme="relilab"] .tile-header.no-image {
+  background: linear-gradient(45deg, #4e54c8, #8f94fb);
 }
