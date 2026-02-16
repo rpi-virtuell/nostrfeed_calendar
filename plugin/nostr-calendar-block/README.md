@@ -1,5 +1,5 @@
 === Nostr Calendar Block ===
-Contributors: rpi-virtuell
+Contributors: Jörg Lohrer, rpi-virtuell
 Tags: nostr, events, calendar, gutenberg, block
 Requires at least: 5.8
 Tested up to: 6.9

@@ -3,7 +3,7 @@
  * Plugin Name: Nostr Calendar Block
  * Description: Gutenberg Block zum Anzeigen von Nostr Events als Event Wall
  * Version: 1.1.0
- * Author: rpi-virtuell
+ * Author: Jörg Lohrer, rpi-virtuell
  * License: GPL-2.0-or-later
  * Text Domain: nostr-calendar-block
  * Domain Path: /languages
