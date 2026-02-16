@@ -95,10 +95,10 @@
     if (isSameDay) {
       const df = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' });
       const tf = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' });
-      return df.format(start) + ', ' + tf.format(start) + ' \u2013 ' + tf.format(end) + ' Uhr';
+      return df.format(start) + ', ' + tf.format(start) + ' \u2013 ' + tf.format(end) + ' ' + t('clock', 'Uhr');
     }
     const ff = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-    return ff.format(start) + ' Uhr \u2013 ' + ff.format(end) + ' Uhr';
+    return ff.format(start) + ' ' + t('clock', 'Uhr') + ' \u2013 ' + ff.format(end) + ' ' + t('clock', 'Uhr');
   };
 
   // SVG icons
@@ -288,7 +288,10 @@
       });
     };
 
+    var tagCountCache = null;
+    var tagCountCacheRef = null;
     var getAllTagsWithCounts = function (events) {
+      if (tagCountCacheRef === events && tagCountCache) return tagCountCache;
       var map = new Map();
       events.forEach(function (e) {
         e.tagsArr.forEach(function (tag) {
@@ -299,9 +302,11 @@
           map.set(key, entry);
         });
       });
-      return Array.from(map.entries())
+      tagCountCacheRef = events;
+      tagCountCache = Array.from(map.entries())
         .sort(function (a, b) { return b[1].count - a[1].count; })
         .map(function (item) { return { key: item[0], label: item[1].label, count: item[1].count }; });
+      return tagCountCache;
     };
 
     var getAllMonths = function (events) {
@@ -354,7 +359,8 @@
       if (loaderEl) {
         loaderEl.textContent = '';
         var errDiv = document.createElement('div');
-        errDiv.style.cssText = 'color:red;padding:20px;text-align:center';
+        errDiv.className = 'nostr-event-error';
+        errDiv.setAttribute('role', 'alert');
         errDiv.textContent = message;
         loaderEl.appendChild(errDiv);
       }
@@ -379,6 +385,7 @@
       var filterToolbar = container.querySelector('.filter-toolbar');
       var filterVisible = filterToolbar && window.getComputedStyle(filterToolbar).display !== 'none';
 
+      var fragment = document.createDocumentFragment();
       list.forEach(function (event, idx) {
         var tile = document.createElement('article');
         tile.className = 'event-tile';
@@ -501,8 +508,9 @@
 
         tile.appendChild(tagsDiv);
         tile.appendChild(wrapper);
-        eventWallEl.appendChild(tile);
+        fragment.appendChild(tile);
       });
+      eventWallEl.appendChild(fragment);
     };
 
     // Event delegation on grid (single listener instead of per-tile)

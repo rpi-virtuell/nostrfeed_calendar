@@ -23,11 +23,18 @@ class Nostr_Calendar_Block_Renderer {
 
         // Sanitize attributes
         $theme = sanitize_text_field($attributes['theme'] ?? 'light');
+        $allowed_themes = ['light', 'dark', 'relilab', 'foerbico'];
+        if (!in_array($theme, $allowed_themes, true)) {
+            $theme = 'light';
+        }
         $show_filterbar = (bool)($attributes['showFilterbar'] ?? true);
         $filter = sanitize_text_field($attributes['filter'] ?? '');
         $relays = is_array($attributes['relays']) ? $attributes['relays'] : [];
         $npub = is_array($attributes['npub']) ? $attributes['npub'] : [];
         $limit = intval($attributes['limit'] ?? 1000);
+        if ($limit < 1 || $limit > 10000) {
+            $limit = 1000;
+        }
 
         // Sanitize arrays
         $relays = array_map('sanitize_text_field', $relays);

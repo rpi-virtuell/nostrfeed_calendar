@@ -23,8 +23,8 @@ class Nostr_Calendar_Block {
     }
 
     private function setup_hooks() {
-        add_action('init', [$this, 'register_block'], 5);
-        add_action('init', [$this, 'load_textdomain']);
+        add_action('init', [$this, 'load_textdomain'], 5);
+        add_action('init', [$this, 'register_block'], 10);
         add_action('enqueue_block_editor_assets', [$this, 'enqueue_editor_assets']);
         add_action('wp_enqueue_scripts', [$this, 'enqueue_frontend_assets']);
     }
@@ -148,6 +148,7 @@ class Nostr_Calendar_Block {
                     'loadError' => __('Fehler beim Laden der Termine.', 'nostr-calendar-block'),
                     'details' => __('Details ansehen', 'nostr-calendar-block'),
                     'removeTag' => __('Tag entfernen', 'nostr-calendar-block'),
+                    'clock' => __('Uhr', 'nostr-calendar-block'),
                 ]
             ]
         );

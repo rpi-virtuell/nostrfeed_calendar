@@ -40,6 +40,7 @@
     return out;
   }
   function bech32Decode(bech) {
+    if (!bech || typeof bech !== 'string' || bech.length === 0) return null;
     try {
       const lower = bech.toLowerCase();
       const pos = lower.lastIndexOf('1');
@@ -75,7 +76,7 @@
     const dec = bech32Decode(npub);
     if (!dec || (dec.hrp !== 'npub' && dec.hrp !== 'nprofile')) return null;
     const bytes = fromWords(dec.data);
-    if (!bytes || bytes.length === 0) return null;
+    if (!bytes || bytes.length !== 32) return null;
     return bytes.map(b => ('0' + b.toString(16)).slice(-2)).join('');
   }
 
