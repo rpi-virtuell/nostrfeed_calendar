@@ -349,6 +349,44 @@
 .nostr-event-wall .tile-body a { color: var(--color-primary-contrast); }
 .nostr-event-wall .tile-title { margin: 0; line-height: 1.35; font-size: 1.05rem; }
 
+/* Author display (tile) */
+.nostr-event-wall .tile-author {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: .95em;
+}
+
+.nostr-event-wall .author-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,.3);
+}
+
+/* Author display (modal) */
+.nostr-event-wall .modal-author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border-color);
+  margin-top: 8px;
+}
+
+.nostr-event-wall .modal-author .author-avatar {
+  width: 36px;
+  height: 36px;
+}
+
+.nostr-event-wall .modal-author .author-name {
+  font-weight: 500;
+  color: var(--color-heading);
+}
+
 /* Tile Toolbar */
 .nostr-event-wall .tile-toolbar {
   display: flex;

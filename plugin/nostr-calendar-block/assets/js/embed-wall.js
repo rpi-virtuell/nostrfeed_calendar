@@ -86,6 +86,7 @@
     var filter = ds.filter || '';
     var showFilterbar = (ds.showFilterbar || 'true').toLowerCase() !== 'false';
     var showDescription = (ds.showDescription || 'true').toLowerCase() !== 'false';
+    var showAuthor = (ds.showAuthor || 'true').toLowerCase() !== 'false';
 
     // Store instance options (keyed by instanceId)
     window.NOSTR_WALL_INSTANCES[instanceId] = {
@@ -168,6 +169,7 @@
             '<p><strong>' + t('location', 'Ort:') + '</strong> <span id="' + pfx + 'modal-location"></span></p>' +
             '<p><strong>' + t('tags', 'Tags') + ':</strong> <span id="' + pfx + 'modal-tags"></span></p>' +
             '<p><strong>' + t('educationalLevel', 'Bildungsstufe:') + '</strong> <span id="' + pfx + 'modal-edu-levels"></span></p>' +
+            '<div id="' + pfx + 'modal-author" class="modal-author"></div>' +
           '</div>' +
           '<div id="' + pfx + 'modal-content-html"></div>' +
         '</div>' +

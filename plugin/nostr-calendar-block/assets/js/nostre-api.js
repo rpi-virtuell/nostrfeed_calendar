@@ -337,6 +337,60 @@
     });
   }
 
+  // ————— Profile Cache (kind:0) —————
+  const _profileCache = new Map(); // hex pubkey -> { name, picture, about }
+
+  /**
+   * Fetch Nostr profiles (kind:0) for a list of hex pubkeys.
+   * Results are cached globally so subsequent calls are free.
+   */
+  async function fetchProfiles({ relays = DEFAULT_RELAYS, pubkeys = [], timeoutMs = 6000 } = {}) {
+    // Filter out already-cached pubkeys
+    const missing = pubkeys.filter(pk => pk && !_profileCache.has(pk));
+    if (missing.length === 0) return;
+
+    const filter = { kinds: [0], authors: missing, limit: missing.length };
+    const rawEvents = await queryNostrEvents({ relays, filter, timeoutMs });
+
+    // kind:0 may have multiple events per pubkey; pick the newest
+    const byPubkey = new Map();
+    rawEvents.forEach(function (ev) {
+      if (!ev.pubkey) return;
+      var existing = byPubkey.get(ev.pubkey);
+      if (!existing || (ev.created_at || 0) > (existing.created_at || 0)) {
+        byPubkey.set(ev.pubkey, ev);
+      }
+    });
+
+    byPubkey.forEach(function (ev, pk) {
+      try {
+        var profile = JSON.parse(ev.content || '{}');
+        _profileCache.set(pk, {
+          name: profile.display_name || profile.name || '',
+          picture: profile.picture || '',
+          about: profile.about || '',
+          nip05: profile.nip05 || '',
+        });
+      } catch (e) {
+        _profileCache.set(pk, { name: '', picture: '', about: '', nip05: '' });
+      }
+    });
+
+    // Mark missing pubkeys as empty so we don't re-fetch
+    missing.forEach(function (pk) {
+      if (!_profileCache.has(pk)) {
+        _profileCache.set(pk, { name: '', picture: '', about: '', nip05: '' });
+      }
+    });
+  }
+
+  /**
+   * Get a cached profile. Returns { name, picture, about, nip05 } or null.
+   */
+  function getProfile(hexPubkey) {
+    return _profileCache.get(hexPubkey) || null;
+  }
+
   // ————— Pipeline —————
   async function getNostrFeed({
     relays = DEFAULT_RELAYS,
@@ -398,7 +452,7 @@
   }
 
   // ————— Public API —————
-  const NostreAPI = { getNostrFeed };
+  const NostreAPI = { getNostrFeed, fetchProfiles, getProfile };
 
   if (typeof window !== "undefined") {
     window.NostreAPI = NostreAPI;

@@ -125,6 +125,7 @@
     }, instanceOpts);
 
     var showDescription = (container.dataset.showDescription || 'true').toLowerCase() !== 'false';
+    var showAuthor = (container.dataset.showAuthor || 'true').toLowerCase() !== 'false';
     var endpoint = (blockData.apiEndpoint) || 'https://n8n.rpi-virtuell.de/webhook/nostre_termine';
 
     // Elements (scoped)
@@ -483,11 +484,23 @@
           meta.appendChild(locPara);
         }
 
-        if (event.pubkey) {
+        if (showAuthor && event.pubkey) {
+          var profile = (window.NostreAPI && window.NostreAPI.getProfile) ? window.NostreAPI.getProfile(event.pubkey) : null;
           var pubPara = document.createElement('p');
-          pubPara.innerHTML = personIcon;
+          pubPara.className = 'tile-author';
+          if (profile && profile.picture && /^https:\/\//i.test(profile.picture)) {
+            var avatar = document.createElement('img');
+            avatar.className = 'author-avatar';
+            avatar.src = profile.picture;
+            avatar.alt = profile.name || '';
+            avatar.setAttribute('loading', 'lazy');
+            avatar.onerror = function () { this.style.display = 'none'; };
+            pubPara.appendChild(avatar);
+          } else {
+            pubPara.innerHTML = personIcon;
+          }
           var pubSpan = document.createElement('span');
-          pubSpan.textContent = event.pubkey;
+          pubSpan.textContent = (profile && profile.name) ? profile.name : event.pubkey.slice(0, 12) + '\u2026';
           pubPara.appendChild(pubSpan);
           meta.appendChild(pubPara);
         }
@@ -641,6 +654,34 @@
           modalEduLevels.parentNode.style.display = '';
         } else {
           modalEduLevels.parentNode.style.display = 'none';
+        }
+      }
+
+      var modalAuthor = $('modal-author');
+      if (modalAuthor) {
+        modalAuthor.innerHTML = '';
+        if (showAuthor && event.pubkey) {
+          var profile = (window.NostreAPI && window.NostreAPI.getProfile) ? window.NostreAPI.getProfile(event.pubkey) : null;
+          if (profile && (profile.name || profile.picture)) {
+            if (profile.picture && /^https:\/\//i.test(profile.picture)) {
+              var mAvatar = document.createElement('img');
+              mAvatar.className = 'author-avatar';
+              mAvatar.src = profile.picture;
+              mAvatar.alt = profile.name || '';
+              mAvatar.setAttribute('loading', 'lazy');
+              mAvatar.onerror = function () { this.style.display = 'none'; };
+              modalAuthor.appendChild(mAvatar);
+            }
+            var mName = document.createElement('span');
+            mName.className = 'author-name';
+            mName.textContent = profile.name || event.pubkey.slice(0, 12) + '\u2026';
+            modalAuthor.appendChild(mName);
+            modalAuthor.style.display = '';
+          } else {
+            modalAuthor.style.display = 'none';
+          }
+        } else {
+          modalAuthor.style.display = 'none';
         }
       }
 
@@ -875,6 +916,23 @@
         }
       }
       window.addEventListener('hashchange', handleHashChange);
+
+      // Fetch author profiles asynchronously, then re-render tiles
+      if (showAuthor && window.NostreAPI && typeof window.NostreAPI.fetchProfiles === 'function') {
+        var pubkeys = [];
+        allEvents.forEach(function (e) {
+          if (e.pubkey && pubkeys.indexOf(e.pubkey) === -1) pubkeys.push(e.pubkey);
+        });
+        if (pubkeys.length > 0) {
+          window.NostreAPI.fetchProfiles({
+            relays: NOSTR_OPTIONS.relays,
+            pubkeys: pubkeys,
+            timeoutMs: 6000,
+          }).then(function () {
+            applyFilters(); // re-render with profile data
+          }).catch(function () { /* ignore profile fetch errors */ });
+        }
+      }
     };
     init();
   }

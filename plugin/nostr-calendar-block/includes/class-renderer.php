@@ -17,6 +17,7 @@ class Nostr_Calendar_Block_Renderer {
             'relays' => ['wss://relay-rpi.edufeed.org/'],
             'npub' => ['npub12j35qpeve33929kg64etvw9g9rzms4c8g5gnqta58yhjdc6wryfse3phmu'],
             'showDescription' => true,
+            'showAuthor' => true,
             'limit' => 1000,
         ];
 
@@ -30,6 +31,7 @@ class Nostr_Calendar_Block_Renderer {
         }
         $show_filterbar = (bool)($attributes['showFilterbar'] ?? true);
         $show_description = (bool)($attributes['showDescription'] ?? true);
+        $show_author = (bool)($attributes['showAuthor'] ?? true);
         $filter = sanitize_text_field($attributes['filter'] ?? '');
         $relays = is_array($attributes['relays']) ? $attributes['relays'] : [];
         $npub = is_array($attributes['npub']) ? $attributes['npub'] : [];
@@ -48,6 +50,7 @@ class Nostr_Calendar_Block_Renderer {
             'data-theme="' . esc_attr($theme) . '"',
             'data-show-filterbar="' . ($show_filterbar ? 'true' : 'false') . '"',
             'data-show-description="' . ($show_description ? 'true' : 'false') . '"',
+            'data-show-author="' . ($show_author ? 'true' : 'false') . '"',
         ];
 
         if (!empty($filter)) {

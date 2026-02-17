@@ -56,6 +56,10 @@
         type: 'boolean',
         default: true
       },
+      showAuthor: {
+        type: 'boolean',
+        default: true
+      },
       filter: {
         type: 'string',
         default: ''
@@ -104,6 +108,12 @@
               help: __('Zeigt den Beschreibungstext der Veranstaltungen an', 'nostr-calendar-block'),
               checked: attributes.showDescription !== false,
               onChange: (value) => setAttributes({ showDescription: value })
+            }),
+            el(ToggleControl, {
+              label: __('Autor anzeigen', 'nostr-calendar-block'),
+              help: __('Zeigt den Autor mit Profilbild und Name an', 'nostr-calendar-block'),
+              checked: attributes.showAuthor !== false,
+              onChange: (value) => setAttributes({ showAuthor: value })
             }),
             el(RangeControl, {
               label: __('Maximale Anzahl Events', 'nostr-calendar-block'),
@@ -219,6 +229,11 @@
                 ' ',
                 el('strong', null, attributes.showDescription !== false ? __('Ja', 'nostr-calendar-block') : __('Nein', 'nostr-calendar-block'))
               ),
+              el('p', null,
+                __('Autor:', 'nostr-calendar-block'),
+                ' ',
+                el('strong', null, attributes.showAuthor !== false ? __('Ja', 'nostr-calendar-block') : __('Nein', 'nostr-calendar-block'))
+              ),
               attributes.filter && el('p', null,
                 __('Filter:', 'nostr-calendar-block'),
                 ' ',
@@ -254,6 +269,7 @@
         'data-theme': attributes.theme || 'light',
         'data-show-filterbar': attributes.showFilterbar !== false ? 'true' : 'false',
         'data-show-description': attributes.showDescription !== false ? 'true' : 'false',
+        'data-show-author': attributes.showAuthor !== false ? 'true' : 'false',
         'data-relays': (attributes.relays || ['wss://relay-rpi.edufeed.org/']).join(','),
         'data-npub': (attributes.npub || ['npub12j35qpeve33929kg64etvw9g9rzms4c8g5gnqta58yhjdc6wryfse3phmu']).join(','),
         'data-limit': attributes.limit || 1000
