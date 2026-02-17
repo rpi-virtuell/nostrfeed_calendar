@@ -587,15 +587,7 @@
       if (modalTitle) modalTitle.textContent = event.title || '';
 
       var modalSummary = $('modal-summary');
-      if (modalSummary) {
-        if (showDescription) {
-          modalSummary.textContent = toPlainText(event.summary) || t('noSummary', 'Keine Zusammenfassung vorhanden.');
-          modalSummary.parentNode.style.display = '';
-        } else {
-          modalSummary.textContent = '';
-          modalSummary.parentNode.style.display = 'none';
-        }
-      }
+      if (modalSummary) modalSummary.textContent = toPlainText(event.summary) || t('noSummary', 'Keine Zusammenfassung vorhanden.');
 
       var modalLocation = $('modal-location');
       if (modalLocation) {
@@ -654,13 +646,7 @@
 
       var modalContentHtml = $('modal-content-html');
       if (modalContentHtml) {
-        if (showDescription) {
-          modalContentHtml.innerHTML = sanitizeHtml(event.content || '');
-          modalContentHtml.style.display = '';
-        } else {
-          modalContentHtml.innerHTML = '';
-          modalContentHtml.style.display = 'none';
-        }
+        modalContentHtml.innerHTML = sanitizeHtml(event.content || '');
       }
 
       try { lastFilterHash = buildFilterHash(); } catch (e) { /* ignore */ }
