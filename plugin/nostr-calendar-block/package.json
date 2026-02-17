@@ -1,6 +1,6 @@
 {
   "name": "nostr-calendar-block",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Gutenberg Block zum Anzeigen von Nostr Events als Event Wall",
   "author": "rpi-virtuell",
   "license": "GPL-2.0-or-later",
