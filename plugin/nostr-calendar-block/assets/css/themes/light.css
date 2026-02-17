@@ -1,0 +1,32 @@
+/* Light theme overrides for nostr-calendar-block
+ *
+ * This file is NOT loaded by the plugin (light is the default in event-wall.css).
+ * It exists for standalone usage outside WordPress.
+ */
+
+[data-theme="light"] {
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --space-xs: 6px;
+  --space-sm: 10px;
+  --space-md: 18px;
+
+  --color-primary: #e4e6ee;
+  --color-primary-contrast: #000000;
+  --color-secondary: #f5a623;
+  --color-background: #f4f7f6;
+  --color-surface: #ffffff;
+  --color-heading: #636363;
+  --color-text: #0f172a;
+  --color-muted: #6b7280;
+  --color-danger: #d9534f;
+  --color-success: #2f855a;
+  --color-warning: #f59e0b;
+
+  --tile-shadow: 0 5px 15px rgba(0, 0, 0, .18);
+  --chip-bg: #eef2ff;
+  --chip-border: #c7d2fe;
+  --border-color: #e5e7eb;
+  --modal-overlay: rgba(0, 0, 0, .5);
+}

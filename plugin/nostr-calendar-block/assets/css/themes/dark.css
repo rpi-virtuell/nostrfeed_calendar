@@ -1,0 +1,124 @@
+/* Dark theme overrides for nostr-calendar-block
+ *
+ * Loaded dynamically by embed-wall.js when data-theme="dark" is set.
+ * The base dark CSS variables are in event-wall.css [data-theme="dark"].
+ * This file provides additional element-level overrides for cohesive appearance.
+ */
+
+/* === Element-level overrides === */
+
+/* No-image tile header */
+[data-theme="dark"] .tile-header.no-image {
+  background: linear-gradient(45deg, #243b55, #141926);
+}
+
+/* Fields */
+[data-theme="dark"] .field {
+  background: var(--color-filter-field-bg);
+  border-color: var(--color-filter-field-border);
+}
+
+[data-theme="dark"] .field:focus-within {
+  box-shadow: 0 0 0 4px rgba(106, 166, 255, 0.06);
+}
+
+/* Suggest dropdown */
+[data-theme="dark"] .suggest,
+[data-theme="dark"] .suggest button {
+  background: var(--color-surface);
+  border-color: var(--border-color);
+  color: var(--color-muted);
+}
+
+[data-theme="dark"] .suggest button:hover,
+[data-theme="dark"] .suggest button:focus {
+  background: var(--color-filter-field-bg);
+  color: var(--color-text);
+}
+
+/* Buttons */
+[data-theme="dark"] .btn.ghost {
+  background: transparent;
+  color: var(--color-text);
+}
+
+/* Cards / Tiles */
+[data-theme="dark"] .event-wrapper {
+  background: var(--color-surface);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+[data-theme="dark"] .tile-body {
+  background: rgba(44, 60, 85, 0.95);
+  color: var(--color-text);
+}
+
+[data-theme="dark"] .tile-title {
+  color: var(--color-text);
+}
+
+[data-theme="dark"] .tile-summary {
+  color: var(--color-text);
+}
+
+[data-theme="dark"] .tile-meta p {
+  color: var(--color-muted);
+}
+
+[data-theme="dark"] .tile-meta svg {
+  fill: var(--color-muted);
+}
+
+/* Date bubble */
+[data-theme="dark"] .date-bubble {
+  background: var(--color-text);
+  box-shadow: 4px 6px 10px rgba(0, 0, 0, .6);
+}
+
+[data-theme="dark"] .date-bubble-day {
+  color: var(--color-background);
+}
+
+/* Tags */
+[data-theme="dark"] .tile-tags .tag-badge,
+[data-theme="dark"] .modal [id$="modal-tags"] button {
+  background-color: #f59e0b;
+  color: var(--color-primary-contrast);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .4);
+}
+
+/* Chips */
+[data-theme="dark"] .chip {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  color: var(--color-text);
+}
+
+/* Modal */
+[data-theme="dark"] .modal {
+  background: var(--modal-overlay);
+}
+
+[data-theme="dark"] .modal-content {
+  background: rgba(44, 60, 85, 0.95);
+  color: var(--color-text);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .6);
+}
+
+[data-theme="dark"] .modal [id$="modal-date"] {
+  color: var(--color-text);
+}
+
+[data-theme="dark"] .close-button {
+  color: var(--color-text);
+}
+
+/* Links */
+[data-theme="dark"] a {
+  color: var(--color-primary);
+}
+
+[data-theme="dark"] a:hover {
+  color: var(--color-primary-contrast);
+}

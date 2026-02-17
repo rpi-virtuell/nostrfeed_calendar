@@ -1,0 +1,17 @@
+/* ReliLab theme overrides for nostr-calendar-block
+ *
+ * Loaded dynamically by embed-wall.js when data-theme="relilab" is set.
+ */
+
+[data-theme="relilab"] {
+  --radius-sm: 3px;
+  --color-primary: #3b3634;
+}
+
+[data-theme="relilab"] .tile-body {
+  background: linear-gradient(45deg, #d32fe4, #f5702f);
+}
+
+[data-theme="relilab"] .tile-header.no-image {
+  background: linear-gradient(45deg, #4e54c8, #8f94fb);
+}

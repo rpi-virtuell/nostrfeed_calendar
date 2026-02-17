@@ -1,0 +1,160 @@
+# Translation template for Nostr Calendar Block.
+# Copyright (C) 2025 rpi-virtuell
+# This file is distributed under the same license as the Nostr Calendar Block package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Nostr Calendar Block 1.0.0\n"
+"Report-Msgid-Bugs-To: https://github.com/rpi-virtuell/nostrfeed_calendar\n"
+"POT-Creation-Date: 2025-10-17 12:00:00+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+#: assets/js/editor.js:32
+msgid "Nostr Event Wall"
+msgstr ""
+
+#: assets/js/editor.js:33
+msgid "Zeigt Events aus dem Nostr-Netzwerk an"
+msgstr ""
+
+#: assets/js/editor.js:48
+msgctxt "Block attribute"
+msgid "theme"
+msgstr ""
+
+#: assets/js/editor.js:50
+msgctxt "Block attribute"
+msgid "showFilterbar"
+msgstr ""
+
+#: assets/js/editor.js:54
+msgctxt "Block attribute"
+msgid "filter"
+msgstr ""
+
+#: assets/js/editor.js:59
+msgctxt "Block attribute"
+msgid "relays"
+msgstr ""
+
+#: assets/js/editor.js:64
+msgctxt "Block attribute"
+msgid "npub"
+msgstr ""
+
+#: assets/js/editor.js:69
+msgctxt "Block attribute"
+msgid "limit"
+msgstr ""
+
+#: assets/js/editor.js:76
+msgid "Design"
+msgstr ""
+
+#: assets/js/editor.js:77
+msgid "Theme"
+msgstr ""
+
+#: assets/js/editor.js:81
+msgid "Hell (Light)"
+msgstr ""
+
+#: assets/js/editor.js:82
+msgid "Dunkel (Dark)"
+msgstr ""
+
+#: assets/js/editor.js:83
+msgid "ReliLab"
+msgstr ""
+
+#: assets/js/editor.js:88
+msgid "Anzeige"
+msgstr ""
+
+#: assets/js/editor.js:89
+msgid "Filterleiste anzeigen"
+msgstr ""
+
+#: assets/js/editor.js:94
+msgid "Maximale Anzahl Events"
+msgstr ""
+
+#: assets/js/editor.js:103
+msgid "Filter (Optional)"
+msgstr ""
+
+#: assets/js/editor.js:105
+msgid "z.B. tags:kita|grundschule"
+msgstr ""
+
+#: assets/js/editor.js:110
+msgid "Relays"
+msgstr ""
+
+#: assets/js/editor.js:114
+msgid "Relay"
+msgstr ""
+
+#: assets/js/editor.js:125
+msgid "Entfernen"
+msgstr ""
+
+#: assets/js/editor.js:132
+msgid "+ Relay hinzufügen"
+msgstr ""
+
+#: assets/js/editor.js:137
+msgid "Autoren (npub)"
+msgstr ""
+
+#: assets/js/editor.js:141
+msgid "npub"
+msgstr ""
+
+#: assets/js/editor.js:152
+msgid "+ Autor hinzufügen"
+msgstr ""
+
+#: assets/js/editor.js:161
+msgid "📅"
+msgstr ""
+
+#: assets/js/editor.js:162
+msgid "Nostr Event Wall"
+msgstr ""
+
+#: assets/js/editor.js:165
+msgid "Theme:"
+msgstr ""
+
+#: assets/js/editor.js:169
+msgid "Filterleiste:"
+msgstr ""
+
+#: assets/js/editor.js:171
+msgid "Ja"
+msgstr ""
+
+#: assets/js/editor.js:171
+msgid "Nein"
+msgstr ""
+
+#: assets/js/editor.js:174
+msgid "Filter:"
+msgstr ""
+
+#: assets/js/editor.js:178
+msgid "Max. Events:"
+msgstr ""
+
+#: assets/js/editor.js:182
+msgid "Relays:"
+msgstr ""
+
+#: assets/js/editor.js:186
+msgid "Autoren:"
+msgstr ""

@@ -1,0 +1,37 @@
+{
+  "name": "nostr-calendar-block",
+  "version": "1.2.0",
+  "description": "Gutenberg Block zum Anzeigen von Nostr Events als Event Wall",
+  "author": "rpi-virtuell",
+  "license": "GPL-2.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rpi-virtuell/nostrfeed_calendar.git"
+  },
+  "keywords": [
+    "wordpress",
+    "gutenberg",
+    "block",
+    "nostr",
+    "events",
+    "calendar"
+  ],
+  "devDependencies": {
+    "@wordpress/blocks": "^11.0.0",
+    "@wordpress/components": "^21.0.0",
+    "@wordpress/compose": "^6.0.0",
+    "@wordpress/data": "^8.0.0",
+    "@wordpress/editor": "^13.0.0",
+    "@wordpress/element": "^5.0.0",
+    "@wordpress/i18n": "^4.0.0",
+    "@wordpress/plugins": "^5.0.0",
+    "@wordpress/scripts": "^25.0.0",
+    "classnames": "^2.3.1"
+  },
+  "scripts": {
+    "build": "wp-scripts build",
+    "start": "wp-scripts start",
+    "lint:js": "wp-scripts lint-js",
+    "lint:pkg-json": "wp-scripts lint-pkg-json"
+  }
+}
