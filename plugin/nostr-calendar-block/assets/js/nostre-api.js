@@ -201,6 +201,63 @@
     return s;
   }
 
+  // --- KIM Educational Level (Bildungsstufe) mapping ---
+  // Based on https://w3id.org/kim/educationalLevel/
+  const KIM_EDUCATIONAL_LEVELS = [
+    { id: 'https://w3id.org/kim/educationalLevel/level_0', label: 'Elementarbereich', aliases: ['Elementarstufe', 'Frühbereich', 'Frühkindliche Bildung', 'ISCED 2011, Level 0'] },
+    { id: 'https://w3id.org/kim/educationalLevel/level_1', label: 'Primarbereich', aliases: ['Primarstufe', 'ISCED 2011, Level 1'] },
+    { id: 'https://w3id.org/kim/educationalLevel/level_2', label: 'Sekundarbereich I', aliases: ['Sekundarstufe I', 'ISCED 2011, Level 2'] },
+    { id: 'https://w3id.org/kim/educationalLevel/level_3', label: 'Sekundarbereich II', aliases: ['Sekundarstufe II', 'ISCED 2011, Level 3'] },
+    { id: 'https://w3id.org/kim/educationalLevel/level_4', label: 'Postsekundarer nicht-tertiärer Bereich', aliases: ['Berufliche Bildung', 'ISCED 2011, Level 4'] },
+    { id: 'https://w3id.org/kim/educationalLevel/level_5', label: 'Kurzes tertiäres Bildungsprogramm', aliases: ['ISCED 2011, Level 5'] },
+    { id: 'https://w3id.org/kim/educationalLevel/level_A', label: 'Hochschule', aliases: [] },
+    { id: 'https://w3id.org/kim/educationalLevel/level_6', label: 'Bachelor oder äquivalent', aliases: ['ISCED 2011, Level 6'] },
+    { id: 'https://w3id.org/kim/educationalLevel/level_7', label: 'Master oder äquivalent', aliases: ['ISCED 2011, Level 7'] },
+    { id: 'https://w3id.org/kim/educationalLevel/level_8', label: 'Promotion oder äquivalent', aliases: ['ISCED 2011, Level 8'] },
+    { id: 'https://w3id.org/kim/educationalLevel/level_B', label: 'Vorbereitungsdienst', aliases: [] },
+    { id: 'https://w3id.org/kim/educationalLevel/level_C', label: 'Fortbildung', aliases: [] },
+  ];
+
+  // Build a lookup map: lowercase label/alias -> level object
+  const _eduLevelLookup = new Map();
+  KIM_EDUCATIONAL_LEVELS.forEach(function (level) {
+    _eduLevelLookup.set(level.label.toLowerCase(), level);
+    _eduLevelLookup.set(level.id.toLowerCase(), level);
+    (level.aliases || []).forEach(function (alias) {
+      _eduLevelLookup.set(alias.toLowerCase(), level);
+    });
+  });
+
+  /**
+   * Extract educational levels from Nostr event tags.
+   * Checks both AMB-style educationalLevel tags and t-tags against KIM vocabulary.
+   */
+  function extractEducationalLevels(tags) {
+    var found = new Map(); // id -> level object (deduplicated)
+
+    // 1. Check AMB-style educationalLevel:id tags
+    (tags || []).forEach(function (tag) {
+      if (Array.isArray(tag) && tag[0] === 'educationalLevel:id' && tag[1]) {
+        var level = _eduLevelLookup.get(tag[1].toLowerCase());
+        if (level && !found.has(level.id)) {
+          found.set(level.id, level);
+        }
+      }
+    });
+
+    // 2. Check t-tags against KIM labels and aliases
+    (tags || []).forEach(function (tag) {
+      if (Array.isArray(tag) && tag[0] === 't' && tag[1]) {
+        var level = _eduLevelLookup.get(tag[1].toLowerCase());
+        if (level && !found.has(level.id)) {
+          found.set(level.id, level);
+        }
+      }
+    });
+
+    return Array.from(found.values());
+  }
+
   const tagValue = (tags, key) => {
     const t = (tags || []).find((arr) => Array.isArray(arr) && arr[0] === key);
     return t ? (t[1] ?? "") : "";
@@ -318,6 +375,7 @@
       const summaryShort = shorten(summaryRaw, 300);
       const summaryHtml = mdToHtml(summaryShort);
       const contentHtml = mdToHtml(contentMd);
+      const educationalLevels = extractEducationalLevels(tags);
 
       return {
         ID: id,
@@ -332,6 +390,7 @@
         content: contentHtml,
         pubkey,
         image,
+        educationalLevels,
       };
     });
 

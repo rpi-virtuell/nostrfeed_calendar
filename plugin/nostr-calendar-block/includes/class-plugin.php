@@ -149,6 +149,7 @@ class Nostr_Calendar_Block {
                     'details' => __('Details ansehen', 'nostr-calendar-block'),
                     'removeTag' => __('Tag entfernen', 'nostr-calendar-block'),
                     'clock' => __('Uhr', 'nostr-calendar-block'),
+                    'educationalLevel' => __('Bildungsstufe:', 'nostr-calendar-block'),
                 ]
             ]
         );

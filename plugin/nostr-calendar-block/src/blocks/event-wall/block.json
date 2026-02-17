@@ -49,6 +49,10 @@
         "type": "string"
       }
     },
+    "showDescription": {
+      "type": "boolean",
+      "default": true
+    },
     "limit": {
       "type": "number",
       "default": 1000,

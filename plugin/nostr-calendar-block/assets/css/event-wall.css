@@ -294,6 +294,45 @@
 .nostr-event-wall .tag-badge:hover,
 .nostr-event-wall .tag-badge:focus { background-color: var(--color-primary); color: var(--color-surface); outline: var(--focus-ring); outline-offset: 1px; }
 
+/* Educational Level badges (tile) */
+.nostr-event-wall .tile-edu-levels {
+  display: flex;
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 5px;
+  z-index: 10;
+  max-width: 55%;
+  padding: 4px;
+}
+
+.nostr-event-wall .edu-level-badge {
+  background-color: var(--color-success);
+  color: #ffffff;
+  padding: 4px 9px;
+  border-radius: var(--radius-round);
+  font-size: 0.7em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 220px;
+}
+
+/* Educational Level badges (modal) */
+.nostr-event-wall .modal [id$="modal-edu-levels"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.nostr-event-wall .modal [id$="modal-edu-levels"] .edu-level-badge {
+  font-size: 0.75em;
+  padding: 4px 8px;
+}
+
 /* Body */
 .nostr-event-wall .tile-body {
   display: flex;

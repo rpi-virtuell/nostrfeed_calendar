@@ -85,6 +85,7 @@
     var limit = parseInt(ds.limit) || 1000;
     var filter = ds.filter || '';
     var showFilterbar = (ds.showFilterbar || 'true').toLowerCase() !== 'false';
+    var showDescription = (ds.showDescription || 'true').toLowerCase() !== 'false';
 
     // Store instance options (keyed by instanceId)
     window.NOSTR_WALL_INSTANCES[instanceId] = {
@@ -96,7 +97,7 @@
     window.NOSTR_OPTIONS = window.NOSTR_WALL_INSTANCES[instanceId];
 
     // Build wall markup with prefixed IDs
-    buildWallMarkup(container, instanceId, { showFilterbar: showFilterbar });
+    buildWallMarkup(container, instanceId, { showFilterbar: showFilterbar, showDescription: showDescription });
 
     // Load theme CSS if not default (deduplicated)
     if (theme && theme !== 'light') {
@@ -166,6 +167,7 @@
             '<p><strong>' + t('summary', 'Zusammenfassung:') + '</strong> <span id="' + pfx + 'modal-summary"></span></p>' +
             '<p><strong>' + t('location', 'Ort:') + '</strong> <span id="' + pfx + 'modal-location"></span></p>' +
             '<p><strong>' + t('tags', 'Tags') + ':</strong> <span id="' + pfx + 'modal-tags"></span></p>' +
+            '<p><strong>' + t('educationalLevel', 'Bildungsstufe:') + '</strong> <span id="' + pfx + 'modal-edu-levels"></span></p>' +
           '</div>' +
           '<div id="' + pfx + 'modal-content-html"></div>' +
         '</div>' +

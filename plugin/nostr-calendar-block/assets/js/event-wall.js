@@ -124,6 +124,7 @@
       timeoutMs: 8000,
     }, instanceOpts);
 
+    var showDescription = (container.dataset.showDescription || 'true').toLowerCase() !== 'false';
     var endpoint = (blockData.apiEndpoint) || 'https://n8n.rpi-virtuell.de/webhook/nostre_termine';
 
     // Elements (scoped)
@@ -268,6 +269,7 @@
         pubkey: it.pubkey,
         image: it.image,
         location_url: it.location_url,
+        educationalLevels: it.educationalLevels || [],
       };
     };
 
@@ -284,7 +286,8 @@
         tagsLower: tagsArr.map(function (tt) { return tt.toLowerCase(); }),
         monthKey: toMonthKey(start),
         summaryPlain: summaryPlain,
-        contentPlain: contentPlain
+        contentPlain: contentPlain,
+        educationalLevels: event.educationalLevels || []
       });
     };
 
@@ -411,6 +414,20 @@
           tagsDiv.appendChild(btn);
         });
 
+        // Build educational level badges
+        var eduDiv = null;
+        if (event.educationalLevels && event.educationalLevels.length) {
+          eduDiv = document.createElement('div');
+          eduDiv.className = 'tile-edu-levels';
+          event.educationalLevels.forEach(function (level) {
+            var badge = document.createElement('span');
+            badge.className = 'edu-level-badge';
+            badge.title = level.id;
+            badge.textContent = level.label;
+            eduDiv.appendChild(badge);
+          });
+        }
+
         var summaryShort = truncateWords(event.summaryPlain || toPlainText(event.summary || ''), SUMMARY_WORD_LIMIT);
 
         // Validate image URL
@@ -483,7 +500,7 @@
         body.appendChild(meta);
         body.appendChild(ghost);
 
-        if (summaryShort) {
+        if (showDescription && summaryShort) {
           var summaryP = document.createElement('p');
           summaryP.className = 'tile-summary';
           summaryP.textContent = summaryShort;
@@ -507,6 +524,7 @@
         wrapper.appendChild(toolbar);
 
         tile.appendChild(tagsDiv);
+        if (eduDiv) tile.appendChild(eduDiv);
         tile.appendChild(wrapper);
         fragment.appendChild(tile);
       });
@@ -569,7 +587,15 @@
       if (modalTitle) modalTitle.textContent = event.title || '';
 
       var modalSummary = $('modal-summary');
-      if (modalSummary) modalSummary.textContent = toPlainText(event.summary) || t('noSummary', 'Keine Zusammenfassung vorhanden.');
+      if (modalSummary) {
+        if (showDescription) {
+          modalSummary.textContent = toPlainText(event.summary) || t('noSummary', 'Keine Zusammenfassung vorhanden.');
+          modalSummary.parentNode.style.display = '';
+        } else {
+          modalSummary.textContent = '';
+          modalSummary.parentNode.style.display = 'none';
+        }
+      }
 
       var modalLocation = $('modal-location');
       if (modalLocation) {
@@ -609,9 +635,32 @@
         }
       }
 
+      var modalEduLevels = $('modal-edu-levels');
+      if (modalEduLevels) {
+        modalEduLevels.innerHTML = '';
+        if (event.educationalLevels && event.educationalLevels.length) {
+          event.educationalLevels.forEach(function (level) {
+            var badge = document.createElement('span');
+            badge.className = 'edu-level-badge';
+            badge.title = level.id;
+            badge.textContent = level.label;
+            modalEduLevels.appendChild(badge);
+          });
+          modalEduLevels.parentNode.style.display = '';
+        } else {
+          modalEduLevels.parentNode.style.display = 'none';
+        }
+      }
+
       var modalContentHtml = $('modal-content-html');
       if (modalContentHtml) {
-        modalContentHtml.innerHTML = sanitizeHtml(event.content || '');
+        if (showDescription) {
+          modalContentHtml.innerHTML = sanitizeHtml(event.content || '');
+          modalContentHtml.style.display = '';
+        } else {
+          modalContentHtml.innerHTML = '';
+          modalContentHtml.style.display = 'none';
+        }
       }
 
       try { lastFilterHash = buildFilterHash(); } catch (e) { /* ignore */ }
