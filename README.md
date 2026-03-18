@@ -16,9 +16,27 @@ Dieses Projekt zeigt Termine aus einem WordPress-System in zwei verschiedenen We
 - **Demoseiten**: 
  >- [Kachel](https://rpi-virtuell.github.io/nostrfeed_calendar/)
  >- [Kalender](https://rpi-virtuell.github.io/nostrfeed_calendar/calendar-view.html)
- 
+ >- [Dry-Run / Beispieldaten](https://rpi-virtuell.github.io/nostrfeed_calendar/dry-run.html)
 
-### 3. Events löschen (Debugging)
+
+### 3. Dry-Run (lokaler Test ohne Netzwerk)
+
+Um die Ansicht lokal zu testen, ohne echte Nostr-Relays zu benötigen, öffne `dry-run.html` in einem lokalen Server:
+
+```bash
+python -m http.server 8000
+# Dann: http://localhost:8000/dry-run.html
+```
+
+Oder aktiviere den Modus programmatisch **vor** dem Laden von `nostre-api.js`:
+
+```html
+<script>window.NostreAPI_DRYRUN = true;</script>
+```
+
+Detaillierte Infos: [docs/nostr-api.md – Abschnitt 2.5](docs/nostr-api.md)
+
+### 4. Events löschen (Debugging)
 
 - Ein dritter n8n-Workflow dient zum Löschen von Events. Dies ist hauptsächlich für Debugging-Zwecke vorgesehen.
 

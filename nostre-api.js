@@ -244,6 +244,100 @@
     return { location, location_url: url };
   }
 
+  // ————— Dry-Run: Beispiel-Events (kein Netzwerk) —————
+  function buildSampleEvents() {
+    const nowMs = Date.now();
+    const msPerDay = 86400 * 1000;
+    const iso = (ms) => new Date(ms).toISOString();
+
+    return [
+      {
+        ID: "dry-run-event-1",
+        title: "Einführung in Nostr-Protokoll",
+        start: iso(nowMs + 7 * msPerDay),
+        end:   iso(nowMs + 7 * msPerDay + 2 * 60 * 60 * 1000),
+        status: "confirmed",
+        location: '<a href="https://example.com/meet/nostr-intro">Link zum Online-Event</a>',
+        location_url: "https://example.com/meet/nostr-intro",
+        tags: "Nostr, Protokoll, Einführung",
+        summary: "<p>Eine kompakte Einführung in das Nostr-Protokoll – Aufbau, Relays und erste Schritte.</p>",
+        content: "<p>In diesem Online-Treffen lernen wir gemeinsam die Grundlagen des Nostr-Protokolls kennen: Was sind Relays? Wie funktioniert die Schlüsselverwaltung? Und wie lassen sich eigene Events veröffentlichen?</p>",
+        pubkey: "54a340072ccc625516c8d572b638a828c5b857074511302fb4392f26e34e1913",
+        image: "",
+      },
+      {
+        ID: "dry-run-event-2",
+        title: "Workshop: Digitale Werkzeuge in der Schule",
+        start: iso(nowMs + 14 * msPerDay),
+        end:   iso(nowMs + 14 * msPerDay + 3 * 60 * 60 * 1000),
+        status: "confirmed",
+        location: '<a href="https://example.com/meet/digitale-werkzeuge">Link zum Online-Event</a>',
+        location_url: "https://example.com/meet/digitale-werkzeuge",
+        tags: "Bildung, Schule, Digitalisierung, Workshop",
+        summary: "<p>Praxisworkshop zu digitalen Lernwerkzeugen für Lehrkräfte aller Schulformen.</p>",
+        content: "<p>Wir erkunden gemeinsam verschiedene digitale Werkzeuge, die den Unterricht bereichern können: kollaborative Schreibtools, interaktive Präsentationen und kreative Medienformate.</p><p>Bitte bringt euren eigenen Laptop mit.</p>",
+        pubkey: "54a340072ccc625516c8d572b638a828c5b857074511302fb4392f26e34e1913",
+        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Bikesgray.jpg/640px-Bikesgray.jpg",
+      },
+      {
+        ID: "dry-run-event-3",
+        title: "Netzwerktreffen: Bildung & Open Source",
+        start: iso(nowMs + 21 * msPerDay),
+        end:   iso(nowMs + 21 * msPerDay + 1.5 * 60 * 60 * 1000),
+        status: "tentative",
+        location: "Berlin, Kulturzentrum Mitte",
+        location_url: "",
+        tags: "Open Source, Bildung, Netzwerk",
+        summary: "<p>Informelles Treffen für Bildungsinteressierte und Open-Source-Enthusiasten.</p>",
+        content: "<p>Kommt vorbei, tauscht euch aus und lernt neue Menschen kennen, die digitale Bildung und offene Software voranbringen möchten. Getränke und Snacks werden bereitgestellt.</p>",
+        pubkey: "54a340072ccc625516c8d572b638a828c5b857074511302fb4392f26e34e1913",
+        image: "",
+      },
+      {
+        ID: "dry-run-event-4",
+        title: "Webinar: Datenschutz im Schulalltag",
+        start: iso(nowMs + 30 * msPerDay),
+        end:   iso(nowMs + 30 * msPerDay + 90 * 60 * 1000),
+        status: "confirmed",
+        location: '<a href="https://example.com/meet/datenschutz">Link zum Online-Event</a>',
+        location_url: "https://example.com/meet/datenschutz",
+        tags: "Datenschutz, DSGVO, Schule, Webinar",
+        summary: "<p>Rechtssichere Nutzung digitaler Tools – was Schulen wissen müssen.</p>",
+        content: "<p>Ein Rechtsexperte und eine Schulberaterin beantworten eure Fragen rund um DSGVO, Einwilligungen, Cloud-Dienste und die sichere Kommunikation mit Eltern und Schülerinnen und Schülern.</p>",
+        pubkey: "54a340072ccc625516c8d572b638a828c5b857074511302fb4392f26e34e1913",
+        image: "",
+      },
+      {
+        ID: "dry-run-event-5",
+        title: "Barcamp: Zukunft der Bildung",
+        start: iso(nowMs + 45 * msPerDay),
+        end:   iso(nowMs + 46 * msPerDay),
+        status: "confirmed",
+        location: "Hamburg, Universität",
+        location_url: "",
+        tags: "Bildung, Barcamp, Zukunft, Innovation",
+        summary: "<p>Ein ganzes Wochenende lang diskutieren und gestalten wir gemeinsam die Schule von morgen.</p>",
+        content: "<p>Das Barcamp lebt von euren Beiträgen! Bringt eure Ideen, Herausforderungen und Erfahrungen mit – die Agenda entsteht am ersten Tag gemeinsam.</p><p>Anmeldung erforderlich – Plätze sind begrenzt.</p>",
+        pubkey: "54a340072ccc625516c8d572b638a828c5b857074511302fb4392f26e34e1913",
+        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/PNG_transparency_demonstration_1.png/280px-PNG_transparency_demonstration_1.png",
+      },
+      {
+        ID: "dry-run-event-6",
+        title: "Online-Kurs: Programmieren lernen mit Scratch",
+        start: iso(nowMs + 60 * msPerDay),
+        end:   iso(nowMs + 60 * msPerDay + 2 * 60 * 60 * 1000),
+        status: "confirmed",
+        location: '<a href="https://example.com/meet/scratch-kurs">Link zum Online-Event</a>',
+        location_url: "https://example.com/meet/scratch-kurs",
+        tags: "Programmieren, Scratch, Kinder, Grundschule",
+        summary: "<p>Einstieg ins Programmieren für Kinder ab 8 Jahren – spielerisch mit Scratch.</p>",
+        content: "<p>In diesem kostenlosen Online-Kurs lernen Kinder ab 8 Jahren spielerisch die Grundlagen des Programmierens. Mit der visuellen Programmierumgebung Scratch entstehen eigene Animationen und kleine Spiele.</p>",
+        pubkey: "54a340072ccc625516c8d572b638a828c5b857074511302fb4392f26e34e1913",
+        image: "",
+      },
+    ];
+  }
+
   // ————— Nostr Query (Browser WebSockets) —————
   function queryNostrEvents({ relays, filter, timeoutMs = 8000 }) {
     // console.log("queryNostrEvents:", { relays, filter, timeoutMs });
@@ -308,7 +402,13 @@
     sinceDays = 365,
     limit = DEFAULT_LIMIT,
     timeoutMs = 8000,
+    dryRun = false,
   } = {}) {
+    // Dry-Run: keine Netzwerkverbindung, stattdessen Beispiel-Events zurückgeben
+    if (dryRun || window.NostreAPI_DRYRUN === true) {
+      console.log('[nostre-api] Dry-Run-Modus aktiv – Beispiel-Events werden verwendet.');
+      return { nostrfeed: buildSampleEvents() };
+    }
     // entspricht: alowed_npubs + read last 1000 events
     const since = nowSec() - Math.max(0, Number(sinceDays)) * 24 * 60 * 60;
   // sanitize allowed_npub: convert bech32 npub -> hex, filter invalid
@@ -374,8 +474,9 @@
     window.NostreAPI = NostreAPI;
 
     // Optionaler Auto-Run: vor dem Laden setzen: window.NostreAPI_AUTORUN = true
-    if (window.NostreAPI_AUTORUN === true) {
-      getNostrFeed().then((out) => {
+    // Dry-Run-Modus: window.NostreAPI_DRYRUN = true (impliziert AUTORUN)
+    if (window.NostreAPI_AUTORUN === true || window.NostreAPI_DRYRUN === true) {
+      getNostrFeed({ dryRun: window.NostreAPI_DRYRUN === true }).then((out) => {
         // „Ausgeben“ wie früher: das Webhook-Resultat (ein Objekt) – hier geloggt:
         console.log(out);
         // und als Event für UI-Integration:

@@ -93,6 +93,32 @@ npx http-server -p 8000 --cors
 
 Öffne danach http://localhost:8000/ in deinem Browser.
 
+### Dry-Run (ohne Internet / ohne echte Nostr-Relays)
+
+Um die Anwendung ohne Netzwerkverbindung zu testen, öffne stattdessen:
+
+```
+http://localhost:8000/dry-run.html
+```
+
+Diese Seite nutzt lokale **Beispiel-Events** – es werden keine WebSocket-Verbindungen zu Nostr-Relays aufgebaut. Ideal für:
+
+- Lokale Entwicklung ohne Internetverbindung
+- UI-Tests und Demos
+- Schnelles Ausprobieren ohne Live-Daten
+
+Alternativ kannst du den Dry-Run-Modus auch in eigenen Seiten aktivieren, indem du **vor** dem Laden von `nostre-api.js` folgendes setzt:
+
+```html
+<script>window.NostreAPI_DRYRUN = true;</script>
+```
+
+Oder direkt beim API-Aufruf:
+
+```js
+const { nostrfeed } = await window.NostreAPI.getNostrFeed({ dryRun: true });
+```
+
 Wenn `nostre-api.js` einen Node-Only-Mechanismus oder Netzwerkzugriffe verwendet, prüfe die Entwicklertools (Console/Network) auf Fehler (CORS, 404, JSON-Parsing).
 
 ## Debugging-Hinweise
