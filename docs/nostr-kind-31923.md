@@ -40,7 +40,7 @@ Das `content`-Feld enthält eine ausführliche Beschreibung des Termins. Es ist 
 ### Hinweise zu einzelnen Tags
 
 **`d` – Identifier**
-Identifiziert das Event eindeutig in Kombination mit dem Pubkey des Autors. Da Kind 31923 ein *adressierbares* Event ist, ersetzt eine neue Version mit gleichem `d`-Tag und Pubkey automatisch die alte (NIP-01). Im relilab-Workflow wird der `d`-Tag aus der Base64-kodierten WordPress-GUID gebildet, sodass WP-Posts und Nostr-Events dauerhaft verknüpft bleiben.
+Identifiziert das Event eindeutig in Kombination mit dem Pubkey des Autors. Da Kind 31923 ein *adressierbares* Event ist, ersetzt eine neue Version mit gleichem `d`-Tag und Pubkey automatisch die alte (NIP-01). Im relilab-Workflow wird die originale WordPress-Permalink-URL direkt als `d`-Tag verwendet (z. B. `https://relilab.org/termine/mein-termin/`). Das macht den Identifier für Menschen lesbar und verknüpft WP-Post und Nostr-Event dauerhaft und nachvollziehbar.
 
 **`start` / `end` – Zeitstempel**
 Beide Werte sind Unix-Timestamps in Sekunden (nicht Millisekunden). `start` ist inklusiv, `end` exklusiv – analog zu Kalenderstandards wie iCalendar.
@@ -50,6 +50,9 @@ IANA-Bezeichner aus der [Zeitzonen-Datenbank](https://www.iana.org/time-zones), 
 
 **`location`**
 Kann ein physischer Ort (Adresse, Raumname) oder eine URL sein. Im relilab-Workflow werden Zoom-Links im Format `Zoom: https://…` gespeichert und beim Anzeigen automatisch zu klickbaren Links umgewandelt.
+
+**`r` – Verweis (Reference)**
+Verlinkung zu verwandten Ressourcen. Im relilab-Workflow wird hier dieselbe WordPress-Permalink-URL eingetragen wie im `d`-Tag. Damit ist der Ursprungsort des Termins für jeden Client direkt abrufbar – auch ohne Kenntnis des WP-Backends.
 
 **`t` – Hashtag**
 Mehrere `t`-Tags sind erlaubt. Sie ermöglichen die Filterung nach Themen, Zielgruppen oder Veranstaltungsreihen (z. B. `["t", "Kita"]`, `["t", "Grundschule"]`).
@@ -120,7 +123,7 @@ Im relilab-Projekt werden WordPress-Termine automatisch als Kind-31923-Events na
 
 | WordPress-Feld | Nostr-Tag | Anmerkung |
 |---|---|---|
-| `guid.rendered` (Base64) | `d` | Stabiler Identifier, verknüpft WP-Post mit Nostr-Event |
+| `link` | `d` | Permalink-URL direkt als Identifier – lesbar und stabil |
 | `title.rendered` | `title` | HTML-Entitäten werden dekodiert |
 | `acf.relilab_startdate` | `start` | `"YYYY-MM-DD HH:MM:SS"` → Unix-Timestamp (UTC) |
 | `acf.relilab_enddate` | `end` | wie `start` |
@@ -129,6 +132,7 @@ Im relilab-Projekt werden WordPress-Termine automatisch als Kind-31923-Events na
 | `acf.relilab_custom_zoom_link` | `location` | Präfix `"Zoom: "` |
 | `featured_image_urls_v2.thumbnail[0]` | `image` | URL des Vorschaubilds |
 | `taxonomy_info.post_tag[].label` | `t` | je Schlagwort ein eigener Tag |
+| `link` | `r` | gleiche URL wie `d` – Quelllink für Clients sichtbar |
 
 ---
 

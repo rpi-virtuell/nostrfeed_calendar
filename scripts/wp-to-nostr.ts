@@ -35,6 +35,7 @@ import { decode } from "nostr-tools/nip19";
 
 interface WpPost {
   id: number;
+  link: string;
   guid: { rendered: string };
   title: { rendered: string };
   content: { rendered: string };
@@ -144,8 +145,8 @@ function mapPostToNostrEvent(post: WpPost): NostrEventTemplate | null {
   // Posts ohne Startdatum überspringen (kein gültiges Kalender-Event)
   if (!startTs) return null;
 
-  // d-Tag: Base64 der WordPress GUID – identischer Identifier wie in N8N
-  const d = btoa(post.guid?.rendered ?? String(post.id));
+  // d-Tag + r-Tag: originale WordPress-Permalink-URL
+  const wpUrl = post.link ?? post.guid?.rendered ?? String(post.id);
 
   // Titel bereinigen (HTML-Entitäten dekodieren)
   const title = (post.title?.rendered ?? "")
@@ -171,7 +172,7 @@ function mapPostToNostrEvent(post: WpPost): NostrEventTemplate | null {
 
   // Nostr-Tags-Array (NIP-52 / kind 31923)
   const tags: string[][] = [
-    ["d",      d],
+    ["d",      wpUrl],
     ["title",  title],
     ["start",  String(startTs)],
     ["end",    String(endTs)],
@@ -180,6 +181,7 @@ function mapPostToNostrEvent(post: WpPost): NostrEventTemplate | null {
   if (summaryMd) tags.push(["summary", summaryMd]);
   if (location)  tags.push(["location", location]);
   if (image)     tags.push(["image", image]);
+  tags.push(["r",  wpUrl]);
   tags.push(...keywordTags);
 
   const createdAt = Math.floor(
