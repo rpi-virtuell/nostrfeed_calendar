@@ -113,10 +113,12 @@ const keywordTags: string[][] = (p.taxonomy_info?.post_tag ?? [])
   .map((t: {label:string}) => ["t", t.label]);
 
 const tags: string[][] = [
-  ["d",     wpUrl],
-  ["title", title],
-  ["start", String(startTs)],
-  ["end",   String(endTs)],
+  ["d",          wpUrl],
+  ["title",      title],
+  ["start",      String(startTs)],
+  ["start_tzid", "Europe/Berlin"],
+  ["end",        String(endTs)],
+  ["end_tzid",   "Europe/Berlin"],
 ];
 if (summaryMd) tags.push(["summary", summaryMd]);
 if (location)  tags.push(["location", location]);
@@ -124,9 +126,12 @@ if (image)     tags.push(["image", image]);
 tags.push(["r", wpUrl]);
 tags.push(...keywordTags);
 
+// created_at = jetzt → Relay ersetzt immer die vorherige Version des Events
+const createdAt = Math.floor(Date.now() / 1000);
+
 const nostrEvent = {
   kind:       31923,
-  created_at: Math.floor(new Date(p.modified_gmt ?? Date.now()).getTime() / 1000),
+  created_at: createdAt,
   tags,
   content:    contentMd,
 };
@@ -142,14 +147,16 @@ const rows: [string, string, string][] = [
   ["link",                        wpUrl,                                    `d: ${wpUrl}`],
   ["title.rendered",              p.title?.rendered ?? "",                  `title: ${title}`],
   ["acf.relilab_startdate",       p.acf?.relilab_startdate ?? "(leer)",    `start: ${startTs} (${new Date(startTs*1000).toISOString()})`],
+  ["(fest)",                      "Europe/Berlin",                          "start_tzid: Europe/Berlin"],
   ["acf.relilab_enddate",         p.acf?.relilab_enddate   ?? "(leer)",    `end:   ${endTs} (${new Date(endTs*1000).toISOString()})`],
+  ["(fest)",                      "Europe/Berlin",                          "end_tzid: Europe/Berlin"],
   ["excerpt.rendered",            (p.excerpt?.rendered ?? "").slice(0,40), `summary: ${summaryMd.slice(0,40)}`],
   ["content.rendered",            (p.content?.rendered ?? "").slice(0,40), `content: ${contentMd.slice(0,40)}`],
   ["relilab_custom_zoom_link",    zoomLink || "(leer)",                     location ? `location: ${location}` : "(kein location-Tag)"],
   ["featured_image_urls_v2[0]",   image || "(leer)",                       image ? `image: ${image}` : "(kein image-Tag)"],
   ["taxonomy_info.post_tag",      keywordTags.map(t=>t[1]).join(", "),     `${keywordTags.length}× t-Tag`],
   ["link (Quellverweis)",         wpUrl,                                    `r: ${wpUrl}`],
-  ["modified_gmt",                p.modified_gmt ?? "",                    `created_at: ${nostrEvent.created_at}`],
+  ["(jetzt)",                     new Date().toISOString(),                `created_at: ${createdAt} (immer aktuell)`],
 ];
 
 printTable(rows);

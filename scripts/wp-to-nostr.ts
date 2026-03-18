@@ -172,20 +172,21 @@ function mapPostToNostrEvent(post: WpPost): NostrEventTemplate | null {
 
   // Nostr-Tags-Array (NIP-52 / kind 31923)
   const tags: string[][] = [
-    ["d",      wpUrl],
-    ["title",  title],
-    ["start",  String(startTs)],
-    ["end",    String(endTs)],
+    ["d",          wpUrl],
+    ["title",      title],
+    ["start",      String(startTs)],
+    ["start_tzid", "Europe/Berlin"],
+    ["end",        String(endTs)],
+    ["end_tzid",   "Europe/Berlin"],
   ];
   if (summaryMd) tags.push(["summary", summaryMd]);
   if (location)  tags.push(["location", location]);
   if (image)     tags.push(["image", image]);
-  tags.push(["r",  wpUrl]);
+  tags.push(["r", wpUrl]);
   tags.push(...keywordTags);
 
-  const createdAt = Math.floor(
-    new Date(post.modified_gmt ?? Date.now()).getTime() / 1000
-  );
+  // created_at = jetzt → Relay ersetzt immer die vorherige Version des Events
+  const createdAt = Math.floor(Date.now() / 1000);
 
   return { kind: 31923, created_at: createdAt, tags, content: contentMd };
 }
