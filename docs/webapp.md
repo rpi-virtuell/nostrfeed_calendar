@@ -14,8 +14,8 @@ Die Webapp ist ein statisches Frontend, das lokale JavaScript-Dateien (`event-wa
 - `index.html` — Einstiegspunkt der Webapp; enthält die Filter-Toolbar, den Bereich `#edu-event-wall` für die Darstellung der Termine und ein Modal für Detailansichten.
 - `event-wall.css` — Stylesheet für die Oberfläche (Layout, Responsiveness, Modal, Filter-UI).
 - `event-wall.js` — Geschäftslogik: initialisiert UI-Elemente, lädt Termindaten, rendert Kacheln/Einträge, verwaltet Filter, Suche, Pagination/Sortierung (falls implementiert) und das Modal.
-- `nostre-api.js` — Schnittstelle zu Nostr-Feeds / externen Quellen. Implementiert (oder kapselt) HTTP/REST-Aufrufe bzw. Websocket-/Feed-Parsing und stellt Daten in einem vereinheitlichten Format bereit.
-- `extrend_rest_api.php` — (optional) Beispiel/Proxy-Server für REST-Anfragen (wenn serverseitige CORS/Transform benötigt wird).
+- `nostre-api.js` — Liest Nostr-Events direkt per WebSocket aus einem Relay, filtert nach `kind:31923` und autorisierten `npub`s und stellt die Daten in einem vereinheitlichten Format bereit. Ersetzt den früheren N8N-Webhook vollständig.
+- `extend_rest_api.php` — WordPress-Plugin, das die REST-API um Sortierung nach Meta-Feldern erweitert (benötigt für den GitHub-Actions-Sync-Workflow).
 - `docs/` — Dokumentationsverzeichnis (hierhin wurde `webapp.md` hinzugefügt).
 
 ## Datenmodell / Vertrag
@@ -84,16 +84,23 @@ cd \path\to\nostrfeed_calendar
 python -m http.server 8000
 ```
 
-Node.js (wenn installiert):
+Deno (empfohlen, da im Projekt bereits vorhanden):
 
-```powershell
-cd \path\to\nostrfeed_calendar
+```bash
+cd /path/to/nostrfeed_calendar
+deno run --allow-net --allow-read "https://deno.land/std/http/file_server.ts" --port 8000
+```
+
+Node.js (alternativ):
+
+```bash
+cd /path/to/nostrfeed_calendar
 npx http-server -p 8000 --cors
 ```
 
 Öffne danach http://localhost:8000/ in deinem Browser.
 
-Wenn `nostre-api.js` einen Node-Only-Mechanismus oder Netzwerkzugriffe verwendet, prüfe die Entwicklertools (Console/Network) auf Fehler (CORS, 404, JSON-Parsing).
+Da `nostre-api.js` WebSocket-Verbindungen direkt im Browser aufbaut, prüfe bei Problemen die Entwicklertools (Console/Network) auf WebSocket-Fehler, CORS-Probleme oder JSON-Parsing-Fehler.
 
 ## Debugging-Hinweise
 

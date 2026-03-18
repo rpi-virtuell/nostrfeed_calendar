@@ -1,34 +1,37 @@
 # Nostr-Feed-Kalender
 
-Dieses Projekt zeigt Termine aus einem WordPress-System in zwei verschiedenen Web-Ansichten an. Die Daten werden über n8n-Workflows und das Nostr-Protokoll synchronisiert.
+Dieses Projekt veröffentlicht Termine aus einem WordPress-System als Nostr-Events und zeigt sie in verschiedenen Web-Ansichten an.
 
-### 1. WordPress zu Nostr
+### 1. WordPress → Nostr (GitHub Actions)
 
-- Ein n8n-Workflow ruft Termindaten über die WordPress REST-API ab.
-- **Wichtige Voraussetzung**: Das beiliegende WordPress-Plugin `extrend_rest_api.php` muss auf der WordPress-Seite installiert sein. Dieses Plugin erweitert die REST-API, um das Sortieren von Beiträgen nach Meta-Feldern (`meta_value` und `meta_value_num`) zu ermöglichen.
-- Die abgerufenen Termine werden als Events vom `kind: 31923` (Kalender-Events) in den dezentralen Nostr-Datenraum gepostet.
+- Ein **GitHub Actions Workflow** (`scripts/wp-to-nostr.ts`) läuft alle 6 Stunden automatisch und kann jederzeit manuell ausgelöst werden.
+- Er ruft alle Termine der Kategorie 176 über die WordPress REST-API ab (mit Pagination, alle Seiten).
+- **Wichtige Voraussetzung**: Das beiliegende WordPress-Plugin `extend_rest_api.php` muss auf der WordPress-Seite installiert sein. Es erweitert die REST-API um die Sortierung nach Meta-Feldern (`meta_value`, `meta_value_num`).
+- Jeder Termin wird als adressierbares Nostr-Event vom Typ `kind: 31923` (NIP-52 Kalender-Event) veröffentlicht. Als Identifier (`d`-Tag) und Quellverweis (`r`-Tag) wird die originale WordPress-Permalink-URL verwendet.
+- Das Script ist in **Deno/TypeScript** geschrieben – kein eigener Server, keine externe Automatisierungsplattform nötig.
+- Zum Testen steht ein **Dry-Run-Modus** zur Verfügung (zeigt alle Events mit Tags, postet nichts).
 
-### 2. Nostr zur HTML-Ansicht
+> **Setup:** Nostr-Privatschlüssel als GitHub Secret `NOSTR_PRIVATE_KEY` (nsec1… oder Hex) hinterlegen, dann unter *Actions → WordPress → Nostr Sync → Run workflow* mit `dry_run: true` testen.
 
-- Ein zweiter n8n-Workflow holt die Event-Daten aus dem Nostr-Netzwerk.
-- Die Daten werden so aufbereitet, dass sie von den HTML-Seiten (`index.html` und `event-wall.html`) direkt verarbeitet und dargestellt werden können.
-- Dabei wird ein Filter angewendet, der nur Events von bestimmten Autoren (identifiziert durch ihre `npub`) berücksichtigt.
-- **Demoseiten**: 
- >- [Kachel](https://rpi-virtuell.github.io/nostrfeed_calendar/)
- >- [Kalender](https://rpi-virtuell.github.io/nostrfeed_calendar/calendar-view.html)
- 
+### 2. Nostr → HTML-Ansicht (direkt im Browser)
+
+- `nostre-api.js` liest Events direkt per WebSocket aus dem Nostr-Relay – kein Server-Zwischenschritt.
+- Die Daten werden gefiltert (nur autorisierte `npub`), aufbereitet und von den HTML-Seiten dargestellt.
+- **Demoseiten**:
+  >- [Kachel](https://rpi-virtuell.github.io/nostrfeed_calendar/)
+  >- [Kalender](https://rpi-virtuell.github.io/nostrfeed_calendar/calendar-view.html)
 
 ### 3. Events löschen (Debugging)
 
-- Ein dritter n8n-Workflow dient zum Löschen von Events. Dies ist hauptsächlich für Debugging-Zwecke vorgesehen.
+- Zum Löschen von Nostr-Events (kind:5 Delete-Request) kann das Script manuell angepasst und ausgeführt werden. Der ursprüngliche N8N-Lösch-Workflow ist in `map_relilab_termine_to_nostr_31923.json` als Referenz erhalten.
 
 
 
 # Konzept
 
- - > Termine aus relilab in Nostr veröffentlichen
- - > Termine aus Nostr filtern und in HTML Views visualisieren
- - > Nicht realisiert: Nostr Events in Wordpress importieren.
+ - > Termine aus relilab in Nostr veröffentlichen → **GitHub Actions + Deno** (`scripts/wp-to-nostr.ts`)
+ - > Termine aus Nostr filtern und in HTML Views visualisieren → **Browser-direkt** (`nostre-api.js`)
+ - > Nicht realisiert: Nostr Events in WordPress importieren (widerspricht dem Konzept, s. u.)
 
  **Aktueller Stand und Vorschlag zur Anzeige von Nostr-Terminen in WordPress**
 
