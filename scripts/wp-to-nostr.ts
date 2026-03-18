@@ -129,11 +129,35 @@ async function fetchWpPosts(): Promise<WpPost[]> {
 }
 
 // ── Datumskonvertierung ───────────────────────────────────────────────────────
+// WP speichert "YYYY-MM-DD HH:MM:SS" als Berliner Lokalzeit (kein TZ-Suffix).
+// Vorgehen: naive UTC-Referenz → Intl zeigt Berliner Wanduhrzeit zu diesem
+// UTC-Moment → Differenz = Berliner UTC-Offset → korrigierter Unix-Timestamp.
+//
+// Beispiel: "2026-03-13 16:00:00" (Berlin CET = UTC+1)
+//   naiveUtc  → 16:00 UTC (falsch, aber Referenz)
+//   Berlin zeigt bei 16:00 UTC → 17:00 Uhr
+//   offsetMs  = 16:00 UTC − 17:00 UTC = −3600 ms
+//   Ergebnis  = 16:00 UTC + (−1h) = 15:00 UTC ✓  (= 16:00 Berlin)
 
 function wpDateToUnix(dateStr: string | undefined): number {
   if (!dateStr) return 0;
-  // WP speichert "YYYY-MM-DD HH:MM:SS" ohne Zeitzone – N8N behandelte als UTC
-  return Math.floor(new Date(dateStr.replace(" ", "T") + "Z").getTime() / 1000);
+  const naiveUtc = new Date(dateStr.replace(" ", "T") + "Z");
+  if (isNaN(naiveUtc.getTime())) return 0;
+
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Berlin",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+    hour12: false,
+  }).formatToParts(naiveUtc);
+
+  const g = (type: string) => parts.find(p => p.type === type)?.value ?? "00";
+  const berlinWallClock = new Date(
+    `${g("year")}-${g("month")}-${g("day")}T${g("hour")}:${g("minute")}:${g("second")}Z`
+  );
+
+  const offsetMs = naiveUtc.getTime() - berlinWallClock.getTime();
+  return Math.floor((naiveUtc.getTime() + offsetMs) / 1000);
 }
 
 // ── WordPress-Post → Nostr-Event mappen ──────────────────────────────────────

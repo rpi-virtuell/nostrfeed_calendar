@@ -26,8 +26,26 @@ const htmlToMarkdown = (html: string) => html ? turndown.turndown(html).trim() :
 
 // ── Datum → Unix-Timestamp ────────────────────────────────────────────────────
 
-const wpDateToUnix = (s?: string) =>
-  s ? Math.floor(new Date(s.replace(" ", "T") + "Z").getTime() / 1000) : 0;
+function wpDateToUnix(dateStr: string | undefined): number {
+  if (!dateStr) return 0;
+  const naiveUtc = new Date(dateStr.replace(" ", "T") + "Z");
+  if (isNaN(naiveUtc.getTime())) return 0;
+
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Berlin",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+    hour12: false,
+  }).formatToParts(naiveUtc);
+
+  const g = (type: string) => parts.find(p => p.type === type)?.value ?? "00";
+  const berlinWallClock = new Date(
+    `${g("year")}-${g("month")}-${g("day")}T${g("hour")}:${g("minute")}:${g("second")}Z`
+  );
+
+  const offsetMs = naiveUtc.getTime() - berlinWallClock.getTime();
+  return Math.floor((naiveUtc.getTime() + offsetMs) / 1000);
+}
 
 // ── Hilfsfunktionen für die Ausgabe ──────────────────────────────────────────
 
