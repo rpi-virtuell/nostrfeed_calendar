@@ -1,7 +1,8 @@
 {
   "tasks": {
     "start":   "deno run --allow-net=relilab.org,relay-rpi.edufeed.org --allow-env=NOSTR_PRIVATE_KEY,DRY_RUN,WP_API_URL,WP_CATEGORY,NOSTR_RELAY wp-to-nostr.ts",
-    "dry-run": "DRY_RUN=true deno run --allow-net=relilab.org,relay-rpi.edufeed.org --allow-env=NOSTR_PRIVATE_KEY,DRY_RUN,WP_API_URL,WP_CATEGORY,NOSTR_RELAY wp-to-nostr.ts"
+    "dry-run": "DRY_RUN=true deno run --allow-net=relilab.org,relay-rpi.edufeed.org --allow-env=NOSTR_PRIVATE_KEY,DRY_RUN,WP_API_URL,WP_CATEGORY,NOSTR_RELAY wp-to-nostr.ts",
+    "inspect": "deno run --allow-net=relilab.org --allow-env=WP_API_URL,WP_CATEGORY,WP_PAGE inspect-mapping.ts"
   },
   "imports": {
     "nostr-tools":         "npm:nostr-tools@^2.10.4",
