@@ -83,6 +83,38 @@ const res = await fetch(endpoint);
 
 ---
 
+## 2.5 Dry-Run (kein Netzwerk, Beispiel-Events)
+
+Mit dem Dry-Run-Modus kannst du die komplette UI testen, ohne eine Internetverbindung oder echte Nostr-Relay-Verbindungen zu benötigen. Es werden lokal generierte Beispiel-Events zurückgegeben.
+
+### Schnellstart: `dry-run.html` öffnen
+
+Die einfachste Möglichkeit: Öffne einfach [`dry-run.html`](../dry-run.html) statt `index.html`.  
+Diese Seite setzt `window.NostreAPI_DRYRUN = true` automatisch und zeigt Beispieldaten.
+
+### Per Flag in eigenen Seiten
+
+```html
+<!-- VOR dem Laden von nostre-api.js setzen: -->
+<script>window.NostreAPI_DRYRUN = true;</script>
+<script src="nostre-api.js" defer></script>
+```
+
+### Per Parameter beim direkten API-Aufruf
+
+```js
+const { nostrfeed } = await window.NostreAPI.getNostrFeed({ dryRun: true });
+console.log(nostrfeed); // 6 Beispiel-Events, keine Netzwerkanfragen
+```
+
+### Hinweise
+
+- Dry-Run überspringt alle WebSocket-Verbindungen zu Relays.
+- Die Beispiel-Events haben Start-Zeiten relativ zum aktuellen Datum (z. B. +7, +14, +21 Tage), damit sie immer als zukünftige Termine angezeigt werden.
+- Ideal für lokale Entwicklung, UI-Tests und Demos ohne Internet.
+
+---
+
 ## 3) Konfiguration
 
 | Option         | Typ       | Default                        | Bedeutung                        |
@@ -92,6 +124,7 @@ const res = await fetch(endpoint);
 | `sinceDays`    | number    | `365`                          | Zeitfenster rückwärts            |
 | `limit`        | number    | `1000`                         | Max. Events                      |
 | `timeoutMs`    | number    | `8000`                         | Socket-Timeout für Abfrage       |
+| `dryRun`       | boolean   | `false`                        | Beispiel-Events, kein Netzwerk   |
 
 Aufruf mit Optionen:
 
