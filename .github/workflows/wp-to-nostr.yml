@@ -1,0 +1,53 @@
+name: WordPress → Nostr Sync
+
+on:
+  # Automatisch alle 6 Stunden
+  schedule:
+    - cron: '0 */6 * * *'
+
+  # Manueller Start – ideal zum Testen vor dem Merge
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry Run – Events anzeigen, aber NICHT auf Nostr posten'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js 20 einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: scripts/package-lock.json
+
+      - name: Abhängigkeiten installieren
+        working-directory: scripts
+        run: npm ci
+
+      - name: WordPress → Nostr synchronisieren
+        working-directory: scripts
+        env:
+          # Privaten Nostr-Schlüssel in GitHub → Settings → Secrets → NOSTR_PRIVATE_KEY eintragen
+          # Format: nsec1… oder 64-stellige Hex-Zeichenkette
+          NOSTR_PRIVATE_KEY: ${{ secrets.NOSTR_PRIVATE_KEY }}
+
+          # Beim manuellen Auslösen (workflow_dispatch) wird der Input-Wert genutzt,
+          # beim automatischen Schedule-Lauf ist DRY_RUN immer 'false'.
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+
+          WP_API_URL:   'https://relilab.org/wp-json/wp/v2/posts'
+          WP_CATEGORY:  '176'
+          NOSTR_RELAY:  'wss://relay-rpi.edufeed.org'
+        run: node wp-to-nostr.mjs

@@ -1,8 +1,1 @@
-# Build output
-dist/*.zip
-
-# Dependencies
-node_modules/
-
-# OS files
-.DS_Store
+scripts/node_modules/
