@@ -1,0 +1,12 @@
+{
+  "tasks": {
+    "start":   "deno run --allow-net=relilab.org,relay-rpi.edufeed.org --allow-env=NOSTR_PRIVATE_KEY,DRY_RUN,WP_API_URL,WP_CATEGORY,NOSTR_RELAY wp-to-nostr.ts",
+    "dry-run": "DRY_RUN=true deno run --allow-net=relilab.org,relay-rpi.edufeed.org --allow-env=NOSTR_PRIVATE_KEY,DRY_RUN,WP_API_URL,WP_CATEGORY,NOSTR_RELAY wp-to-nostr.ts"
+  },
+  "imports": {
+    "nostr-tools":         "npm:nostr-tools@^2.10.4",
+    "nostr-tools/relay":   "npm:nostr-tools@^2.10.4/relay",
+    "nostr-tools/nip19":   "npm:nostr-tools@^2.10.4/nip19",
+    "turndown":            "npm:turndown@^7.2.0"
+  }
+}

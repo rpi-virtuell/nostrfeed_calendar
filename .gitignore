@@ -1,1 +1,2 @@
-scripts/node_modules/
+# Deno-Cache nicht committen (global in ~/.deno – taucht hier normalerweise nicht auf)
+.deno/

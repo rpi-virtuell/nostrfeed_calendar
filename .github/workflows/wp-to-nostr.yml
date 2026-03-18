@@ -25,16 +25,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Node.js 20 einrichten
-        uses: actions/setup-node@v4
+      - name: Deno einrichten
+        uses: denoland/setup-deno@v2
         with:
-          node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: scripts/package-lock.json
-
-      - name: Abhängigkeiten installieren
-        working-directory: scripts
-        run: npm ci
+          deno-version: v2.x
 
       - name: WordPress → Nostr synchronisieren
         working-directory: scripts
@@ -47,7 +41,7 @@ jobs:
           # beim automatischen Schedule-Lauf ist DRY_RUN immer 'false'.
           DRY_RUN: ${{ inputs.dry_run || 'false' }}
 
-          WP_API_URL:   'https://relilab.org/wp-json/wp/v2/posts'
-          WP_CATEGORY:  '176'
-          NOSTR_RELAY:  'wss://relay-rpi.edufeed.org'
-        run: node wp-to-nostr.mjs
+          WP_API_URL:  'https://relilab.org/wp-json/wp/v2/posts'
+          WP_CATEGORY: '176'
+          NOSTR_RELAY: 'wss://relay-rpi.edufeed.org'
+        run: deno task start
