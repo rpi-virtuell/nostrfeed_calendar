@@ -96,20 +96,35 @@ function htmlToMarkdown(html: string): string {
   return turndown.turndown(html).trim();
 }
 
-// ── WordPress REST-API ────────────────────────────────────────────────────────
+// ── WordPress REST-API (mit Pagination) ──────────────────────────────────────
 
 async function fetchWpPosts(): Promise<WpPost[]> {
-  const url = new URL(WP_API_URL);
-  url.searchParams.set("categories", WP_CATEGORY);
-  url.searchParams.set("per_page",   "50");
-  url.searchParams.set("meta_key",   "relilab_startdate");
-  url.searchParams.set("orderby",    "meta_value");
-  url.searchParams.set("order",      "desc");
+  const base = new URL(WP_API_URL);
+  base.searchParams.set("categories", WP_CATEGORY);
+  base.searchParams.set("per_page",   "100");          // WordPress-Maximum
+  base.searchParams.set("meta_key",   "relilab_startdate");
+  base.searchParams.set("orderby",    "meta_value");
+  base.searchParams.set("order",      "desc");
 
-  console.log(`  API-URL: ${url}`);
-  const res = await fetch(url.toString());
-  if (!res.ok) throw new Error(`WordPress API Fehler: ${res.status} ${res.statusText}`);
-  return res.json() as Promise<WpPost[]>;
+  const all: WpPost[] = [];
+  let page = 1;
+  let totalPages = 1;
+
+  do {
+    base.searchParams.set("page", String(page));
+    console.log(`  Seite ${page}/${totalPages} – ${base}`);
+
+    const res = await fetch(base.toString());
+    if (!res.ok) throw new Error(`WordPress API Fehler (Seite ${page}): ${res.status} ${res.statusText}`);
+
+    // Gesamtseitenanzahl aus Response-Header lesen
+    totalPages = Number(res.headers.get("X-WP-TotalPages") ?? "1");
+    const posts = await res.json() as WpPost[];
+    all.push(...posts);
+    page++;
+  } while (page <= totalPages);
+
+  return all;
 }
 
 // ── Datumskonvertierung ───────────────────────────────────────────────────────
@@ -123,12 +138,11 @@ function wpDateToUnix(dateStr: string | undefined): number {
 // ── WordPress-Post → Nostr-Event mappen ──────────────────────────────────────
 
 function mapPostToNostrEvent(post: WpPost): NostrEventTemplate | null {
-  const now     = Math.floor(Date.now() / 1000);
   const startTs = wpDateToUnix(post.acf?.relilab_startdate);
   const endTs   = wpDateToUnix(post.acf?.relilab_enddate);
 
-  // Nur zukünftige Termine (identisch mit dem N8N-Filter-Node)
-  if (startTs <= now) return null;
+  // Posts ohne Startdatum überspringen (kein gültiges Kalender-Event)
+  if (!startTs) return null;
 
   // d-Tag: Base64 der WordPress GUID – identischer Identifier wie in N8N
   const d = btoa(post.guid?.rendered ?? String(post.id));
@@ -218,7 +232,7 @@ async function main(): Promise<void> {
   const events = posts.map(mapPostToNostrEvent).filter(
     (e): e is NostrEventTemplate => e !== null
   );
-  console.log(`📅 ${events.length} zukünftige Termine zum Synchronisieren\n`);
+  console.log(`📅 ${events.length} Termine zum Synchronisieren\n`);
 
   if (events.length === 0) {
     console.log("✅ Nichts zu veröffentlichen – alles aktuell.");
