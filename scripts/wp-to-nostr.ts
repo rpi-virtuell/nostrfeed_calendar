@@ -176,7 +176,6 @@ function mapPostToNostrEvent(post: WpPost): NostrEventTemplate | null {
     ["title",  title],
     ["start",  String(startTs)],
     ["end",    String(endTs)],
-    ["status", "planned"],
   ];
   if (summaryMd) tags.push(["summary", summaryMd]);
   if (location)  tags.push(["location", location]);

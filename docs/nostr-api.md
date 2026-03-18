@@ -15,7 +15,7 @@ Damit kannst du Nostr-Events (Kind **31923**, NIP-52 Kalender) **direkt aus Rela
 * **Direktabruf aus Nostr-Relays:**
   Verwendet native `WebSocket`-Verbindungen zu Relays (z. B. `wss://relilab.nostr1.com`), filtert auf `kinds:[31923]`, `authors:[…]`, `since`.
 * **Feldmapping wie n8n:**
-  Tags werden extrahiert (`title`, `start`, `end`, `status`, `location`, `t`, `image`, `summary`) und zu lesbaren Feldern umgebaut:
+  Tags werden extrahiert (`title`, `start`, `end`, `location`, `t`, `image`, `summary`) und zu lesbaren Feldern umgebaut:
 
   * `start`/`end` → ISO-Zeitstempel
   * `location` „Zoom:…” → klickbarer Link + `location_url`
@@ -116,7 +116,6 @@ Ein Event in `nostrfeed` enthält u. a.:
   "title": "…",
   "start": "2025-09-29T17:00:00.000Z",
   "end":   "2025-09-29T19:00:00.000Z",
-  "status": "planned",
   "location": "<a href=\"https://…\">Link zum Online-Event</a>",
   "location_url": "https://…",
   "tags": "Grundschule, schöpfung, …",
@@ -227,7 +226,7 @@ const NOSTR_OPTIONS = {
 
 const normalizeFromNostr = (it) => ({
   ID: it.ID, title: it.title,
-  start: it.start, end: it.end, status: it.status,
+  start: it.start, end: it.end,
   location: it.location, location_url: it.location_url,
   tags: it.tags, summary: it.summary, content: it.content,
   pubkey: it.pubkey, image: it.image,
