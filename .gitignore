@@ -1,2 +1,12 @@
 # Deno-Cache nicht committen (global in ~/.deno – taucht hier normalerweise nicht auf)
 .deno/
+
+# macOS
+.DS_Store
+
+# Claude Code lokale Einstellungen und Worktrees
+.claude/
+
+# Lokale Daten-Dumps aus der WordPress-REST-API
+termine.json
+mec_full.json
